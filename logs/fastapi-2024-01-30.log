@@ -1,0 +1,1805 @@
+2024-01-30 14:46:04.782 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 14:46:19.539 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 14:46:19.640 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 14:46:19.642 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 14:46:19.642 | INFO     | uvicorn.server:serve:87 - Finished server process [9154]
+2024-01-30 14:47:39.942 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 14:48:09.980 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 14:48:10.125 | ERROR    | apis.routers.users:user_send_verify_email:34 - module 'templates.user_send_verify_email' has no attribute 'title'Traceback (most recent call last):
+
+  File "<string>", line 1, in <module>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               │     │   └ 4
+               │     └ 7
+               └ <function _main at 0x102cf59d0>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 129, in _main
+    return self._bootstrap(parent_sentinel)
+           │    │          └ 4
+           │    └ <function BaseProcess._bootstrap at 0x102a73430>
+           └ <SpawnProcess name='SpawnProcess-1' parent=9245 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+    │    └ <function BaseProcess.run at 0x102a68a60>
+    └ <SpawnProcess name='SpawnProcess-1' parent=9245 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    │    │        │    │        │    └ {'config': <uvicorn.config.Config object at 0x102d06a60>, 'target': <bound method Server.run of <uvicorn.server.Server object...
+    │    │        │    │        └ <SpawnProcess name='SpawnProcess-1' parent=9245 started>
+    │    │        │    └ ()
+    │    │        └ <SpawnProcess name='SpawnProcess-1' parent=9245 started>
+    │    └ <function subprocess_started at 0x1062633a0>
+    └ <SpawnProcess name='SpawnProcess-1' parent=9245 started>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/_subprocess.py", line 78, in subprocess_started
+    target(sockets=sockets)
+    │              └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+    └ <bound method Server.run of <uvicorn.server.Server object at 0x102d06a90>>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/server.py", line 62, in run
+    return asyncio.run(self.serve(sockets=sockets))
+           │       │   │    │             └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+           │       │   │    └ <function Server.serve at 0x10624c8b0>
+           │       │   └ <uvicorn.server.Server object at 0x102d06a90>
+           │       └ <function run at 0x102d32790>
+           └ <module 'asyncio' from '/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/async...
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+           │    │                  └ <coroutine object Server.serve at 0x10624e540>
+           │    └ <method 'run_until_complete' of 'uvloop.loop.Loop' objects>
+           └ <uvloop.Loop running=True closed=False debug=False>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 419, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+                   └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x1062a1730>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    return await self.app(scope, receive, send)
+                 │    │   │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f1070>>
+                 │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+                 │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+                 │    └ <fastapi.applications.FastAPI object at 0x106543cd0>
+                 └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x1062a1730>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+                           │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f1070>>
+                           │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+                           └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f1070>>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x106563640>
+          └ <fastapi.applications.FastAPI object at 0x106543cd0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+          │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x1065601f0>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.cors.CORSMiddleware object at 0x106563790>
+          └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x106563640>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/cors.py", line 83, in __call__
+    await self.app(scope, receive, send)
+          │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x1065601f0>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x106563700>
+          └ <starlette.middleware.cors.CORSMiddleware object at 0x106563790>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+          │                            │    │    │     │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x1065601f0>
+          │                            │    │    │     │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │                            │    │    │     └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    │    └ <starlette.requests.Request object at 0x10655ee80>
+          │                            │    └ <fastapi.routing.APIRouter object at 0x106543dc0>
+          │                            └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x106563700>
+          └ <function wrap_app_handling_exceptions at 0x10546e4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x106560160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <fastapi.routing.APIRouter object at 0x106543dc0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 762, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x106560160>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <bound method Router.app of <fastapi.routing.APIRouter object at 0x106543dc0>>
+          └ <fastapi.routing.APIRouter object at 0x106543dc0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 782, in app
+    await route.handle(scope, receive, send)
+          │     │      │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x106560160>
+          │     │      │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │     │      └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │     └ <function Route.handle at 0x105482820>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+          │    │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x106560160>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <function request_response.<locals>.app at 0x1065428b0>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+          │                            │    │        │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x106560160>
+          │                            │    │        │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │                            │    │        └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    └ <starlette.requests.Request object at 0x10655e820>
+          │                            └ <function request_response.<locals>.app.<locals>.app at 0x106560b80>
+          └ <function wrap_app_handling_exceptions at 0x10546e4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x106552160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <function request_response.<locals>.app.<locals>.app at 0x106560b80>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+                     │    └ <starlette.requests.Request object at 0x10655e820>
+                     └ <function LoggingContextRoute.get_route_handler.<locals>.custom_route_handler at 0x106542820>
+
+  File "/Users/ryu/Milize_Home_Loan/core/custom.py", line 17, in custom_route_handler
+    response: Response = await original_route_handler(request)
+                               │                      └ <starlette.requests.Request object at 0x10655e820>
+                               └ <function get_request_handler.<locals>.app at 0x106542790>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/routing.py", line 294, in app
+    raw_response = await run_endpoint_function(
+                         └ <function run_endpoint_function at 0x10546e310>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+                 │         │      └ {'db': <core.database.DB object at 0x1065636d0>, 'data': VerifyEmail(email='buddhist.monk1990@gmail.com', s_sale_company_org_...
+                 │         └ <function user_send_verify_email at 0x105fe8af0>
+                 └ <fastapi.dependencies.models.Dependant object at 0x106543a60>
+
+> File "/Users/ryu/Milize_Home_Loan/apis/routers/users.py", line 27, in user_send_verify_email
+    utils.send_email(
+    │     └ <function send_email at 0x1058cfd30>
+    └ <module 'utils' from '/Users/ryu/Milize_Home_Loan/utils/__init__.py'>
+
+  File "/Users/ryu/Milize_Home_Loan/utils/mailer.py", line 19, in send_email
+    "Subject": {"Data": template_module.title},
+                        └ <module 'templates.user_send_verify_email' from '/Users/ryu/Milize_Home_Loan/templates/user_send_verify_email.py'>
+
+AttributeError: module 'templates.user_send_verify_email' has no attribute 'title'
+
+2024-01-30 14:48:10.138 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 14:48:10.139 | INFO     | core.database:execute:57 - 
+    INSERT INTO s_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249600, null, '127.0.0.1', 'http://0.0.0.0:8000/user/verify-email', '/user/verify-email', 'POST', '{"headers": {"content-type": "application/json", "user-agent": "PostmanRuntime/7.36.1", "accept": "*/*", "postman-token": "68aaea30-e02a-427a-a596-283e8801f2be", "host": "0.0.0.0:8000", "accept-encoding": "gzip, deflate, br", "connection": "keep-alive", "content-length": "39"}, "path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 500,  '{"message": "An unknown exception occurred, please try again later."}');
+    
+2024-01-30 14:48:10.141 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:62305 - "POST /user/verify-email HTTP/1.1" 500
+2024-01-30 14:48:10.141 | ERROR    | uvicorn.protocols.http.httptools_impl:run_asgi:424 - Exception in ASGI application
+Traceback (most recent call last):
+
+  File "<string>", line 1, in <module>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               │     │   └ 4
+               │     └ 7
+               └ <function _main at 0x102cf59d0>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 129, in _main
+    return self._bootstrap(parent_sentinel)
+           │    │          └ 4
+           │    └ <function BaseProcess._bootstrap at 0x102a73430>
+           └ <SpawnProcess name='SpawnProcess-1' parent=9245 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+    │    └ <function BaseProcess.run at 0x102a68a60>
+    └ <SpawnProcess name='SpawnProcess-1' parent=9245 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    │    │        │    │        │    └ {'config': <uvicorn.config.Config object at 0x102d06a60>, 'target': <bound method Server.run of <uvicorn.server.Server object...
+    │    │        │    │        └ <SpawnProcess name='SpawnProcess-1' parent=9245 started>
+    │    │        │    └ ()
+    │    │        └ <SpawnProcess name='SpawnProcess-1' parent=9245 started>
+    │    └ <function subprocess_started at 0x1062633a0>
+    └ <SpawnProcess name='SpawnProcess-1' parent=9245 started>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/_subprocess.py", line 78, in subprocess_started
+    target(sockets=sockets)
+    │              └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+    └ <bound method Server.run of <uvicorn.server.Server object at 0x102d06a90>>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/server.py", line 62, in run
+    return asyncio.run(self.serve(sockets=sockets))
+           │       │   │    │             └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+           │       │   │    └ <function Server.serve at 0x10624c8b0>
+           │       │   └ <uvicorn.server.Server object at 0x102d06a90>
+           │       └ <function run at 0x102d32790>
+           └ <module 'asyncio' from '/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/async...
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+           │    │                  └ <coroutine object Server.serve at 0x10624e540>
+           │    └ <method 'run_until_complete' of 'uvloop.loop.Loop' objects>
+           └ <uvloop.Loop running=True closed=False debug=False>
+
+> File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 419, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+                   └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x1062a1730>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    return await self.app(scope, receive, send)
+                 │    │   │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f1070>>
+                 │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+                 │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+                 │    └ <fastapi.applications.FastAPI object at 0x106543cd0>
+                 └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x1062a1730>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+                           │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f1070>>
+                           │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+                           └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f1070>>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x106563640>
+          └ <fastapi.applications.FastAPI object at 0x106543cd0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+          │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x1065601f0>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.cors.CORSMiddleware object at 0x106563790>
+          └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x106563640>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/cors.py", line 83, in __call__
+    await self.app(scope, receive, send)
+          │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x1065601f0>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x106563700>
+          └ <starlette.middleware.cors.CORSMiddleware object at 0x106563790>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+          │                            │    │    │     │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x1065601f0>
+          │                            │    │    │     │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │                            │    │    │     └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    │    └ <starlette.requests.Request object at 0x10655ee80>
+          │                            │    └ <fastapi.routing.APIRouter object at 0x106543dc0>
+          │                            └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x106563700>
+          └ <function wrap_app_handling_exceptions at 0x10546e4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x106560160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <fastapi.routing.APIRouter object at 0x106543dc0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 762, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x106560160>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <bound method Router.app of <fastapi.routing.APIRouter object at 0x106543dc0>>
+          └ <fastapi.routing.APIRouter object at 0x106543dc0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 782, in app
+    await route.handle(scope, receive, send)
+          │     │      │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x106560160>
+          │     │      │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │     │      └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │     └ <function Route.handle at 0x105482820>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+          │    │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x106560160>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <function request_response.<locals>.app at 0x1065428b0>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+          │                            │    │        │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x106560160>
+          │                            │    │        │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │                            │    │        └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    └ <starlette.requests.Request object at 0x10655e820>
+          │                            └ <function request_response.<locals>.app.<locals>.app at 0x106560b80>
+          └ <function wrap_app_handling_exceptions at 0x10546e4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x106552160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1057f10...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <function request_response.<locals>.app.<locals>.app at 0x106560b80>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+                     │    └ <starlette.requests.Request object at 0x10655e820>
+                     └ <function LoggingContextRoute.get_route_handler.<locals>.custom_route_handler at 0x106542820>
+
+  File "/Users/ryu/Milize_Home_Loan/core/custom.py", line 20, in custom_route_handler
+    await crud.insert_s_access_log(
+          │    └ <function insert_s_access_log at 0x105672e50>
+          └ <module 'crud' from '/Users/ryu/Milize_Home_Loan/crud/__init__.py'>
+
+  File "/Users/ryu/Milize_Home_Loan/crud/common.py", line 21, in insert_s_access_log
+    await db.execute(sql)
+          │  │       └ '\n    INSERT INTO s_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │  └ <function DB.execute at 0x1056724c0>
+          └ <core.database.DB object at 0x1065636d0>
+
+  File "/Users/ryu/Milize_Home_Loan/core/database.py", line 58, in execute
+    await cur.execute(sql)
+          │   │       └ '\n    INSERT INTO s_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │   └ <function Cursor.execute at 0x1056624c0>
+          └ <aiomysql.cursors.DictCursor object at 0x106563670>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+          │    │      └ '\n    INSERT INTO s_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │    └ <function Cursor._query at 0x105662940>
+          └ <aiomysql.cursors.DictCursor object at 0x106563670>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+          │    │     └ '\n    INSERT INTO s_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │    └ <function Connection.query at 0x10566b790>
+          └ <aiomysql.connection.Connection object at 0x10655e190>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+          │    │                             └ False
+          │    └ <function Connection._read_query_result at 0x10566bee0>
+          └ <aiomysql.connection.Connection object at 0x10655e190>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+          │      └ <function MySQLResult.read at 0x10566caf0>
+          └ <aiomysql.connection.MySQLResult object at 0x10655e1c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                         │    └ None
+                         └ <aiomysql.connection.MySQLResult object at 0x10655e1c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    │      └ <function MysqlPacket.raise_for_error at 0x1056380d0>
+    └ <pymysql.protocol.MysqlPacket object at 0x10655e2e0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/pymysql/protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    │   │                     │    └ <member '_data' of 'MysqlPacket' objects>
+    │   │                     └ <pymysql.protocol.MysqlPacket object at 0x10655e2e0>
+    │   └ <function raise_mysql_exception at 0x1055e50d0>
+    └ <module 'pymysql.err' from '/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/pymysql...
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/pymysql/err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+          │          │      └ "Table 'db_design__milize_homeloan_v3.1.s_access_logs' doesn't exist"
+          │          └ 1146
+          └ <class 'pymysql.err.ProgrammingError'>
+
+pymysql.err.ProgrammingError: (1146, "Table 'db_design__milize_homeloan_v3.1.s_access_logs' doesn't exist")
+
+2024-01-30 14:48:40.265 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 14:48:40.366 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 14:48:40.367 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 14:48:40.367 | INFO     | uvicorn.server:serve:87 - Finished server process [9247]
+2024-01-30 14:48:40.887 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 14:48:45.192 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 14:48:45.277 | ERROR    | apis.routers.users:user_send_verify_email:34 - module 'templates.user_send_verify_email' has no attribute 'title'Traceback (most recent call last):
+
+  File "<string>", line 1, in <module>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               │     │   └ 4
+               │     └ 8
+               └ <function _main at 0x100e399d0>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 129, in _main
+    return self._bootstrap(parent_sentinel)
+           │    │          └ 4
+           │    └ <function BaseProcess._bootstrap at 0x100bb7430>
+           └ <SpawnProcess name='SpawnProcess-2' parent=9245 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+    │    └ <function BaseProcess.run at 0x100baca60>
+    └ <SpawnProcess name='SpawnProcess-2' parent=9245 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    │    │        │    │        │    └ {'config': <uvicorn.config.Config object at 0x100e4aa60>, 'target': <bound method Server.run of <uvicorn.server.Server object...
+    │    │        │    │        └ <SpawnProcess name='SpawnProcess-2' parent=9245 started>
+    │    │        │    └ ()
+    │    │        └ <SpawnProcess name='SpawnProcess-2' parent=9245 started>
+    │    └ <function subprocess_started at 0x10359f3a0>
+    └ <SpawnProcess name='SpawnProcess-2' parent=9245 started>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/_subprocess.py", line 78, in subprocess_started
+    target(sockets=sockets)
+    │              └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+    └ <bound method Server.run of <uvicorn.server.Server object at 0x100e4aa90>>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/server.py", line 62, in run
+    return asyncio.run(self.serve(sockets=sockets))
+           │       │   │    │             └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+           │       │   │    └ <function Server.serve at 0x1035888b0>
+           │       │   └ <uvicorn.server.Server object at 0x100e4aa90>
+           │       └ <function run at 0x100e76790>
+           └ <module 'asyncio' from '/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/async...
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+           │    │                  └ <coroutine object Server.serve at 0x10358b540>
+           │    └ <method 'run_until_complete' of 'uvloop.loop.Loop' objects>
+           └ <uvloop.Loop running=True closed=False debug=False>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 419, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+                   └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x1035dd700>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    return await self.app(scope, receive, send)
+                 │    │   │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d040>>
+                 │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d0...
+                 │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+                 │    └ <fastapi.applications.FastAPI object at 0x10387fca0>
+                 └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x1035dd700>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+                           │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d040>>
+                           │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d0...
+                           └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d040>>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d0...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x1038a04c0>
+          └ <fastapi.applications.FastAPI object at 0x10387fca0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+          │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x10389c280>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d0...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.cors.CORSMiddleware object at 0x1038a06d0>
+          └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x1038a04c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/cors.py", line 83, in __call__
+    await self.app(scope, receive, send)
+          │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x10389c280>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d0...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x1038a06a0>
+          └ <starlette.middleware.cors.CORSMiddleware object at 0x1038a06d0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+          │                            │    │    │     │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x10389c280>
+          │                            │    │    │     │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d0...
+          │                            │    │    │     └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    │    └ <starlette.requests.Request object at 0x10389ae20>
+          │                            │    └ <fastapi.routing.APIRouter object at 0x10387fd90>
+          │                            └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x1038a06a0>
+          └ <function wrap_app_handling_exceptions at 0x1029aa4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x10389c160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d0...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <fastapi.routing.APIRouter object at 0x10387fd90>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 762, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x10389c160>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d0...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <bound method Router.app of <fastapi.routing.APIRouter object at 0x10387fd90>>
+          └ <fastapi.routing.APIRouter object at 0x10387fd90>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 782, in app
+    await route.handle(scope, receive, send)
+          │     │      │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x10389c160>
+          │     │      │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d0...
+          │     │      └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │     └ <function Route.handle at 0x1029bf820>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+          │    │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x10389c160>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d0...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <function request_response.<locals>.app at 0x10387e8b0>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+          │                            │    │        │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x10389c160>
+          │                            │    │        │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d0...
+          │                            │    │        └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    └ <starlette.requests.Request object at 0x10389a5e0>
+          │                            └ <function request_response.<locals>.app.<locals>.app at 0x10389cb80>
+          └ <function wrap_app_handling_exceptions at 0x1029aa4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x10388e160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x102d2d0...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <function request_response.<locals>.app.<locals>.app at 0x10389cb80>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+                     │    └ <starlette.requests.Request object at 0x10389a5e0>
+                     └ <function LoggingContextRoute.get_route_handler.<locals>.custom_route_handler at 0x10387e820>
+
+  File "/Users/ryu/Milize_Home_Loan/core/custom.py", line 17, in custom_route_handler
+    response: Response = await original_route_handler(request)
+                               │                      └ <starlette.requests.Request object at 0x10389a5e0>
+                               └ <function get_request_handler.<locals>.app at 0x10387e790>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/routing.py", line 294, in app
+    raw_response = await run_endpoint_function(
+                         └ <function run_endpoint_function at 0x1029aa310>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+                 │         │      └ {'db': <core.database.DB object at 0x1038a0790>, 'data': VerifyEmail(email='buddhist.monk1990@gmail.com', s_sale_company_org_...
+                 │         └ <function user_send_verify_email at 0x103424af0>
+                 └ <fastapi.dependencies.models.Dependant object at 0x10387fa60>
+
+> File "/Users/ryu/Milize_Home_Loan/apis/routers/users.py", line 27, in user_send_verify_email
+    utils.send_email(
+    │     └ <function send_email at 0x102e0bd30>
+    └ <module 'utils' from '/Users/ryu/Milize_Home_Loan/utils/__init__.py'>
+
+  File "/Users/ryu/Milize_Home_Loan/utils/mailer.py", line 19, in send_email
+    "Subject": {"Data": template_module.title},
+                        └ <module 'templates.user_send_verify_email' from '/Users/ryu/Milize_Home_Loan/templates/user_send_verify_email.py'>
+
+AttributeError: module 'templates.user_send_verify_email' has no attribute 'title'
+
+2024-01-30 14:48:45.286 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 14:48:45.287 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249601, null, '127.0.0.1', 'http://0.0.0.0:8000/user/verify-email', '/user/verify-email', 'POST', '{"headers": {"content-type": "application/json", "user-agent": "PostmanRuntime/7.36.1", "accept": "*/*", "postman-token": "22948783-fb8d-4001-b26d-f37174d09e55", "host": "0.0.0.0:8000", "accept-encoding": "gzip, deflate, br", "connection": "keep-alive", "content-length": "39"}, "path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 500,  '{"message": "An unknown exception occurred, please try again later."}');
+    
+2024-01-30 14:48:45.291 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:62462 - "POST /user/verify-email HTTP/1.1" 500
+2024-01-30 14:49:45.601 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 14:50:26.447 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 14:50:26.550 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 14:50:26.551 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 14:50:26.552 | INFO     | uvicorn.server:serve:87 - Finished server process [9390]
+2024-01-30 14:50:26.985 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 14:54:25.372 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 14:54:25.474 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 14:54:25.474 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 14:54:25.474 | INFO     | uvicorn.server:serve:87 - Finished server process [9397]
+2024-01-30 14:58:02.239 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 14:58:15.588 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 14:58:15.690 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 14:58:15.690 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 14:58:15.690 | INFO     | uvicorn.server:serve:87 - Finished server process [9492]
+2024-01-30 14:58:16.119 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 14:58:38.011 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 15:35:39.692 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:57880 - "OPTIONS /user/verify-email HTTP/1.1" 200
+2024-01-30 15:35:39.702 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 15:35:39.825 | ERROR    | apis.routers.users:user_send_verify_email:34 - module 'templates.user_send_verify_email' has no attribute 'title'Traceback (most recent call last):
+
+  File "<string>", line 1, in <module>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               │     │   └ 4
+               │     └ 7
+               └ <function _main at 0x104e619d0>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 129, in _main
+    return self._bootstrap(parent_sentinel)
+           │    │          └ 4
+           │    └ <function BaseProcess._bootstrap at 0x104bdf430>
+           └ <SpawnProcess name='SpawnProcess-1' parent=9582 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+    │    └ <function BaseProcess.run at 0x104bd4a60>
+    └ <SpawnProcess name='SpawnProcess-1' parent=9582 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    │    │        │    │        │    └ {'config': <uvicorn.config.Config object at 0x104e72a60>, 'target': <bound method Server.run of <uvicorn.server.Server object...
+    │    │        │    │        └ <SpawnProcess name='SpawnProcess-1' parent=9582 started>
+    │    │        │    └ ()
+    │    │        └ <SpawnProcess name='SpawnProcess-1' parent=9582 started>
+    │    └ <function subprocess_started at 0x1103e33a0>
+    └ <SpawnProcess name='SpawnProcess-1' parent=9582 started>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/_subprocess.py", line 78, in subprocess_started
+    target(sockets=sockets)
+    │              └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+    └ <bound method Server.run of <uvicorn.server.Server object at 0x104e72a90>>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/server.py", line 62, in run
+    return asyncio.run(self.serve(sockets=sockets))
+           │       │   │    │             └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+           │       │   │    └ <function Server.serve at 0x1103cc8b0>
+           │       │   └ <uvicorn.server.Server object at 0x104e72a90>
+           │       └ <function run at 0x104e9e790>
+           └ <module 'asyncio' from '/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/async...
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+           │    │                  └ <coroutine object Server.serve at 0x1103ce540>
+           │    └ <method 'run_until_complete' of 'uvloop.loop.Loop' objects>
+           └ <uvloop.Loop running=True closed=False debug=False>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 419, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+                   └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x110421730>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    return await self.app(scope, receive, send)
+                 │    │   │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e130>>
+                 │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+                 │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+                 │    └ <fastapi.applications.FastAPI object at 0x110643cd0>
+                 └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x110421730>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+                           │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e130>>
+                           │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+                           └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e130>>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x110664640>
+          └ <fastapi.applications.FastAPI object at 0x110643cd0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+          │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x1106611f0>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.cors.CORSMiddleware object at 0x110664790>
+          └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x110664640>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+          │    │               │      │        │                     └ Headers({'host': '127.0.0.1:8000', 'connection': 'keep-alive', 'content-length': '39', 'sec-ch-ua': '"Not_A Brand";v="8", "Ch...
+          │    │               │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x1106611f0>
+          │    │               │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │    │               └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <function CORSMiddleware.simple_response at 0x1076aa4c0>
+          └ <starlette.middleware.cors.CORSMiddleware object at 0x110664790>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/cors.py", line 146, in simple_response
+    await self.app(scope, receive, send)
+          │    │   │      │        └ functools.partial(<bound method CORSMiddleware.send of <starlette.middleware.cors.CORSMiddleware object at 0x110664790>>, sen...
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x110664700>
+          └ <starlette.middleware.cors.CORSMiddleware object at 0x110664790>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+          │                            │    │    │     │      │        └ functools.partial(<bound method CORSMiddleware.send of <starlette.middleware.cors.CORSMiddleware object at 0x110664790>>, sen...
+          │                            │    │    │     │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │                            │    │    │     └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    │    └ <starlette.requests.Request object at 0x110250a00>
+          │                            │    └ <fastapi.routing.APIRouter object at 0x110643dc0>
+          │                            └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x110664700>
+          └ <function wrap_app_handling_exceptions at 0x1074ec4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x110661160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <fastapi.routing.APIRouter object at 0x110643dc0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 762, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x110661160>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <bound method Router.app of <fastapi.routing.APIRouter object at 0x110643dc0>>
+          └ <fastapi.routing.APIRouter object at 0x110643dc0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 782, in app
+    await route.handle(scope, receive, send)
+          │     │      │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x110661160>
+          │     │      │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │     │      └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │     └ <function Route.handle at 0x107602820>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+          │    │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x110661160>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <function request_response.<locals>.app at 0x1106428b0>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+          │                            │    │        │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x110661160>
+          │                            │    │        │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │                            │    │        └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    └ <starlette.requests.Request object at 0x107a700a0>
+          │                            └ <function request_response.<locals>.app.<locals>.app at 0x110661b80>
+          └ <function wrap_app_handling_exceptions at 0x1074ec4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x110652160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <function request_response.<locals>.app.<locals>.app at 0x110661b80>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+                     │    └ <starlette.requests.Request object at 0x107a700a0>
+                     └ <function LoggingContextRoute.get_route_handler.<locals>.custom_route_handler at 0x110642820>
+
+  File "/Users/ryu/Milize_Home_Loan/core/custom.py", line 17, in custom_route_handler
+    response: Response = await original_route_handler(request)
+                               │                      └ <starlette.requests.Request object at 0x107a700a0>
+                               └ <function get_request_handler.<locals>.app at 0x110642790>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/routing.py", line 294, in app
+    raw_response = await run_endpoint_function(
+                         └ <function run_endpoint_function at 0x1074ec310>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+                 │         │      └ {'db': <core.database.DB object at 0x1106646d0>, 'data': VerifyEmail(email='buddhist.monk1990@gmail.com', s_sale_company_org_...
+                 │         └ <function user_send_verify_email at 0x110268af0>
+                 └ <fastapi.dependencies.models.Dependant object at 0x110643a60>
+
+> File "/Users/ryu/Milize_Home_Loan/apis/routers/users.py", line 27, in user_send_verify_email
+    utils.send_email(
+    │     └ <function send_email at 0x107b4fd30>
+    └ <module 'utils' from '/Users/ryu/Milize_Home_Loan/utils/__init__.py'>
+
+  File "/Users/ryu/Milize_Home_Loan/utils/mailer.py", line 19, in send_email
+    "Subject": {"Data": template_module.title},
+                        └ <module 'templates.user_send_verify_email' from '/Users/ryu/Milize_Home_Loan/templates/user_send_verify_email.py'>
+
+AttributeError: module 'templates.user_send_verify_email' has no attribute 'title'
+
+2024-01-30 15:35:39.841 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 15:35:39.842 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249602, null, '127.0.0.1', 'http://127.0.0.1:8000/user/verify-email', '/user/verify-email', 'POST', '{"headers": {"host": "127.0.0.1:8000", "connection": "keep-alive", "content-length": "39", "sec-ch-ua": "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"", "accept": "application/json, text/plain, */*", "content-type": "application/json", "sec-ch-ua-mobile": "?0", "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", "sec-ch-ua-platform": "\"macOS\"", "origin": "http://localhost:5173", "sec-fetch-site": "cross-site", "sec-fetch-mode": "cors", "sec-fetch-dest": "empty", "referer": "http://localhost:5173/", "accept-encoding": "gzip, deflate, br", "accept-language": "ja,en-US;q=0.9,en;q=0.8,zh-CN;q=0.7,zh;q=0.6"}, "path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 500,  '{"message": "An unknown exception occurred, please try again later."}');
+    
+2024-01-30 15:35:39.843 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:57880 - "POST /user/verify-email HTTP/1.1" 500
+2024-01-30 15:35:39.843 | ERROR    | uvicorn.protocols.http.httptools_impl:run_asgi:424 - Exception in ASGI application
+Traceback (most recent call last):
+
+  File "<string>", line 1, in <module>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               │     │   └ 4
+               │     └ 7
+               └ <function _main at 0x104e619d0>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 129, in _main
+    return self._bootstrap(parent_sentinel)
+           │    │          └ 4
+           │    └ <function BaseProcess._bootstrap at 0x104bdf430>
+           └ <SpawnProcess name='SpawnProcess-1' parent=9582 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+    │    └ <function BaseProcess.run at 0x104bd4a60>
+    └ <SpawnProcess name='SpawnProcess-1' parent=9582 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    │    │        │    │        │    └ {'config': <uvicorn.config.Config object at 0x104e72a60>, 'target': <bound method Server.run of <uvicorn.server.Server object...
+    │    │        │    │        └ <SpawnProcess name='SpawnProcess-1' parent=9582 started>
+    │    │        │    └ ()
+    │    │        └ <SpawnProcess name='SpawnProcess-1' parent=9582 started>
+    │    └ <function subprocess_started at 0x1103e33a0>
+    └ <SpawnProcess name='SpawnProcess-1' parent=9582 started>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/_subprocess.py", line 78, in subprocess_started
+    target(sockets=sockets)
+    │              └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+    └ <bound method Server.run of <uvicorn.server.Server object at 0x104e72a90>>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/server.py", line 62, in run
+    return asyncio.run(self.serve(sockets=sockets))
+           │       │   │    │             └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+           │       │   │    └ <function Server.serve at 0x1103cc8b0>
+           │       │   └ <uvicorn.server.Server object at 0x104e72a90>
+           │       └ <function run at 0x104e9e790>
+           └ <module 'asyncio' from '/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/async...
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+           │    │                  └ <coroutine object Server.serve at 0x1103ce540>
+           │    └ <method 'run_until_complete' of 'uvloop.loop.Loop' objects>
+           └ <uvloop.Loop running=True closed=False debug=False>
+
+> File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 419, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+                   └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x110421730>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    return await self.app(scope, receive, send)
+                 │    │   │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e130>>
+                 │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+                 │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+                 │    └ <fastapi.applications.FastAPI object at 0x110643cd0>
+                 └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x110421730>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+                           │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e130>>
+                           │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+                           └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e130>>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x110664640>
+          └ <fastapi.applications.FastAPI object at 0x110643cd0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+          │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x1106611f0>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.cors.CORSMiddleware object at 0x110664790>
+          └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x110664640>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+          │    │               │      │        │                     └ Headers({'host': '127.0.0.1:8000', 'connection': 'keep-alive', 'content-length': '39', 'sec-ch-ua': '"Not_A Brand";v="8", "Ch...
+          │    │               │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x1106611f0>
+          │    │               │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │    │               └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <function CORSMiddleware.simple_response at 0x1076aa4c0>
+          └ <starlette.middleware.cors.CORSMiddleware object at 0x110664790>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/cors.py", line 146, in simple_response
+    await self.app(scope, receive, send)
+          │    │   │      │        └ functools.partial(<bound method CORSMiddleware.send of <starlette.middleware.cors.CORSMiddleware object at 0x110664790>>, sen...
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x110664700>
+          └ <starlette.middleware.cors.CORSMiddleware object at 0x110664790>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+          │                            │    │    │     │      │        └ functools.partial(<bound method CORSMiddleware.send of <starlette.middleware.cors.CORSMiddleware object at 0x110664790>>, sen...
+          │                            │    │    │     │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │                            │    │    │     └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    │    └ <starlette.requests.Request object at 0x110250a00>
+          │                            │    └ <fastapi.routing.APIRouter object at 0x110643dc0>
+          │                            └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x110664700>
+          └ <function wrap_app_handling_exceptions at 0x1074ec4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x110661160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <fastapi.routing.APIRouter object at 0x110643dc0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 762, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x110661160>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <bound method Router.app of <fastapi.routing.APIRouter object at 0x110643dc0>>
+          └ <fastapi.routing.APIRouter object at 0x110643dc0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 782, in app
+    await route.handle(scope, receive, send)
+          │     │      │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x110661160>
+          │     │      │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │     │      └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │     └ <function Route.handle at 0x107602820>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+          │    │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x110661160>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <function request_response.<locals>.app at 0x1106428b0>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+          │                            │    │        │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x110661160>
+          │                            │    │        │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │                            │    │        └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    └ <starlette.requests.Request object at 0x107a700a0>
+          │                            └ <function request_response.<locals>.app.<locals>.app at 0x110661b80>
+          └ <function wrap_app_handling_exceptions at 0x1074ec4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x110652160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x11065e1...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <function request_response.<locals>.app.<locals>.app at 0x110661b80>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+                     │    └ <starlette.requests.Request object at 0x107a700a0>
+                     └ <function LoggingContextRoute.get_route_handler.<locals>.custom_route_handler at 0x110642820>
+
+  File "/Users/ryu/Milize_Home_Loan/core/custom.py", line 20, in custom_route_handler
+    await crud.insert_s_access_log(
+          │    └ <function insert_s_access_log at 0x1077f2e50>
+          └ <module 'crud' from '/Users/ryu/Milize_Home_Loan/crud/__init__.py'>
+
+  File "/Users/ryu/Milize_Home_Loan/crud/common.py", line 21, in insert_s_access_log
+    await db.execute(sql)
+          │  │       └ '\n    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │  └ <function DB.execute at 0x1077f24c0>
+          └ <core.database.DB object at 0x1106646d0>
+
+  File "/Users/ryu/Milize_Home_Loan/core/database.py", line 58, in execute
+    await cur.execute(sql)
+          │   │       └ '\n    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │   └ <function Cursor.execute at 0x1077e24c0>
+          └ <aiomysql.cursors.DictCursor object at 0x110664670>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+          │    │      └ '\n    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │    └ <function Cursor._query at 0x1077e2940>
+          └ <aiomysql.cursors.DictCursor object at 0x110664670>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+          │    │     └ '\n    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │    └ <function Connection.query at 0x1077eb790>
+          └ <aiomysql.connection.Connection object at 0x110657880>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+          │    │                             └ False
+          │    └ <function Connection._read_query_result at 0x1077ebee0>
+          └ <aiomysql.connection.Connection object at 0x110657880>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+          │      └ <function MySQLResult.read at 0x1077ecaf0>
+          └ <aiomysql.connection.MySQLResult object at 0x11065e9a0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                         │    └ None
+                         └ <aiomysql.connection.MySQLResult object at 0x11065e9a0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    │      └ <function MysqlPacket.raise_for_error at 0x1077b80d0>
+    └ <pymysql.protocol.MysqlPacket object at 0x110657700>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/pymysql/protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    │   │                     │    └ <member '_data' of 'MysqlPacket' objects>
+    │   │                     └ <pymysql.protocol.MysqlPacket object at 0x110657700>
+    │   └ <function raise_mysql_exception at 0x1077650d0>
+    └ <module 'pymysql.err' from '/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/pymysql...
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/pymysql/err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+          │          │      └ 'Invalid JSON text: "Missing a comma or \'}\' after an object member." at position 106 in value for column \'c_access_logs.pa...
+          │          └ 3140
+          └ <class 'pymysql.err.OperationalError'>
+
+pymysql.err.OperationalError: (3140, 'Invalid JSON text: "Missing a comma or \'}\' after an object member." at position 106 in value for column \'c_access_logs.params\'.')
+
+2024-01-30 15:37:18.928 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 15:37:19.028 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 15:37:19.029 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 15:37:19.029 | INFO     | uvicorn.server:serve:87 - Finished server process [9584]
+2024-01-30 15:37:19.578 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 15:39:08.578 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 15:39:08.677 | ERROR    | apis.routers.users:user_send_verify_email:34 - module 'templates.user_send_verify_email' has no attribute 'title'Traceback (most recent call last):
+
+  File "<string>", line 1, in <module>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               │     │   └ 4
+               │     └ 8
+               └ <function _main at 0x1051f99d0>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 129, in _main
+    return self._bootstrap(parent_sentinel)
+           │    │          └ 4
+           │    └ <function BaseProcess._bootstrap at 0x104f77430>
+           └ <SpawnProcess name='SpawnProcess-2' parent=9582 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+    │    └ <function BaseProcess.run at 0x104f6ca60>
+    └ <SpawnProcess name='SpawnProcess-2' parent=9582 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    │    │        │    │        │    └ {'config': <uvicorn.config.Config object at 0x10520aa60>, 'target': <bound method Server.run of <uvicorn.server.Server object...
+    │    │        │    │        └ <SpawnProcess name='SpawnProcess-2' parent=9582 started>
+    │    │        │    └ ()
+    │    │        └ <SpawnProcess name='SpawnProcess-2' parent=9582 started>
+    │    └ <function subprocess_started at 0x10795f3a0>
+    └ <SpawnProcess name='SpawnProcess-2' parent=9582 started>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/_subprocess.py", line 78, in subprocess_started
+    target(sockets=sockets)
+    │              └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+    └ <bound method Server.run of <uvicorn.server.Server object at 0x10520aa90>>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/server.py", line 62, in run
+    return asyncio.run(self.serve(sockets=sockets))
+           │       │   │    │             └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+           │       │   │    └ <function Server.serve at 0x1079478b0>
+           │       │   └ <uvicorn.server.Server object at 0x10520aa90>
+           │       └ <function run at 0x105236790>
+           └ <module 'asyncio' from '/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/async...
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+           │    │                  └ <coroutine object Server.serve at 0x10794b540>
+           │    └ <method 'run_until_complete' of 'uvloop.loop.Loop' objects>
+           └ <uvloop.Loop running=True closed=False debug=False>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 419, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+                   └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x10799d700>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    return await self.app(scope, receive, send)
+                 │    │   │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a940>>
+                 │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+                 │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+                 │    └ <fastapi.applications.FastAPI object at 0x107c3fca0>
+                 └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x10799d700>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+                           │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a940>>
+                           │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+                           └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a940>>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x107c5f4c0>
+          └ <fastapi.applications.FastAPI object at 0x107c3fca0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+          │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x107c5c1f0>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.cors.CORSMiddleware object at 0x107c5f6d0>
+          └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x107c5f4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+          │    │               │      │        │                     └ Headers({'host': '127.0.0.1:8000', 'connection': 'keep-alive', 'content-length': '39', 'sec-ch-ua': '"Not_A Brand";v="8", "Ch...
+          │    │               │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x107c5c1f0>
+          │    │               │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │    │               └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <function CORSMiddleware.simple_response at 0x106e264c0>
+          └ <starlette.middleware.cors.CORSMiddleware object at 0x107c5f6d0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/cors.py", line 146, in simple_response
+    await self.app(scope, receive, send)
+          │    │   │      │        └ functools.partial(<bound method CORSMiddleware.send of <starlette.middleware.cors.CORSMiddleware object at 0x107c5f6d0>>, sen...
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x107c5f6a0>
+          └ <starlette.middleware.cors.CORSMiddleware object at 0x107c5f6d0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+          │                            │    │    │     │      │        └ functools.partial(<bound method CORSMiddleware.send of <starlette.middleware.cors.CORSMiddleware object at 0x107c5f6d0>>, sen...
+          │                            │    │    │     │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │                            │    │    │     └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    │    └ <starlette.requests.Request object at 0x107c5a790>
+          │                            │    └ <fastapi.routing.APIRouter object at 0x107c3fd90>
+          │                            └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x107c5f6a0>
+          └ <function wrap_app_handling_exceptions at 0x106d6a4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x107c5c160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <fastapi.routing.APIRouter object at 0x107c3fd90>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 762, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x107c5c160>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <bound method Router.app of <fastapi.routing.APIRouter object at 0x107c3fd90>>
+          └ <fastapi.routing.APIRouter object at 0x107c3fd90>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 782, in app
+    await route.handle(scope, receive, send)
+          │     │      │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x107c5c160>
+          │     │      │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │     │      └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │     └ <function Route.handle at 0x106d7f820>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+          │    │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x107c5c160>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <function request_response.<locals>.app at 0x107c3e8b0>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+          │                            │    │        │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x107c5c160>
+          │                            │    │        │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │                            │    │        └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    └ <starlette.requests.Request object at 0x107c5a310>
+          │                            └ <function request_response.<locals>.app.<locals>.app at 0x107c5cb80>
+          └ <function wrap_app_handling_exceptions at 0x106d6a4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x107c4e160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <function request_response.<locals>.app.<locals>.app at 0x107c5cb80>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+                     │    └ <starlette.requests.Request object at 0x107c5a310>
+                     └ <function LoggingContextRoute.get_route_handler.<locals>.custom_route_handler at 0x107c3e820>
+
+  File "/Users/ryu/Milize_Home_Loan/core/custom.py", line 17, in custom_route_handler
+    response: Response = await original_route_handler(request)
+                               │                      └ <starlette.requests.Request object at 0x107c5a310>
+                               └ <function get_request_handler.<locals>.app at 0x107c3e790>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/routing.py", line 294, in app
+    raw_response = await run_endpoint_function(
+                         └ <function run_endpoint_function at 0x106d6a310>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+                 │         │      └ {'db': <core.database.DB object at 0x107c5f790>, 'data': VerifyEmail(email='buddhist.monk1990@gmail.com', s_sale_company_org_...
+                 │         └ <function user_send_verify_email at 0x1077e4af0>
+                 └ <fastapi.dependencies.models.Dependant object at 0x107c3fa60>
+
+> File "/Users/ryu/Milize_Home_Loan/apis/routers/users.py", line 27, in user_send_verify_email
+    utils.send_email(
+    │     └ <function send_email at 0x1071cbd30>
+    └ <module 'utils' from '/Users/ryu/Milize_Home_Loan/utils/__init__.py'>
+
+  File "/Users/ryu/Milize_Home_Loan/utils/mailer.py", line 19, in send_email
+    "Subject": {"Data": template_module.title},
+                        └ <module 'templates.user_send_verify_email' from '/Users/ryu/Milize_Home_Loan/templates/user_send_verify_email.py'>
+
+AttributeError: module 'templates.user_send_verify_email' has no attribute 'title'
+
+2024-01-30 15:39:08.692 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 15:39:08.693 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249603, null, '127.0.0.1', 'http://127.0.0.1:8000/user/verify-email', '/user/verify-email', 'POST', '{"headers": {"host": "127.0.0.1:8000", "connection": "keep-alive", "content-length": "39", "sec-ch-ua": "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"", "accept": "application/json, text/plain, */*", "content-type": "application/json", "sec-ch-ua-mobile": "?0", "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", "sec-ch-ua-platform": "\"macOS\"", "origin": "http://localhost:5173", "sec-fetch-site": "cross-site", "sec-fetch-mode": "cors", "sec-fetch-dest": "empty", "referer": "http://localhost:5173/", "accept-encoding": "gzip, deflate, br", "accept-language": "ja,en-US;q=0.9,en;q=0.8,zh-CN;q=0.7,zh;q=0.6"}, "path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 500,  '{"message": "An unknown exception occurred, please try again later."}');
+    
+2024-01-30 15:39:08.694 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:58736 - "POST /user/verify-email HTTP/1.1" 500
+2024-01-30 15:39:08.694 | ERROR    | uvicorn.protocols.http.httptools_impl:run_asgi:424 - Exception in ASGI application
+Traceback (most recent call last):
+
+  File "<string>", line 1, in <module>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               │     │   └ 4
+               │     └ 8
+               └ <function _main at 0x1051f99d0>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 129, in _main
+    return self._bootstrap(parent_sentinel)
+           │    │          └ 4
+           │    └ <function BaseProcess._bootstrap at 0x104f77430>
+           └ <SpawnProcess name='SpawnProcess-2' parent=9582 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+    │    └ <function BaseProcess.run at 0x104f6ca60>
+    └ <SpawnProcess name='SpawnProcess-2' parent=9582 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    │    │        │    │        │    └ {'config': <uvicorn.config.Config object at 0x10520aa60>, 'target': <bound method Server.run of <uvicorn.server.Server object...
+    │    │        │    │        └ <SpawnProcess name='SpawnProcess-2' parent=9582 started>
+    │    │        │    └ ()
+    │    │        └ <SpawnProcess name='SpawnProcess-2' parent=9582 started>
+    │    └ <function subprocess_started at 0x10795f3a0>
+    └ <SpawnProcess name='SpawnProcess-2' parent=9582 started>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/_subprocess.py", line 78, in subprocess_started
+    target(sockets=sockets)
+    │              └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+    └ <bound method Server.run of <uvicorn.server.Server object at 0x10520aa90>>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/server.py", line 62, in run
+    return asyncio.run(self.serve(sockets=sockets))
+           │       │   │    │             └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+           │       │   │    └ <function Server.serve at 0x1079478b0>
+           │       │   └ <uvicorn.server.Server object at 0x10520aa90>
+           │       └ <function run at 0x105236790>
+           └ <module 'asyncio' from '/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/async...
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+           │    │                  └ <coroutine object Server.serve at 0x10794b540>
+           │    └ <method 'run_until_complete' of 'uvloop.loop.Loop' objects>
+           └ <uvloop.Loop running=True closed=False debug=False>
+
+> File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 419, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+                   └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x10799d700>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    return await self.app(scope, receive, send)
+                 │    │   │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a940>>
+                 │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+                 │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+                 │    └ <fastapi.applications.FastAPI object at 0x107c3fca0>
+                 └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x10799d700>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+                           │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a940>>
+                           │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+                           └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a940>>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x107c5f4c0>
+          └ <fastapi.applications.FastAPI object at 0x107c3fca0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+          │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x107c5c1f0>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.cors.CORSMiddleware object at 0x107c5f6d0>
+          └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x107c5f4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+          │    │               │      │        │                     └ Headers({'host': '127.0.0.1:8000', 'connection': 'keep-alive', 'content-length': '39', 'sec-ch-ua': '"Not_A Brand";v="8", "Ch...
+          │    │               │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x107c5c1f0>
+          │    │               │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │    │               └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <function CORSMiddleware.simple_response at 0x106e264c0>
+          └ <starlette.middleware.cors.CORSMiddleware object at 0x107c5f6d0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/cors.py", line 146, in simple_response
+    await self.app(scope, receive, send)
+          │    │   │      │        └ functools.partial(<bound method CORSMiddleware.send of <starlette.middleware.cors.CORSMiddleware object at 0x107c5f6d0>>, sen...
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x107c5f6a0>
+          └ <starlette.middleware.cors.CORSMiddleware object at 0x107c5f6d0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+          │                            │    │    │     │      │        └ functools.partial(<bound method CORSMiddleware.send of <starlette.middleware.cors.CORSMiddleware object at 0x107c5f6d0>>, sen...
+          │                            │    │    │     │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │                            │    │    │     └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    │    └ <starlette.requests.Request object at 0x107c5a790>
+          │                            │    └ <fastapi.routing.APIRouter object at 0x107c3fd90>
+          │                            └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x107c5f6a0>
+          └ <function wrap_app_handling_exceptions at 0x106d6a4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x107c5c160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <fastapi.routing.APIRouter object at 0x107c3fd90>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 762, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x107c5c160>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <bound method Router.app of <fastapi.routing.APIRouter object at 0x107c3fd90>>
+          └ <fastapi.routing.APIRouter object at 0x107c3fd90>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 782, in app
+    await route.handle(scope, receive, send)
+          │     │      │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x107c5c160>
+          │     │      │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │     │      └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │     └ <function Route.handle at 0x106d7f820>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+          │    │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x107c5c160>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <function request_response.<locals>.app at 0x107c3e8b0>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+          │                            │    │        │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x107c5c160>
+          │                            │    │        │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │                            │    │        └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    └ <starlette.requests.Request object at 0x107c5a310>
+          │                            └ <function request_response.<locals>.app.<locals>.app at 0x107c5cb80>
+          └ <function wrap_app_handling_exceptions at 0x106d6a4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x107c4e160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x107c5a9...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <function request_response.<locals>.app.<locals>.app at 0x107c5cb80>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+                     │    └ <starlette.requests.Request object at 0x107c5a310>
+                     └ <function LoggingContextRoute.get_route_handler.<locals>.custom_route_handler at 0x107c3e820>
+
+  File "/Users/ryu/Milize_Home_Loan/core/custom.py", line 20, in custom_route_handler
+    await crud.insert_s_access_log(
+          │    └ <function insert_s_access_log at 0x106f6ee50>
+          └ <module 'crud' from '/Users/ryu/Milize_Home_Loan/crud/__init__.py'>
+
+  File "/Users/ryu/Milize_Home_Loan/crud/common.py", line 22, in insert_s_access_log
+    await db.execute(sql)
+          │  │       └ '\n    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │  └ <function DB.execute at 0x106f6e4c0>
+          └ <core.database.DB object at 0x107c5f790>
+
+  File "/Users/ryu/Milize_Home_Loan/core/database.py", line 58, in execute
+    await cur.execute(sql)
+          │   │       └ '\n    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │   └ <function Cursor.execute at 0x106f5e4c0>
+          └ <aiomysql.cursors.DictCursor object at 0x107c5a070>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+          │    │      └ '\n    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │    └ <function Cursor._query at 0x106f5e940>
+          └ <aiomysql.cursors.DictCursor object at 0x107c5a070>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+          │    │     └ '\n    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │    └ <function Connection.query at 0x106f67790>
+          └ <aiomysql.connection.Connection object at 0x107c53f70>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+          │    │                             └ False
+          │    └ <function Connection._read_query_result at 0x106f67ee0>
+          └ <aiomysql.connection.Connection object at 0x107c53f70>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+          │      └ <function MySQLResult.read at 0x106f68af0>
+          └ <aiomysql.connection.MySQLResult object at 0x107c5f220>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                         │    └ None
+                         └ <aiomysql.connection.MySQLResult object at 0x107c5f220>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    │      └ <function MysqlPacket.raise_for_error at 0x106f340d0>
+    └ <pymysql.protocol.MysqlPacket object at 0x107cfd3a0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/pymysql/protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    │   │                     │    └ <member '_data' of 'MysqlPacket' objects>
+    │   │                     └ <pymysql.protocol.MysqlPacket object at 0x107cfd3a0>
+    │   └ <function raise_mysql_exception at 0x106ee10d0>
+    └ <module 'pymysql.err' from '/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/pymysql...
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/pymysql/err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+          │          │      └ 'Invalid JSON text: "Missing a comma or \'}\' after an object member." at position 106 in value for column \'c_access_logs.pa...
+          │          └ 3140
+          └ <class 'pymysql.err.OperationalError'>
+
+pymysql.err.OperationalError: (3140, 'Invalid JSON text: "Missing a comma or \'}\' after an object member." at position 106 in value for column \'c_access_logs.params\'.')
+
+2024-01-30 15:41:44.747 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 15:41:44.849 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 15:41:44.850 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 15:41:44.850 | INFO     | uvicorn.server:serve:87 - Finished server process [9915]
+2024-01-30 15:41:45.382 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 15:41:51.347 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 15:41:51.449 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 15:41:51.449 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 15:41:51.449 | INFO     | uvicorn.server:serve:87 - Finished server process [9971]
+2024-01-30 15:41:51.903 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 15:42:14.088 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 15:42:14.374 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 15:42:14.376 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249604, null, '127.0.0.1', 'http://127.0.0.1:8000/user/verify-email', '/user/verify-email', 'POST', '{"headers": {"host": "127.0.0.1:8000", "connection": "keep-alive", "content-length": "39", "sec-ch-ua": "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"", "accept": "application/json, text/plain, */*", "content-type": "application/json", "sec-ch-ua-mobile": "?0", "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", "sec-ch-ua-platform": "\"macOS\"", "origin": "http://localhost:5173", "sec-fetch-site": "cross-site", "sec-fetch-mode": "cors", "sec-fetch-dest": "empty", "referer": "http://localhost:5173/", "accept-encoding": "gzip, deflate, br", "accept-language": "ja,en-US;q=0.9,en;q=0.8,zh-CN;q=0.7,zh;q=0.6"}, "path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 200,  '{"message": "verify email send successful."}');
+    
+2024-01-30 15:42:14.377 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:59510 - "POST /user/verify-email HTTP/1.1" 500
+2024-01-30 15:42:14.377 | ERROR    | uvicorn.protocols.http.httptools_impl:run_asgi:424 - Exception in ASGI application
+Traceback (most recent call last):
+
+  File "<string>", line 1, in <module>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               │     │   └ 4
+               │     └ 8
+               └ <function _main at 0x102afd9d0>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 129, in _main
+    return self._bootstrap(parent_sentinel)
+           │    │          └ 4
+           │    └ <function BaseProcess._bootstrap at 0x10287b430>
+           └ <SpawnProcess name='SpawnProcess-4' parent=9582 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+    │    └ <function BaseProcess.run at 0x102870a60>
+    └ <SpawnProcess name='SpawnProcess-4' parent=9582 started>
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    │    │        │    │        │    └ {'config': <uvicorn.config.Config object at 0x102b0ea60>, 'target': <bound method Server.run of <uvicorn.server.Server object...
+    │    │        │    │        └ <SpawnProcess name='SpawnProcess-4' parent=9582 started>
+    │    │        │    └ ()
+    │    │        └ <SpawnProcess name='SpawnProcess-4' parent=9582 started>
+    │    └ <function subprocess_started at 0x1052633a0>
+    └ <SpawnProcess name='SpawnProcess-4' parent=9582 started>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/_subprocess.py", line 78, in subprocess_started
+    target(sockets=sockets)
+    │              └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+    └ <bound method Server.run of <uvicorn.server.Server object at 0x102b0ea90>>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/server.py", line 62, in run
+    return asyncio.run(self.serve(sockets=sockets))
+           │       │   │    │             └ [<socket.socket fd=3, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]
+           │       │   │    └ <function Server.serve at 0x10524b8b0>
+           │       │   └ <uvicorn.server.Server object at 0x102b0ea90>
+           │       └ <function run at 0x102b3a790>
+           └ <module 'asyncio' from '/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/async...
+
+  File "/opt/homebrew/Cellar/python@3.9/3.9.18_2/Frameworks/Python.framework/Versions/3.9/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+           │    │                  └ <coroutine object Server.serve at 0x10524f540>
+           │    └ <method 'run_until_complete' of 'uvloop.loop.Loop' objects>
+           └ <uvloop.Loop running=True closed=False debug=False>
+
+> File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 419, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+                   └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x1052a1730>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    return await self.app(scope, receive, send)
+                 │    │   │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de910>>
+                 │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de9...
+                 │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+                 │    └ <fastapi.applications.FastAPI object at 0x1054c3cd0>
+                 └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x1052a1730>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+                           │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de910>>
+                           │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de9...
+                           └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de910>>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de9...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x1054e3640>
+          └ <fastapi.applications.FastAPI object at 0x1054c3cd0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+          │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x1054e1280>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de9...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.cors.CORSMiddleware object at 0x1054e3790>
+          └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x1054e3640>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+          │    │               │      │        │                     └ Headers({'host': '127.0.0.1:8000', 'connection': 'keep-alive', 'content-length': '39', 'sec-ch-ua': '"Not_A Brand";v="8", "Ch...
+          │    │               │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x1054e1280>
+          │    │               │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de9...
+          │    │               └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <function CORSMiddleware.simple_response at 0x10472a4c0>
+          └ <starlette.middleware.cors.CORSMiddleware object at 0x1054e3790>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/cors.py", line 146, in simple_response
+    await self.app(scope, receive, send)
+          │    │   │      │        └ functools.partial(<bound method CORSMiddleware.send of <starlette.middleware.cors.CORSMiddleware object at 0x1054e3790>>, sen...
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de9...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x1054e3700>
+          └ <starlette.middleware.cors.CORSMiddleware object at 0x1054e3790>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+          │                            │    │    │     │      │        └ functools.partial(<bound method CORSMiddleware.send of <starlette.middleware.cors.CORSMiddleware object at 0x1054e3790>>, sen...
+          │                            │    │    │     │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de9...
+          │                            │    │    │     └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    │    └ <starlette.requests.Request object at 0x1054de7c0>
+          │                            │    └ <fastapi.routing.APIRouter object at 0x1054c3dc0>
+          │                            └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x1054e3700>
+          └ <function wrap_app_handling_exceptions at 0x10466d4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x1054e1160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de9...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <fastapi.routing.APIRouter object at 0x1054c3dc0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 762, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x1054e1160>
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de9...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <bound method Router.app of <fastapi.routing.APIRouter object at 0x1054c3dc0>>
+          └ <fastapi.routing.APIRouter object at 0x1054c3dc0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 782, in app
+    await route.handle(scope, receive, send)
+          │     │      │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x1054e1160>
+          │     │      │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de9...
+          │     │      └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │     └ <function Route.handle at 0x104683820>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+          │    │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x1054e1160>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de9...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <function request_response.<locals>.app at 0x1054c28b0>
+          └ LoggingContextRoute(path='/user/verify-email', name='user_send_verify_email', methods=['POST'])
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+          │                            │    │        │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x1054e1160>
+          │                            │    │        │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de9...
+          │                            │    │        └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    └ <starlette.requests.Request object at 0x1054de340>
+          │                            └ <function request_response.<locals>.app.<locals>.app at 0x1054e1b80>
+          └ <function wrap_app_handling_exceptions at 0x10466d4c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x1054d2160>
+          │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x1054de9...
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <function request_response.<locals>.app.<locals>.app at 0x1054e1b80>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+                     │    └ <starlette.requests.Request object at 0x1054de340>
+                     └ <function LoggingContextRoute.get_route_handler.<locals>.custom_route_handler at 0x1054c2820>
+
+  File "/Users/ryu/Milize_Home_Loan/core/custom.py", line 20, in custom_route_handler
+    await crud.insert_s_access_log(
+          │    └ <function insert_s_access_log at 0x104872e50>
+          └ <module 'crud' from '/Users/ryu/Milize_Home_Loan/crud/__init__.py'>
+
+  File "/Users/ryu/Milize_Home_Loan/crud/common.py", line 22, in insert_s_access_log
+    await db.execute(sql)
+          │  │       └ '\n    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │  └ <function DB.execute at 0x1048724c0>
+          └ <core.database.DB object at 0x1054e36d0>
+
+  File "/Users/ryu/Milize_Home_Loan/core/database.py", line 58, in execute
+    await cur.execute(sql)
+          │   │       └ '\n    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │   └ <function Cursor.execute at 0x1048624c0>
+          └ <aiomysql.cursors.DictCursor object at 0x1054d77c0>
+
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/cursors.py", line 239, in execute
+    await self._query(query)
+          │    │      └ '\n    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │    └ <function Cursor._query at 0x104862940>
+          └ <aiomysql.cursors.DictCursor object at 0x1054d77c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/cursors.py", line 457, in _query
+    await conn.query(q)
+          │    │     └ '\n    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)\n    VALUES ...
+          │    └ <function Connection.query at 0x10486b790>
+          └ <aiomysql.connection.Connection object at 0x1054d7d30>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 469, in query
+    await self._read_query_result(unbuffered=unbuffered)
+          │    │                             └ False
+          │    └ <function Connection._read_query_result at 0x10486bee0>
+          └ <aiomysql.connection.Connection object at 0x1054d7d30>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 683, in _read_query_result
+    await result.read()
+          │      └ <function MySQLResult.read at 0x10486caf0>
+          └ <aiomysql.connection.MySQLResult object at 0x1054de1c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 1164, in read
+    first_packet = await self.connection._read_packet()
+                         │    └ None
+                         └ <aiomysql.connection.MySQLResult object at 0x1054de1c0>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/aiomysql/connection.py", line 652, in _read_packet
+    packet.raise_for_error()
+    │      └ <function MysqlPacket.raise_for_error at 0x1048380d0>
+    └ <pymysql.protocol.MysqlPacket object at 0x1054e3550>
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/pymysql/protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    │   │                     │    └ <member '_data' of 'MysqlPacket' objects>
+    │   │                     └ <pymysql.protocol.MysqlPacket object at 0x1054e3550>
+    │   └ <function raise_mysql_exception at 0x1047e80d0>
+    └ <module 'pymysql.err' from '/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/pymysql...
+  File "/Users/ryu/.local/share/virtualenvs/Milize_Home_Loan-qdC7yC_9/lib/python3.9/site-packages/pymysql/err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+          │          │      └ 'Invalid JSON text: "Missing a comma or \'}\' after an object member." at position 106 in value for column \'c_access_logs.pa...
+          │          └ 3140
+          └ <class 'pymysql.err.OperationalError'>
+
+pymysql.err.OperationalError: (3140, 'Invalid JSON text: "Missing a comma or \'}\' after an object member." at position 106 in value for column \'c_access_logs.params\'.')
+
+2024-01-30 15:44:17.955 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 15:44:18.060 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 15:44:18.061 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 15:44:18.062 | INFO     | uvicorn.server:serve:87 - Finished server process [9977]
+2024-01-30 15:44:18.511 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 15:44:37.056 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 15:44:37.350 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 15:44:37.351 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249605, null, '127.0.0.1', 'http://127.0.0.1:8000/user/verify-email', '/user/verify-email', 'POST', '{"path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 200,  '{"message": "verify email send successful."}');
+    
+2024-01-30 15:44:37.356 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:60101 - "POST /user/verify-email HTTP/1.1" 200
+2024-01-30 15:45:44.596 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 15:45:44.699 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 15:45:44.700 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 15:45:44.701 | INFO     | uvicorn.server:serve:87 - Finished server process [10029]
+2024-01-30 15:45:45.149 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 15:46:33.473 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:60590 - "OPTIONS /user/verify-email HTTP/1.1" 200
+2024-01-30 15:46:33.477 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 15:46:33.752 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 15:46:33.754 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249606, null, '127.0.0.1', 'http://127.0.0.1:8000/user/verify-email', '/user/verify-email', 'POST', '{"path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 200,  '{"message": "verify email send successful."}');
+    
+2024-01-30 15:46:33.758 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:60590 - "POST /user/verify-email HTTP/1.1" 200
+2024-01-30 15:47:09.178 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 15:47:09.430 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 15:47:09.435 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249607, null, '127.0.0.1', 'http://127.0.0.1:8000/user/verify-email', '/user/verify-email', 'POST', '{"path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 200,  '{"message": "verify email send successful."}');
+    
+2024-01-30 15:47:09.440 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:60591 - "POST /user/verify-email HTTP/1.1" 200
+2024-01-30 15:48:23.837 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 15:48:59.008 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 15:48:59.320 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 15:48:59.321 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249608, null, '127.0.0.1', 'http://127.0.0.1:8000/user/verify-email', '/user/verify-email', 'POST', '{"path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 200,  '{"message": "verify email send successful."}');
+    
+2024-01-30 15:48:59.325 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:61216 - "POST /user/verify-email HTTP/1.1" 200
+2024-01-30 15:50:27.600 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 15:51:04.732 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 15:51:05.033 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 15:51:05.034 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249609, null, '127.0.0.1', 'http://127.0.0.1:8000/user/verify-email', '/user/verify-email', 'POST', '{"path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 200,  '{"message": "verify email send successful."}');
+    
+2024-01-30 15:51:05.037 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:61754 - "POST /user/verify-email HTTP/1.1" 200
+2024-01-30 15:51:43.193 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 15:52:00.533 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 15:52:00.828 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 15:52:00.830 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249610, null, '127.0.0.1', 'http://127.0.0.1:8000/user/verify-email', '/user/verify-email', 'POST', '{"path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 200,  '{"message": "verify email send successful."}');
+    
+2024-01-30 15:52:00.833 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:61999 - "POST /user/verify-email HTTP/1.1" 200
+2024-01-30 16:57:54.086 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:61935 - "OPTIONS /user/verify-email HTTP/1.1" 200
+2024-01-30 16:57:54.091 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 16:57:54.353 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 16:57:54.355 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249611, null, '127.0.0.1', 'http://127.0.0.1:8000/user/verify-email', '/user/verify-email', 'POST', '{"path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 200,  '{"message": "verify email send successful."}');
+    
+2024-01-30 16:57:54.360 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:61935 - "POST /user/verify-email HTTP/1.1" 200
+2024-01-30 17:03:34.418 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 17:03:34.637 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 17:03:34.638 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249612, null, '127.0.0.1', 'http://127.0.0.1:8000/user/verify-email', '/user/verify-email', 'POST', '{"path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 200,  '{"message": "verify email send successful."}');
+    
+2024-01-30 17:03:34.643 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:63411 - "POST /user/verify-email HTTP/1.1" 200
+2024-01-30 17:24:44.256 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:52351 - "OPTIONS /user/verify-email HTTP/1.1" 200
+2024-01-30 17:24:44.264 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1900@gmail.com';
+2024-01-30 17:24:44.500 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 17:24:44.502 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249613, null, '127.0.0.1', 'http://127.0.0.1:8000/user/verify-email', '/user/verify-email', 'POST', '{"path": null, "query": null, "body": {"email": "buddhist.monk1900@gmail.com"}}', 200,  '{"message": "verify email send successful."}');
+    
+2024-01-30 17:24:44.510 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:52351 - "POST /user/verify-email HTTP/1.1" 200
+2024-01-30 17:26:24.861 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 17:26:25.231 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 17:26:25.234 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249614, null, '127.0.0.1', 'http://127.0.0.1:8000/user/verify-email', '/user/verify-email', 'POST', '{"path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 200,  '{"message": "verify email send successful."}');
+    
+2024-01-30 17:26:25.237 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:52776 - "POST /user/verify-email HTTP/1.1" 200
+2024-01-30 18:19:30.609 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:49411 - "OPTIONS /user/verify-email HTTP/1.1" 200
+2024-01-30 18:19:30.616 | INFO     | core.database:fetch_one:35 - SELECT id FROM c_users WHERE c_users.email = 'buddhist.monk1990@gmail.com';
+2024-01-30 18:19:30.888 | INFO     | core.database:fetch_one:35 - SELECT UUID_SHORT() as value;
+2024-01-30 18:19:30.890 | INFO     | core.database:execute:57 - 
+    INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
+    VALUES (100688388004249615, null, '127.0.0.1', 'http://127.0.0.1:8000/user/verify-email', '/user/verify-email', 'POST', '{"path": null, "query": null, "body": {"email": "buddhist.monk1990@gmail.com"}}', 200,  '{"message": "verify email send successful."}');
+    
+2024-01-30 18:19:30.894 | INFO     | uvicorn.protocols.http.httptools_impl:send:489 - 127.0.0.1:49411 - "POST /user/verify-email HTTP/1.1" 200
+2024-01-30 22:26:22.457 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:26:22.560 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:26:22.560 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:26:22.560 | INFO     | uvicorn.server:serve:87 - Finished server process [10399]
+2024-01-30 22:26:23.148 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:26:45.698 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:26:45.800 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:26:45.800 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:26:45.801 | INFO     | uvicorn.server:serve:87 - Finished server process [14216]
+2024-01-30 22:26:46.233 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:27:04.124 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:27:04.226 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:27:04.226 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:27:04.226 | INFO     | uvicorn.server:serve:87 - Finished server process [14227]
+2024-01-30 22:27:04.656 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:28:04.282 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:28:04.384 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:28:04.385 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:28:04.385 | INFO     | uvicorn.server:serve:87 - Finished server process [14233]
+2024-01-30 22:28:04.812 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:32:29.759 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:32:29.859 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:32:29.860 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:32:29.860 | INFO     | uvicorn.server:serve:87 - Finished server process [14243]
+2024-01-30 22:32:30.400 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:34:18.254 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:34:18.355 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:34:18.356 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:34:18.356 | INFO     | uvicorn.server:serve:87 - Finished server process [14268]
+2024-01-30 22:36:48.232 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:37:16.055 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:37:16.156 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:37:16.156 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:37:16.157 | INFO     | uvicorn.server:serve:87 - Finished server process [14332]
+2024-01-30 22:37:16.604 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:38:23.331 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:38:23.432 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:38:23.433 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:38:23.433 | INFO     | uvicorn.server:serve:87 - Finished server process [14338]
+2024-01-30 22:38:23.874 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:38:48.263 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:38:48.364 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:38:48.364 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:38:48.365 | INFO     | uvicorn.server:serve:87 - Finished server process [14348]
+2024-01-30 22:38:48.794 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:39:08.109 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:39:08.211 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:39:08.212 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:39:08.212 | INFO     | uvicorn.server:serve:87 - Finished server process [14356]
+2024-01-30 22:39:08.665 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:41:39.333 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:41:39.435 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:41:39.435 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:41:39.435 | INFO     | uvicorn.server:serve:87 - Finished server process [14362]
+2024-01-30 22:41:39.881 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:50:59.708 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:50:59.810 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:50:59.811 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:50:59.811 | INFO     | uvicorn.server:serve:87 - Finished server process [14380]
+2024-01-30 22:51:00.333 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:53:33.622 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:53:33.723 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:53:33.723 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:53:33.723 | INFO     | uvicorn.server:serve:87 - Finished server process [14446]
+2024-01-30 22:53:34.174 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:58:08.917 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:58:09.019 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:58:09.019 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:58:09.020 | INFO     | uvicorn.server:serve:87 - Finished server process [14473]
+2024-01-30 22:58:09.478 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:58:50.616 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:58:50.718 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:58:50.718 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:58:50.718 | INFO     | uvicorn.server:serve:87 - Finished server process [14493]
+2024-01-30 22:58:51.160 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 22:59:15.439 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 22:59:15.540 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 22:59:15.541 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 22:59:15.541 | INFO     | uvicorn.server:serve:87 - Finished server process [14504]
+2024-01-30 22:59:15.993 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 23:00:08.057 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 23:00:08.159 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 23:00:08.159 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 23:00:08.159 | INFO     | uvicorn.server:serve:87 - Finished server process [14510]
+2024-01-30 23:00:08.622 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 23:00:32.996 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 23:00:33.098 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 23:00:33.098 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 23:00:33.099 | INFO     | uvicorn.server:serve:87 - Finished server process [14520]
+2024-01-30 23:00:33.541 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 23:01:25.942 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 23:01:26.044 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 23:01:26.045 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 23:01:26.045 | INFO     | uvicorn.server:serve:87 - Finished server process [14529]
+2024-01-30 23:01:26.554 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 23:01:32.822 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 23:01:32.924 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 23:01:32.924 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 23:01:32.924 | INFO     | uvicorn.server:serve:87 - Finished server process [14543]
+2024-01-30 23:01:33.374 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 23:02:14.108 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 23:02:14.210 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 23:02:14.210 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 23:02:14.211 | INFO     | uvicorn.server:serve:87 - Finished server process [14549]
+2024-01-30 23:02:14.659 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 23:02:20.529 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 23:02:20.631 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 23:02:20.631 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 23:02:20.631 | INFO     | uvicorn.server:serve:87 - Finished server process [14557]
+2024-01-30 23:02:25.258 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 23:04:06.637 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 23:04:06.739 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 23:04:06.739 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 23:04:06.739 | INFO     | uvicorn.server:serve:87 - Finished server process [14563]
+2024-01-30 23:04:07.175 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
+2024-01-30 23:04:56.713 | INFO     | uvicorn.server:shutdown:265 - Shutting down
+2024-01-30 23:04:56.814 | INFO     | uvicorn.lifespan.on:shutdown:65 - Waiting for application shutdown.
+2024-01-30 23:04:56.815 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2024-01-30 23:04:56.815 | INFO     | uvicorn.server:serve:87 - Finished server process [14576]
+2024-01-30 23:04:57.276 | INFO     | uvicorn.lifespan.on:startup:60 - Application startup complete.
