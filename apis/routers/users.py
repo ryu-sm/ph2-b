@@ -24,7 +24,10 @@ async def user_send_verify_email(data: schemas.VerifyEmail, db=Depends(get_db)):
         is_exist = await crud.check_c_user_with_email(db, email=data.email)
         if is_exist:
             return JSONResponse(status_code=400, content={"message": "user email is exist."})
-        token = utils.gen_token({"email": data.email, "s_sales_company_org_id": data.s_sales_company_org_id})
+        token = utils.gen_token(
+            {"email": data.email, "s_sales_company_org_id": data.s_sales_company_org_id},
+            expires_delta=settings.JWT_VERIFY_EMAIL_TOKEN_EXP,
+        )
         utils.send_email(
             to=data.email,
             template="user_send_verify_email",
@@ -218,3 +221,32 @@ async def user_withdrawal(db=Depends(get_db), user_id=Depends(get_user_id)):
         return JSONResponse(
             status_code=500, content={"message": "An unknown exception occurred, please try again later."}
         )
+
+
+@router.post("/user/draft")
+async def user_save_draft(data: dict, db=Depends(get_db), user_id=Depends(get_user_id)):
+    try:
+        await crud.upsert_p_draft_data(db, user_id, data)
+        return JSONResponse(status_code=200, content={"message": "save successful."})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.get("/user/draft")
+async def user_get_draft(db=Depends(get_db), user_id=Depends(get_user_id)):
+    try:
+        data = await crud.query_p_draft_data(db, user_id)
+        return JSONResponse(status_code=200, content=data)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.get("/uuid")
+async def get_uuid(db=Depends(get_db)):
+    return await db.uuid_short()

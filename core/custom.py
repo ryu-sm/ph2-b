@@ -17,6 +17,7 @@ class LoggingContextRoute(APIRoute):
             response: Response = await original_route_handler(request)
             payload = utils.only_parse_payload(request.headers.get("authorization"))
             request_body = await request.body()
+
             await crud.insert_c_access_log(
                 db=DB(),
                 account_id=payload["id"] if payload else None,
@@ -25,8 +26,8 @@ class LoggingContextRoute(APIRoute):
                 endpoint=utils.parse_endpoint(request.url.path, request.path_params),
                 method=request.method,
                 params={
-                    "path": request.path_params if request.path_params else None,
-                    "query": request.query_params if request.query_params else None,
+                    "path": dict(request.path_params) if request.path_params else None,
+                    "query": dict(request.query_params) if request.query_params else None,
                     "body": json.loads(request_body) if request_body else None,
                 },
                 status_code=response.status_code,

@@ -85,18 +85,53 @@ async def delete_c_user(db: DB, id: int):
     await db.execute(sql)
 
 
-async def insert_p_draft(db: DB, c_user_id: int, data: dict):
-    id = await db.uuid_short()
-    sql = f"INSERT INTO p_drafts (id, c_user_id, data) VALUE ({id}, {c_user_id}, '{json.dumps(data)}');"
-    await db.execute(sql)
-
-
 async def query_c_user_token_payload(db: DB, c_user_id: int):
-    sql = f"SELECT id, email, agent_sended, first_login FROM c_users WHERE id = {c_user_id};"
-    return await db.fetch_one(sql)
+    sql = f"""
+    SELECT
+        c_users.id,
+        c_users.email,
+        c_users.s_sales_company_org_id,
+        c_users.agent_sended,
+        c_users.first_login,
+        p_drafts.data as draft,
+        p_application_headers.apply_no,
+        p_application_headers.pre_examination_status,
+        s_sales_company_orgs.display_pdf
+    FROM
+        c_users
+    LEFT JOIN
+        p_drafts
+        ON
+        p_drafts.c_user_id = c_users.id
+    LEFT JOIN
+        p_application_headers
+        ON
+        p_application_headers.c_user_id = c_users.id
+    LEFT JOIN
+        s_sales_company_orgs
+        ON
+        s_sales_company_orgs.id = c_users.s_sales_company_org_id
+    WHERE
+        c_users.id = {c_user_id};
+    """
+    result = await db.fetch_one(sql)
+    result["draft"] = json.loads(result["draft"]) if result["draft"] else None
+    return result
 
 
 async def query_p_draft_data(db: DB, c_user_id: int):
     sql = f"SELECT data FROM p_drafts WHERE c_user_id = {c_user_id};"
     p_draft = await db.fetch_one(sql)
     return json.loads(p_draft["data"])
+
+
+async def upsert_p_draft_data(db: DB, c_user_id: int, data: dict):
+    sql = f"SELECT COUNT(id) as isExist FROM p_drafts WHERE c_user_id = {c_user_id};"
+    p_draft = await db.fetch_one(sql)
+    if p_draft["isExist"]:
+        sql = f"UPDATE p_drafts SET data = '{json.dumps(data, ensure_ascii=False)}' WHERE c_user_id = {c_user_id};"
+        await db.execute(sql)
+    else:
+        id = await db.uuid_short()
+        sql = f"INSERT INTO p_drafts (id, c_user_id, data) VALUE ({id}, {c_user_id}, '{json.dumps(data, ensure_ascii=False)}');"
+        await db.execute(sql)

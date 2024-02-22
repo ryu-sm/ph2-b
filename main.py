@@ -14,6 +14,7 @@ from core.custom import AuthException
 
 from apis.routers.users import router as users_router
 from apis.routers.optipns import router as optipns_router
+from apis.routers.orgs import router as orgs_router
 
 
 # スタートアップ前のイベント
@@ -36,6 +37,7 @@ app = FastAPI(
 # ROUTER追加
 app.include_router(users_router)
 app.include_router(optipns_router)
+app.include_router(orgs_router)
 
 
 # カスタム認証例外追加
