@@ -13,8 +13,9 @@ aiomysql = "*"
 boto3 = "*"
 python-jose = "*"
 passlib = "*"
-bcrypt = "*"
 cryptography = "*"
+python-magic = "*"
+bcrypt = "==4.0.1"
 
 [dev-packages]
 

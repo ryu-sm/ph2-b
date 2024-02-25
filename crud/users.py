@@ -3,12 +3,12 @@ from core.database import DB
 
 
 async def check_c_user_with_email(db: DB, email: str):
-    sql = f"SELECT id FROM c_users WHERE c_users.email = '{email}';"
+    sql = f"SELECT CONVERT(id,CHAR) AS id FROM c_users WHERE c_users.email = '{email}';"
     return await db.fetch_one(sql)
 
 
 async def query_c_user_with_email(db: DB, email: str):
-    sql = f"SELECT id, email, s_sales_company_org_id, status, failed_first_at, failed_time, first_login, hashed_pwd FROM c_users WHERE c_users.email = '{email}';"
+    sql = f"SELECT CONVERT(id,CHAR) AS id, email, CONVERT(s_sales_company_org_id,CHAR) AS s_sales_company_org_id, status, failed_first_at, failed_time, first_login, hashed_pwd FROM c_users WHERE c_users.email = '{email}';"
     return await db.fetch_one(sql)
 
 
@@ -59,8 +59,13 @@ async def update_c_user_email(db: DB, id: int, new_email: str):
     await db.execute(sql)
 
 
+async def update_c_user_agent_sended(db: DB, id: int):
+    sql = f"UPDATE c_users SET agent_sended = 1 WHERE c_users.id = {id};"
+    await db.execute(sql)
+
+
 async def query_c_user_basic_info(db: DB, id: int):
-    sql = f"SELECT id, email, s_sales_company_org_id, status, failed_first_at, failed_time, first_login FROM c_users WHERE c_users.id = {id};"
+    sql = f"SELECT CONVERT(id,CHAR) AS id, email, CONVERT(s_sales_company_org_id,CHAR) AS s_sales_company_org_id, status, failed_first_at, failed_time, first_login FROM c_users WHERE c_users.id = {id};"
     return await db.fetch_one(sql)
 
 
@@ -88,15 +93,16 @@ async def delete_c_user(db: DB, id: int):
 async def query_c_user_token_payload(db: DB, c_user_id: int):
     sql = f"""
     SELECT
-        c_users.id,
+        CONVERT(c_users.id,CHAR) AS id,
         c_users.email,
-        c_users.s_sales_company_org_id,
+        CONVERT(c_users.s_sales_company_org_id,CHAR) AS s_sales_company_org_id,
         c_users.agent_sended,
         c_users.first_login,
-        p_drafts.data as draft,
+        p_drafts.data as has_draft,
         p_application_headers.apply_no,
         p_application_headers.pre_examination_status,
-        s_sales_company_orgs.display_pdf
+        s_sales_company_orgs.display_pdf,
+        1 as role_type
     FROM
         c_users
     LEFT JOIN
@@ -115,7 +121,7 @@ async def query_c_user_token_payload(db: DB, c_user_id: int):
         c_users.id = {c_user_id};
     """
     result = await db.fetch_one(sql)
-    result["draft"] = json.loads(result["draft"]) if result["draft"] else None
+    result["has_draft"] = bool(result["has_draft"])
     return result
 
 
@@ -135,3 +141,8 @@ async def upsert_p_draft_data(db: DB, c_user_id: int, data: dict):
         id = await db.uuid_short()
         sql = f"INSERT INTO p_drafts (id, c_user_id, data) VALUE ({id}, {c_user_id}, '{json.dumps(data, ensure_ascii=False)}');"
         await db.execute(sql)
+
+
+async def delete_p_draft_data(db: DB, c_user_id: int):
+    sql = f"DELETE FROM p_drafts WHERE c_user_id = {c_user_id};"
+    await db.execute(sql)
