@@ -652,30 +652,26 @@ async def diff_update_p_application_headers_for_ap(db: DB, data_: dict, p_applic
     old_p_application_headers = await query_p_application_headers_for_ap(db, p_application_header_id)
 
     for key, value in data.items():
-
+        if key == "join_guarantor_umu" and value != "1":
+            sql = f"DELETE FROM p_join_guarantors WHERE p_application_header_id = {p_application_header_id};"
+            await db.execute(sql)
         old_value = old_p_application_headers.get(key, "")
-
         if value == old_value:
             continue
         if key in JSON_FIELD_KEYS:
             temp = json.dumps(value, ensure_ascii=False)
             if temp == old_value:
                 continue
-
         operate_type = 1
         if not value and old_value:
             operate_type = 0
         if value and not old_value:
             operate_type = 2
-
         content = value
         if key in JSON_FIELD_KEYS:
             content = json.dumps(value, ensure_ascii=False)
-
         content = f"'{content}'" if content else f"'{old_value}'"
-
         id = await db.uuid_short()
-
         sql = f"""
         INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
         VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', '{key}', {p_application_header_id}, {content}, {operate_type});
@@ -1106,4 +1102,38 @@ async def delete_p_borrowings_for_ap(db: DB, p_application_header_id):
     await db.execute(sql)
 
     sql = f"""DELETE FROM p_borrowings WHERE p_application_header_id = {p_application_header_id};"""
+    await db.execute(sql)
+
+
+async def delete_p_applicant_persons__1(db: DB, p_application_header_id):
+    p_applicant_persons = await query_p_applicant_persons_for_ap(db, p_application_header_id, 1)
+
+    if p_applicant_persons is None:
+        return
+    p_applicant_persons_id = p_applicant_persons["id"]
+
+    sql = f"DELETE FROM p_applicant_persons WHERE id = {p_applicant_persons_id};"
+    await db.execute(sql)
+    if p_applicant_persons["nationality"] == "2":
+        sql = f"SELECT file_name FROM p_uploaded_files WHERE s3_key = '{p_applicant_persons_id}/p_applicant_persons__1__H__a';"
+        p_uploaded_files = await db.fetch_one(sql)
+        delete_from_s3(p_uploaded_files["file_name"])
+        sql = f"DELETE FROM p_uploaded_files WHERE s3_key = '{p_applicant_persons_id}/p_applicant_persons__1__H__a';"
+        await db.execute(sql)
+        sql = f"SELECT file_name FROM p_uploaded_files WHERE s3_key = '{p_applicant_persons_id}/p_applicant_persons__1__H__b';"
+        p_uploaded_files = await db.fetch_one(sql)
+        delete_from_s3(p_uploaded_files["file_name"])
+        sql = f"DELETE FROM p_uploaded_files WHERE s3_key = '{p_applicant_persons_id}/p_applicant_persons__1__H__b';"
+        await db.execute(sql)
+
+
+async def delete_p_borrowing_details__1(db: DB, p_application_header_id):
+    sql = (
+        f"DELETE FROM p_borrowing_details WHERE p_application_header_id = {p_application_header_id} AND time_type = 2;"
+    )
+    await db.execute(sql)
+
+
+async def delete_p_join_guarantors(db: DB, p_application_header_id):
+    sql = f"DELETE FROM p_join_guarantors WHERE p_application_header_id = {p_application_header_id};"
     await db.execute(sql)

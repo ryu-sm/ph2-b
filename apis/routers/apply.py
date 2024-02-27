@@ -73,55 +73,49 @@ async def user_orgs(apply_no: str, data: dict, db=Depends(get_db), token: dict =
     try:
 
         p_application_header_id = await crud.query_p_application_header_id(db, apply_no)
-        if data.get("p_application_headers"):
+        if data.get("p_application_headers") is not None:
             await crud.diff_update_p_application_headers_for_ap(
                 db, data["p_application_headers"], p_application_header_id, token["role_type"], token["id"]
             )
-        if data.get("p_applicant_persons__0"):
+        if data.get("p_applicant_persons__0") is not None:
             await crud.diff_update_p_applicant_persons_for_ap(
                 db, data["p_applicant_persons__0"], p_application_header_id, 0, token["role_type"], token["id"]
             )
-        if data.get("p_applicant_persons__1"):
+        if data.get("p_applicant_persons__1") is not None:
             if data["hasIncomeTotalizer"]:
                 await crud.diff_update_p_applicant_persons_for_ap(
                     db, data["p_applicant_persons__1"], p_application_header_id, 1, token["role_type"], token["id"]
                 )
             else:
-                pass
-                # TODO
-        if data.get("p_borrowing_details__1"):
+                await crud.delete_p_applicant_persons__1(db, p_application_header_id)
+        if data.get("p_borrowing_details__1") is not None:
             await crud.diff_update_p_borrowing_details_for_ap(
                 db, data["p_borrowing_details__1"], p_application_header_id, 1, token["role_type"], token["id"]
             )
-        if data.get("p_borrowing_details__2"):
+        if data.get("p_borrowing_details__2") is not None:
             if data["p_application_headers"]["land_advance_plan"] == "1":
                 await crud.diff_update_p_borrowing_details_for_ap(
                     db, data["p_borrowing_details__2"], p_application_header_id, 2, token["role_type"], token["id"]
                 )
             else:
-                pass
-                # TODO
-        if data.get("p_application_banks"):
+                await crud.delete_p_borrowing_details__1(db, p_application_header_id)
+        if data.get("p_application_banks") is not None:
             await crud.diff_update_p_application_banks_for_ap(
                 db, data["p_application_banks"], p_application_header_id, token["role_type"], token["id"]
             )
-        if data.get("p_join_guarantors"):
+        if data.get("p_join_guarantors") is not None:
             if data["hasJoinGuarantor"]:
                 await crud.diff_update_p_join_guarantors_for_ap(
                     db, data["p_join_guarantors"], p_application_header_id, token["role_type"], token["id"]
                 )
-            else:
-                pass
-                # TODO
         if data.get("p_borrowings") is not None:
             if data["p_application_headers"]["curr_borrowing_status"] == "1":
                 await crud.diff_update_p_borrowings_for_ap(
                     db, data["p_borrowings"], p_application_header_id, token["role_type"], token["id"]
                 )
             else:
-
                 await crud.delete_p_borrowings_for_ap(db, p_application_header_id)
-        if data.get("p_uploaded_files"):
+        if data.get("p_uploaded_files") is not None:
             await crud.diff_p_uploaded_files_for_ap(
                 db, data["p_uploaded_files"], p_application_header_id, token["role_type"], token["id"]
             )
