@@ -122,6 +122,8 @@ async def query_c_user_token_payload(db: DB, c_user_id: int):
     """
     result = await db.fetch_one(sql)
     result["has_draft"] = bool(result["has_draft"])
+    if result["s_sales_company_org_id"] is None:
+        result["s_sales_company_org_id"] = "100713166408778466"
     return result
 
 

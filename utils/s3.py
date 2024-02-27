@@ -18,6 +18,10 @@ def upload_to_s3(file_name, file_content):
     s3_client.put_object(Bucket=BUCKET_NAME, Key=file_name, Body=file_content)
 
 
+def delete_from_s3(file_name):
+    s3_client.delete_object(Bucket=BUCKET_NAME, Key=file_name)
+
+
 def download_from_s3(file_name):
 
     file_obj = s3_client.get_object(Bucket=BUCKET_NAME, Key=file_name)
