@@ -401,8 +401,8 @@ async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int,
         transfer_office_district_kanji,
         transfer_office_other_address_kanji,
         maternity_paternity_leave,
-        DATE_FORMAT(maternity_paternity_leave_start_date, '%Y/%m/%d') as maternity_paternity_leave_start_date,
-        DATE_FORMAT(maternity_paternity_leave_end_date, '%Y/%m/%d') as maternity_paternity_leave_end_date,
+        maternity_paternity_leave_start_date,
+        maternity_paternity_leave_end_date,
         nursing_leave,
         identity_verification_type
     FROM
@@ -503,7 +503,7 @@ async def query_p_borrowings_for_ap(db: DB, p_application_header_id: int):
         loan_purpose,
         loan_purpose_other,
         category,
-        DATE_FORMAT(card_expiry_date, '%Y/%m/%d') as card_expiry_date,
+        card_expiry_date,
         rental_room_num,
         common_housing,
         estate_setting

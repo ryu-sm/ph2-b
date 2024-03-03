@@ -84,7 +84,7 @@ async def query_c_user_hashed_pwd(db: DB, id: int):
 async def delete_c_user(db: DB, id: int):
     sql = f"DELETE FROM p_drafts WHERE c_user_id = {id};"
     await db.execute(sql)
-    sql = f"UPDATE p_application_headers SET c_user_id = null WHERE c_user_id = {id};"
+    sql = f"UPDATE p_application_headers SET c_user_id = null, unsubcribed = 0 WHERE c_user_id = {id};"
     await db.execute(sql)
     sql = f"DELETE FROM c_users WHERE c_users.id = {id};"
     await db.execute(sql)

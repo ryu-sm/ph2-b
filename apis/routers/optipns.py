@@ -28,3 +28,27 @@ async def get_bank_options(db=Depends(get_db)):
         return JSONResponse(
             status_code=500, content={"message": "An unknown exception occurred, please try again later."}
         )
+
+
+@router.get("/sales_person_options")
+async def get_sales_person_options(parent_id: int, db=Depends(get_db)):
+    try:
+        sales_person_options = await crud.query_sales_person_options(db, parent_id)
+        return JSONResponse(status_code=200, content=sales_person_options)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.get("/pair_loan_options")
+async def get_pair_loan_options(id: int, db=Depends(get_db)):
+    try:
+        pair_loan_options = await crud.query_pair_loan_options(db, id)
+        return JSONResponse(status_code=200, content=pair_loan_options)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )

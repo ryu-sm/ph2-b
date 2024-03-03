@@ -94,10 +94,7 @@ async def user_reset_password(data: schemas.ResetPasswordUser, db=Depends(get_db
     try:
         payload = utils.parse_token(data.token)
         if payload is None:
-            return JSONResponse(status_code=401, content={"message": "token is invalid."})
-        is_exist = await crud.check_c_user_with_email(db, email=payload["email"])
-        if not is_exist:
-            return JSONResponse(status_code=400, content={"message": "user email is not exist."})
+            return JSONResponse(status_code=400, content={"message": "token is invalid."})
         await crud.update_c_user_password_with_email(
             db, email=payload["email"], hashed_pwd=utils.hash_password(data.password)
         )
@@ -248,5 +245,10 @@ async def user_get_draft(db=Depends(get_db), user_id=Depends(get_user_id)):
 
 
 @router.get("/uuid")
-async def get_uuid(db=Depends(get_db)):
-    return await db.uuid_short()
+async def get_uuid(num: int, db=Depends(get_db)):
+    l = []
+    for i in range(num):
+        r = await db.uuid_short()
+
+        l.append(r)
+    return l

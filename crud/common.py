@@ -18,6 +18,7 @@ async def insert_c_access_log(
     INSERT INTO c_access_logs (id, account_id, ip, url, endpoint, method, params, status_code, response_body)
     VALUES ({id}, {account_id if account_id else 'null'}, '{ip}', '{url}', '{endpoint}', '{method}', '{json.dumps(params, ensure_ascii=False)}', {status_code},  '{json.dumps(response_body, ensure_ascii=False)}');
     """
+
     await db.execute(sql)
 
 

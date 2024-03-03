@@ -1,0 +1,236 @@
+from loguru import logger
+from datetime import datetime
+from fastapi import APIRouter
+from fastapi import Depends
+from fastapi.responses import JSONResponse
+
+from core.config import settings
+from core.custom import LoggingContextRoute
+from apis.deps import get_db
+from apis.deps import get_token
+import crud
+import utils
+import schemas
+import asyncio
+
+from templates.user_register_init_message import INIT_MESSAGE
+
+router = APIRouter(route_class=LoggingContextRoute)
+
+
+@router.post("/manager/password/verify-email")
+async def manager_send_reset_password_verify_email(data: schemas.VerifyEmail, db=Depends(get_db)):
+    try:
+        is_exist = await crud.check_s_manager_with_email(db, email=data.email)
+        if not is_exist:
+            return JSONResponse(status_code=400, content={"message": "user email is not exist."})
+        token = utils.gen_token({"email": data.email}, expires_delta=settings.JWT_VERIFY_EMAIL_TOKEN_EXP)
+        utils.send_email(
+            to=data.email,
+            template="manager_send_reset_password_verify_email",
+            link=f"{settings.FRONTEND_BASE_URL}/manager/reset-password?token={token}",
+        )
+        print(f"{settings.FRONTEND_BASE_URL}/manager/reset-password?token={token}")
+        return JSONResponse(status_code=200, content={"message": "reset password email send successful."})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.post("/manager/password")
+async def manager_reset_password(data: schemas.ResetPasswordManager, db=Depends(get_db)):
+    try:
+        payload = utils.parse_token(data.token)
+        if payload is None:
+            return JSONResponse(status_code=400, content={"message": "token is invalid."})
+        await crud.update_s_manager_password_with_email(
+            db, email=payload["email"], hashed_pwd=utils.hash_password(data.password)
+        )
+        return JSONResponse(status_code=200, content={"message": "reset password successful."})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.put("/manager/password")
+async def manager_up_password(data: schemas.UpPasswordUser, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        if not utils.verify_password(data.password, await crud.query_s_manager_hashed_pwd(db, token["id"])):
+            return JSONResponse(status_code=412, content={"massage": "curr password is wrong."})
+        await crud.update_s_manager_password_with_id(
+            db, id=token["id"], hashed_pwd=utils.hash_password(data.new_password)
+        )
+        return JSONResponse(status_code=200, content={"message": "update password successful."})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.post("/manager/token")
+async def manager_login(data: schemas.LoginManager, db=Depends(get_db)):
+    try:
+        is_exist = await crud.check_s_manager_with_email(db, email=data.email)
+        if not is_exist:
+            return JSONResponse(status_code=400, content={"message": "user email is not exist."})
+        if is_exist["status"] == 2:
+            return JSONResponse(status_code=423, content={"message": "account is locked."})
+        if not utils.verify_password(data.password, is_exist["hashed_pwd"]):
+            if is_exist["failed_first_at"]:
+                if (datetime.now() - is_exist["failed_first_at"]).seconds < 300 and is_exist["failed_time"] == 4:
+                    await crud.update_s_manager_status_locked(db, id=is_exist["id"])
+                    return JSONResponse(status_code=423, content={"message": "account is locked."})
+                else:
+                    await crud.update_s_manager_failed_time(
+                        db, id=is_exist["id"], failed_time=is_exist["failed_time"] + 1
+                    )
+            else:
+                await crud.update_s_manager_failed_time(db, id=is_exist["id"])
+            return JSONResponse(status_code=400, content={"message": "email or password is invalid."})
+        access_token = utils.gen_token(
+            payload=await crud.query_s_manager_token_payload(db, id=is_exist["id"]),
+            expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
+        )
+        return JSONResponse(status_code=200, content={"access_token": access_token})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.get("/manager/preliminaries")
+async def manager_get_access_applications(status: int, db=Depends(get_db), token=Depends(get_token)):
+
+    try:
+        p_application_headers_basic_list = await crud.query_manager_access_p_application_headers(
+            db, status, token["id"]
+        )
+        return JSONResponse(status_code=200, content=p_application_headers_basic_list)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.put("/manager/preliminarie/s_manager_id")
+async def manager_update_preliminarie_s_manager_id(data: int, db=Depends(get_db), token=Depends(get_token)):
+
+    try:
+        await crud.update_p_application_headers_s_manager_id(db, data["p_application_header_id"], data["s_manager_id"])
+        return JSONResponse(status_code=200, content={"message": "successful"})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.put("/manager/preliminarie/s_sales_person_id")
+async def manager_update_preliminarie_s_sales_person_id(data: int, db=Depends(get_db), token=Depends(get_token)):
+
+    try:
+        await crud.update_p_application_headers_s_sales_person_id(
+            db, data["p_application_header_id"], data["s_sales_person_id"]
+        )
+        return JSONResponse(status_code=200, content={"message": "successful"})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.put("/manager/preliminarie/sales_area_id")
+async def manager_update_preliminarie_sales_area_id(data: int, db=Depends(get_db), token=Depends(get_token)):
+
+    try:
+        await crud.update_p_application_headers_sales_area_id(
+            db, data["p_application_header_id"], data["sales_area_id"]
+        )
+        return JSONResponse(status_code=200, content={"message": "successful"})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.put("/manager/un-pair-loan")
+async def un_pair_laon(data: dict, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        await crud.delete_pair_laon(db, data.values())
+        return JSONResponse(status_code=200, content={"message": "successful"})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.put("/manager/set-pair-loan")
+async def set_pair_laon(data: dict, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        await crud.set_pair_loan(db, data)
+        return JSONResponse(status_code=200, content={"message": "successful"})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.get("/manager/memos")
+async def get_memos(id: int, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        memos = await crud.query_memos(db, id)
+        return JSONResponse(status_code=200, content=memos)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.post("/manager/memo")
+async def new_memo(data: dict, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        await crud.insert_memo(db, data["p_application_header_id"], token["id"], data["content"])
+        return JSONResponse(status_code=200, content={"message": "successful"})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.put("/manager/memo")
+async def new_memo(data: dict, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        await crud.update_memo(db, data["id"], data["content"])
+        return JSONResponse(status_code=200, content={"message": "successful"})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.put("/manager/provisional_after_result")
+async def update_provisional_after_result(data: dict, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        await crud.update_p_application_banks_provisional_after_result(
+            db, data["p_application_header_id"], data["s_bank_id"], data["provisional_after_result"]
+        )
+        return JSONResponse(status_code=200, content={"message": "successful"})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )

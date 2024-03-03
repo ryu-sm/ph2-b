@@ -19,6 +19,7 @@ async def query_s_sales_company_orgs_root_id(db: DB, child_id: int):
     return result["root_id"]
 
 
+# options に遷移
 async def query_s_sales_company_orgs(db: DB, s_sales_company_org_id: int):
     root_id = await query_s_sales_company_orgs_root_id(db, s_sales_company_org_id)
     sql = f"""
@@ -30,7 +31,27 @@ async def query_s_sales_company_orgs(db: DB, s_sales_company_org_id: int):
     SELECT
         CONVERT(parents.id,CHAR) as id,
         CONVERT(parents.pid,CHAR) as pid,
-        CONVERT(parents.category,CHAR) as category,
+        parents.category,
+        parents.name
+    FROM
+        parents
+    WHERE
+        parents.pid is NOT NULL;
+    """
+    return await db.fetch_all(sql)
+
+
+async def query_child_s_sales_company_orgs(db: DB, parent_id: int):
+    sql = f"""
+    WITH RECURSIVE parents AS (
+     SELECT id, pid, category, name FROM s_sales_company_orgs WHERE id = {parent_id}
+     union
+     SELECT child.id, child.pid, child.category, child.name FROM s_sales_company_orgs as child INNER JOIN parents ON parents.id = child.pid
+    )
+    SELECT
+        CONVERT(parents.id,CHAR) as id,
+        CONVERT(parents.pid,CHAR) as pid,
+        parents.category,
         parents.name
     FROM
         parents
