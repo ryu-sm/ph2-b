@@ -29,10 +29,12 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str
 
     # メーラー情報
-    MAIL_SENDER: str
-    MAIL_ACCESS_KEY_ID: str
-    MAIL_SECRET_ACCESS_KEY: str
-    MAIL_REGION_NAME: str
+    AWS_MAIL_SENDER: str
+
+    AWS_ACCESS_KEY_ID: str
+    AWS_SECRET_ACCESS_KEY: str
+    AWS_REGION: str
+    AWS_BUCKET_NAME: str
 
     # フロントエンド情報
     FRONTEND_BASE_URL: str

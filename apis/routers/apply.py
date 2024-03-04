@@ -1,11 +1,10 @@
 from loguru import logger
-from datetime import datetime
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
-from core.config import settings
+
 from core.custom import LoggingContextRoute
 from apis.deps import get_db
 from apis.deps import get_token
