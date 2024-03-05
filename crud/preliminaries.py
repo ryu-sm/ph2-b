@@ -183,10 +183,32 @@ async def update_p_application_headers_s_sales_person_id(db: DB, p_application_h
     )
 
 
-async def update_p_application_headers_sales_area_id(db: DB, p_application_header_id: int, sales_area_id: int):
+async def update_p_application_headers_sales_area_id(
+    db: DB, p_application_header_id: int, sales_area_id: int, sales_exhibition_hall_id: int
+):
+    sales_exhibition_halls = await crud.query_child_exhibition_hall_options(db, sales_area_id)
+    subUpdate = ""
+    if sales_exhibition_hall_id not in [item["value"] for item in sales_exhibition_halls]:
+        subUpdate = ", sales_exhibition_hall_id = NULL"
     await db.execute(
-        f"UPDATE p_application_headers SET sales_area_id = {sales_area_id if sales_area_id else 'null'} WHERE id = {p_application_header_id}"
+        f"UPDATE p_application_headers SET sales_area_id = {sales_area_id if sales_area_id else 'null'} {subUpdate}  WHERE id = {p_application_header_id}"
     )
+
+    return {"sales_exhibition_hall_id": sales_exhibition_hall_id if not subUpdate else subUpdate}
+
+
+async def update_p_application_headers_sales_exhibition_hall_id(
+    db: DB, p_application_header_id: int, sales_exhibition_hall_id: int, s_sales_person_id: int
+):
+    sales_persons = await crud.query_sales_person_options(db, sales_exhibition_hall_id)
+    subUpdate = ""
+    if s_sales_person_id not in [item["value"] for item in sales_persons]:
+        subUpdate = ", s_sales_person_id = NULL"
+    await db.execute(
+        f"UPDATE p_application_headers SET sales_exhibition_hall_id = {sales_exhibition_hall_id if sales_exhibition_hall_id else 'null'} {subUpdate}  WHERE id = {p_application_header_id}"
+    )
+
+    return {"s_sales_person_id": s_sales_person_id if not subUpdate else subUpdate}
 
 
 async def delete_pair_laon(db: DB, ids: list):

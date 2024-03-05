@@ -43,6 +43,18 @@ async def get_sales_person_options(parent_id: int, db=Depends(get_db)):
         )
 
 
+@router.get("/sales_exhibition_hall_options")
+async def get_sales_exhibition_hall_options(parent_id: int, db=Depends(get_db)):
+    try:
+        sales_exhibition_hall_options = await crud.query_child_exhibition_hall_options(db, parent_id)
+        return JSONResponse(status_code=200, content=sales_exhibition_hall_options)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
 @router.get("/pair_loan_options")
 async def get_pair_loan_options(id: int, db=Depends(get_db)):
     try:

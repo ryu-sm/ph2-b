@@ -25,6 +25,26 @@ async def query_child_area_options(db: DB, parent_id):
     return await db.fetch_all(sql)
 
 
+async def query_child_exhibition_hall_options(db, parent_id):
+    sql = f"""
+    WITH RECURSIVE parents AS (
+     SELECT id, pid, category, name FROM s_sales_company_orgs WHERE id = {parent_id}
+     union
+     SELECT child.id, child.pid, child.category, child.name FROM s_sales_company_orgs as child INNER JOIN parents ON parents.id = child.pid
+    )
+    SELECT
+        CONVERT(parents.id,CHAR) as value,
+        parents.name as label
+    FROM
+        parents
+    WHERE
+        parents.category = 'E'
+        AND
+        parents.pid is NOT NULL;
+    """
+    return await db.fetch_all(sql)
+
+
 async def query_manager_options(db: DB):
     return await db.fetch_all("SELECT CONVERT(id,CHAR) as value, name_kanji as label FROM s_managers;")
 

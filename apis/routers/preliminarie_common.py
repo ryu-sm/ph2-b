@@ -46,10 +46,25 @@ async def common_update_preliminarie_s_sales_person_id(data: dict, db=Depends(ge
 async def common_update_preliminarie_sales_area_id(data: dict, db=Depends(get_db), token=Depends(get_token)):
 
     try:
-        await crud.update_p_application_headers_sales_area_id(
-            db, data["p_application_header_id"], data["sales_area_id"]
+        result = await crud.update_p_application_headers_sales_area_id(
+            db, data["p_application_header_id"], data["sales_area_id"], data["sales_exhibition_hall_id"]
         )
-        return JSONResponse(status_code=200, content={"message": "successful"})
+        return JSONResponse(status_code=200, content=result)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.put("/preliminarie/sales_exhibition_hall_id")
+async def common_update_preliminarie_sales_exhibition_hall_id(data: dict, db=Depends(get_db), token=Depends(get_token)):
+
+    try:
+        result = await crud.update_p_application_headers_sales_exhibition_hall_id(
+            db, data["p_application_header_id"], data["sales_exhibition_hall_id"], data["s_sales_person_id"]
+        )
+        return JSONResponse(status_code=200, content=result)
     except Exception as err:
         logger.exception(err)
         return JSONResponse(
