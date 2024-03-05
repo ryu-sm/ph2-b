@@ -23,7 +23,6 @@ router = APIRouter(route_class=LoggingContextRoute)
 async def user_orgs(s_sales_company_org_id: Optional[int] = None, db=Depends(get_db)):
     try:
         orgs = await crud.query_s_sales_company_orgs(db, s_sales_company_org_id)
-        print(999, orgs)
         return JSONResponse(status_code=200, content=orgs)
     except Exception as err:
         logger.exception(err)

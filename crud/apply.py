@@ -354,6 +354,7 @@ async def query_p_application_banks_for_ap(db: DB, p_application_header_id: int)
 async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int, type: int):
     sql = f"""
     SELECT
+        rel_to_applicant_a_name,
         last_name_kanji,
         first_name_kanji,
         last_name_kana,
@@ -368,6 +369,9 @@ async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int,
         city_kanji,
         district_kanji,
         other_address_kanji,
+        prefecture_kana,
+        city_kana,
+        district_kana,
         email,
         office_occupation,
         office_occupation_other,
@@ -383,6 +387,9 @@ async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int,
         office_city_kanji,
         office_district_kanji,
         office_other_address_kanji,
+        office_prefecture_kana,
+        office_city_kana,
+        office_district_kana,
         office_employee_num,
         office_joining_date,
         last_year_income,
@@ -419,6 +426,8 @@ async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int,
     for key, value in result.items():
         if type == 1 and key == "email":
             continue
+        if type == 0 and key == "rel_to_applicant_a_name":
+            continue
         if key in JSON_FIELD_KEYS:
             temp[key] = json.loads(value) if value else []
         else:
@@ -443,7 +452,10 @@ async def query_p_join_guarantors_for_ap(db: DB, p_application_header_id: int):
         prefecture_kanji,
         city_kanji,
         district_kanji,
-        other_address_kanji
+        other_address_kanji,
+        prefecture_kana,
+        city_kana,
+        district_kana
     FROM
         p_join_guarantors
     WHERE
@@ -471,7 +483,10 @@ async def query_p_residents_for_ap(db: DB, p_application_header_id: int):
         prefecture_kanji,
         city_kanji,
         district_kanji,
-        other_address_kanji
+        other_address_kanji,
+        prefecture_kana,
+        city_kana,
+        district_kana
     FROM
         p_residents
     WHERE
@@ -645,7 +660,7 @@ async def query_p_application_header_apply_no(db: DB, p_application_header_id: i
 async def diff_update_p_application_headers_for_ap(db: DB, data_: dict, p_application_header_id, role_type, role_id):
     JOBS = []
     data = deepcopy(data_)
-    if data_["loan_type"] != "2":
+    if data_.get("loan_type") != "2":
         data["pair_loan_last_name"] = ""
         data["pair_loan_first_name"] = ""
         data["pair_loan_rel_name"] = ""

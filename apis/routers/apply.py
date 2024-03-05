@@ -81,7 +81,7 @@ async def user_orgs(apply_no: str, data: dict, db=Depends(get_db), token: dict =
                 db, data["p_applicant_persons__0"], p_application_header_id, 0, token["role_type"], token["id"]
             )
         if data.get("p_applicant_persons__1") is not None:
-            if data["hasIncomeTotalizer"]:
+            if data["p_application_headers"]["loan_type"] in ["3", "4"]:
                 await crud.diff_update_p_applicant_persons_for_ap(
                     db, data["p_applicant_persons__1"], p_application_header_id, 1, token["role_type"], token["id"]
                 )
@@ -103,10 +103,12 @@ async def user_orgs(apply_no: str, data: dict, db=Depends(get_db), token: dict =
                 db, data["p_application_banks"], p_application_header_id, token["role_type"], token["id"]
             )
         if data.get("p_join_guarantors") is not None:
-            if data["hasJoinGuarantor"]:
+            if data["p_application_headers"]["join_guarantor_umu"] == "1":
                 await crud.diff_update_p_join_guarantors_for_ap(
                     db, data["p_join_guarantors"], p_application_header_id, token["role_type"], token["id"]
                 )
+            else:
+                await crud.delete_p_join_guarantors(db, p_application_header_id)
         if data.get("p_borrowings") is not None:
             if data["p_application_headers"]["curr_borrowing_status"] == "1":
                 await crud.diff_update_p_borrowings_for_ap(

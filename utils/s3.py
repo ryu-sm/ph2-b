@@ -14,16 +14,16 @@ s3_client = boto3.client(
 
 
 def upload_to_s3(file_name, file_content):
-    s3_client.put_object(Bucket=settings.AWS_REGION, Key=file_name, Body=file_content)
+    s3_client.put_object(Bucket=settings.AWS_BUCKET_NAME, Key=file_name, Body=file_content)
 
 
 def delete_from_s3(file_name):
-    s3_client.delete_object(Bucket=settings.AWS_REGION, Key=file_name)
+    s3_client.delete_object(Bucket=settings.AWS_BUCKET_NAME, Key=file_name)
 
 
 def download_from_s3(file_name):
 
-    file_obj = s3_client.get_object(Bucket=settings.AWS_REGION, Key=file_name)
+    file_obj = s3_client.get_object(Bucket=settings.AWS_BUCKET_NAME, Key=file_name)
     file_content = file_obj["Body"].read()
 
     mime_type = magic.from_buffer(file_content, mime=True)
