@@ -11,6 +11,7 @@ from apis.deps import get_user_id
 import crud
 import utils
 import schemas
+from typing import Optional
 
 
 from templates.user_register_init_message import INIT_MESSAGE
@@ -19,7 +20,7 @@ router = APIRouter(route_class=LoggingContextRoute)
 
 
 @router.get("/orgs")
-async def user_orgs(s_sales_company_org_id: int, db=Depends(get_db)):
+async def user_orgs(s_sales_company_org_id: Optional[int] = None, db=Depends(get_db)):
     try:
         orgs = await crud.query_s_sales_company_orgs(db, s_sales_company_org_id)
         print(999, orgs)

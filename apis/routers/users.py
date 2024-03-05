@@ -46,7 +46,7 @@ async def user_register(data: schemas.NewUser, db=Depends(get_db)):
     try:
         payload = utils.parse_token(data.token)
         if payload is None:
-            return JSONResponse(status_code=401, content={"message": "token is invalid."})
+            return JSONResponse(status_code=407, content={"message": "token is invalid."})
         is_exist = await crud.check_c_user_with_email(db, email=payload["email"])
         if is_exist:
             return JSONResponse(status_code=400, content={"message": "user email is exist."})
@@ -124,8 +124,6 @@ async def user_login(data: schemas.LoginUser, db=Depends(get_db)):
             else:
                 await crud.update_c_user_failed_first_at(db, id=is_exist["id"])
             return JSONResponse(status_code=400, content={"message": "email or password is invalid."})
-        if is_exist["first_login"] == 0:
-            await crud.update_c_user_first_login(db, id=is_exist["id"])
         access_token = utils.gen_token(
             payload=await crud.query_c_user_token_payload(db, c_user_id=is_exist["id"]),
             expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
@@ -242,13 +240,3 @@ async def user_get_draft(db=Depends(get_db), user_id=Depends(get_user_id)):
         return JSONResponse(
             status_code=500, content={"message": "An unknown exception occurred, please try again later."}
         )
-
-
-@router.get("/uuid")
-async def get_uuid(num: int, db=Depends(get_db)):
-    l = []
-    for i in range(num):
-        r = await db.uuid_short()
-
-        l.append(r)
-    return l

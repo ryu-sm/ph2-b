@@ -7,4 +7,4 @@ class VerifyEmail(BaseModel):
         max_length=128,
         pattern="^[a-zA-Z0-9_+-]+(.[a-zA-Z0-9_+-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$",
     )
-    s_sales_company_org_id: typing.Optional[int] = None
+    s_sales_company_org_id: typing.Optional[str] = None

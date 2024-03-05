@@ -1,3 +1,4 @@
+from typing import Optional
 from loguru import logger
 from datetime import datetime
 from fastapi import APIRouter
