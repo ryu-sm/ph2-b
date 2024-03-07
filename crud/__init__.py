@@ -6,3 +6,4 @@ from .apply import *
 from .manages import *
 from .sales_persons import *
 from .preliminaries import *
+from .edit_preliminary import *

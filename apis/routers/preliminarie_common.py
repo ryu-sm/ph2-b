@@ -70,3 +70,34 @@ async def common_update_preliminarie_sales_exhibition_hall_id(data: dict, db=Dep
         return JSONResponse(
             status_code=500, content={"message": "An unknown exception occurred, please try again later."}
         )
+
+
+@router.get("/preliminary/{p_application_header_id}")
+async def common_get_preliminary(p_application_header_id: int, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        preliminary = {}
+        p_application_headers = await crud.query_p_application_headers_for_ad(db, p_application_header_id)
+        preliminary["p_application_headers"] = p_application_headers
+
+        p_borrowing_details__1 = await crud.query_p_borrowing_details_for_ad(db, p_application_header_id, 1)
+        preliminary["p_borrowing_details__1"] = p_borrowing_details__1
+
+        p_borrowing_details__2 = await crud.query_p_borrowing_details_for_ad(db, p_application_header_id, 2)
+        if p_borrowing_details__2:
+            preliminary["p_borrowing_details__2"] = p_borrowing_details__2
+        p_application_banks = await crud.query_p_application_banks_for_ad(db, p_application_header_id)
+        preliminary["p_application_banks"] = p_application_banks
+
+        p_applicant_persons__0 = await crud.query_p_applicant_persons_for_ap(db, p_application_header_id, 0)
+        preliminary["p_applicant_persons__0"] = p_applicant_persons__0
+
+        p_applicant_persons__1 = await crud.query_p_applicant_persons_for_ap(db, p_application_header_id, 1)
+        if p_applicant_persons__1:
+            preliminary["p_applicant_persons__1"] = p_applicant_persons__1
+
+        return JSONResponse(status_code=200, content=preliminary)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
