@@ -97,8 +97,8 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
     paired_tab_2 = []
     paired_tab_3 = []
     for group in paired:
-        if (group["provisional_after_result"] == "" and group["unsubcribed"] == "1") or (
-            group["pair_loan_data"]["provisional_after_result"] == "" and group["unsubcribed"] == "1"
+        if (group["provisional_after_result"] == "" and group["unsubcribed"] != "1") or (
+            group["pair_loan_data"]["provisional_after_result"] == "" and group["unsubcribed"] != "1"
         ):
 
             paired_tab_1.append(group)
@@ -128,15 +128,15 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
         )
 
     if status == 1:
-        filted = [x for x in result if x["unsubcribed"] == "1" and x["provisional_after_result"] == ""]
+        filted = [x for x in result if x["unsubcribed"] != "1" and x["provisional_after_result"] == ""]
 
         return [*filted, *paired_tab_1]
     if status == 2:
-        filted = [x for x in result if x["unsubcribed"] == "1" and x["provisional_after_result"] == "1"]
+        filted = [x for x in result if x["unsubcribed"] != "1" and x["provisional_after_result"] == "1"]
         return [*filted, *paired_tab_2]
     if status == 3:
         filted = [
-            x for x in result if x["unsubcribed"] == "0" or x["provisional_after_result"] in ["0", "2", "3", "4", "5"]
+            x for x in result if x["unsubcribed"] == "1" or x["provisional_after_result"] in ["0", "2", "3", "4", "5"]
         ]
         return [*filted, *paired_tab_3]
 
