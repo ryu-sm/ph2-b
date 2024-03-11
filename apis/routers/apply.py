@@ -54,6 +54,9 @@ async def user_orgs(data_: dict, db=Depends(get_db), token: dict = Depends(get_t
             db, data["p_uploaded_files"], p_application_header_id, token["role_type"], token["id"]
         )
 
+        if data["p_residents"]:
+            await crud.insert_p_residents(db, data["p_residents"])
+
         if token["role_type"] == 1:
             await crud.update_c_user_agent_sended(db, token["id"])
             await crud.delete_p_draft_data(db, token["id"])
@@ -125,6 +128,11 @@ async def user_orgs(apply_no: str, data: dict, db=Depends(get_db), token: dict =
             await crud.diff_p_uploaded_files_for_ap(
                 db, data["p_uploaded_files"], p_application_header_id, token["role_type"], token["id"]
             )
+        if data.get("p_residents") is not None:
+            await crud.diff_update_p_residents_for_ap(
+                db, data["p_residents"], p_application_header_id, token["role_type"], token["id"]
+            )
+
         return JSONResponse(status_code=200, content={"apply_no": apply_no})
     except Exception as err:
         logger.exception(err)

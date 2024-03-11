@@ -11,6 +11,7 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
     sbi_id = sbi["id"]
     sql = f"""
     SELECT
+        CONVERT(p_application_headers.id,CHAR) AS id,
         p_application_headers.apply_no,
         DATE_FORMAT(p_application_headers.created_at, '%Y/%m/%d %h:%m') as created_at,
         DATE_FORMAT(p_application_headers.apply_date, '%Y/%m/%d') as apply_date,
@@ -18,6 +19,7 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
         p_application_headers.loan_target,
         p_application_headers.land_advance_plan,
         p_application_headers.loan_type,
+        p_application_headers.pair_loan_id,
         p_application_headers.pair_loan_last_name,
         p_application_headers.pair_loan_first_name,
         p_application_headers.pair_loan_rel_name,
@@ -65,7 +67,7 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
         p_application_headers.property_planning_area_other,
         p_application_headers.property_rebuilding_reason,
         p_application_headers.property_rebuilding_reason_other,
-        property_flat_35_plan,
+        p_application_headers.property_flat_35_plan,
         p_application_headers.property_maintenance_type,
         p_application_headers.property_flat_35_tech,
         p_application_headers.property_region_type,
@@ -98,6 +100,7 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
         p_application_headers.sales_company_id,
         p_application_headers.sales_area_id,
         p_application_headers.sales_exhibition_hall_id,
+        p_application_headers.s_sales_person_id,
         p_application_headers.vendor_name,
         p_application_headers.vendor_phone,
         p_application_headers.pre_examination_status,
@@ -109,7 +112,8 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
         p_application_headers.property_land_price,
         p_application_headers.property_total_price,
         p_application_headers.funding_other_refinance_amount,
-        p_application_headers.funding_other_loan_amount
+        p_application_headers.funding_other_loan_amount,
+        p_application_headers.unsubcribed
     FROM
         p_application_headers
     LEFT JOIN

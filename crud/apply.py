@@ -909,7 +909,69 @@ async def diff_update_p_join_guarantors_for_ap(
         JOBS.append(db.execute(sql))
         sql = f"DELETE FROM p_join_guarantors WHERE id = {old_p_join_guarantor['id']};"
         JOBS.append(db.execute(sql))
+    if JOBS:
+        await asyncio.wait(JOBS)
 
+
+async def diff_update_p_residents_for_ap(db: DB, data: typing.List[dict], p_application_header_id, role_type, role_id):
+    JOBS = []
+    old_p_residents = await query_p_residents_for_ap(db, p_application_header_id)
+
+    for p_resident in data:
+        filter = [item for item in old_p_residents if item["id"] == p_resident["id"]]
+        if len(filter) == 0:
+            data_ = utils.blank_to_none(p_resident)
+            await insert_p_residents(db, [data_], p_application_header_id)
+            return None
+        [old_p_resident] = filter
+        for key, value in old_p_resident.items():
+
+            old_value = old_p_resident.get(key, "")
+
+            if value == old_value:
+                continue
+            if key in JSON_FIELD_KEYS:
+                temp = json.dumps(value, ensure_ascii=False)
+                if temp == old_value:
+                    continue
+
+            operate_type = 1
+            if not value and old_value:
+                operate_type = 0
+            if value and not old_value:
+                operate_type = 2
+
+            content = value
+            if key in JSON_FIELD_KEYS:
+                content = json.dumps(value, ensure_ascii=False)
+
+            content = f"'{content}'" if content else f"'{old_value}'"
+
+            id = await db.uuid_short()
+            sql = f"""
+            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+            VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_residents', '{key}', {old_p_resident["id"]}, {content}, {operate_type});
+            """
+            JOBS.append(db.execute(sql))
+            content = value
+            if key in JSON_FIELD_KEYS:
+                content = json.dumps(value, ensure_ascii=False)
+            content = f"'{content}'" if content else "null"
+            sql = f"UPDATE p_residents SET {key} = {content} WHERE id = {old_p_resident['id']}"
+            JOBS.append(db.execute(sql))
+
+    for old_p_resident in old_p_residents:
+        filter = [item for item in data if item["id"] == old_p_resident["id"]]
+        if len(filter) > 0:
+            continue
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_residents', null, {old_p_resident['id']}, null, 0);
+        """
+        JOBS.append(db.execute(sql))
+        sql = f"DELETE FROM p_residents WHERE id = {old_p_resident['id']};"
+        JOBS.append(db.execute(sql))
     if JOBS:
         await asyncio.wait(JOBS)
 
