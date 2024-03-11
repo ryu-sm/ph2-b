@@ -97,15 +97,50 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
     paired_tab_2 = []
     paired_tab_3 = []
     for group in paired:
+
+        sales_company_id = group["sales_company_id"]
+        area_options = await crud.query_child_area_options(db, sales_company_id)
+        p_application_header_id = group["id"]
+
+        messages = await db.fetch_all(
+            f"SELECT CONVERT(id,CHAR) AS id, viewed FROM c_messages WHERE p_application_header_id = {p_application_header_id}"
+        )
+        unviewed = 0
+        for message in messages:
+            if role_id in json.loads(message["viewed"]):
+                continue
+            unviewed += 1
+
         if (group["provisional_after_result"] == "" and group["unsubcribed"] != "1") or (
             group["pair_loan_data"]["provisional_after_result"] == "" and group["unsubcribed"] != "1"
         ):
 
-            paired_tab_1.append(group)
+            paired_tab_1.append(
+                {
+                    **group,
+                    "unviewed": unviewed,
+                    "area_options": area_options,
+                    "manager_options": manager_options,
+                }
+            )
         elif group["provisional_after_result"] == "1" and group["pair_loan_data"]["provisional_after_result"] == "1":
-            paired_tab_2.append(group)
+            paired_tab_2.append(
+                {
+                    **group,
+                    "unviewed": unviewed,
+                    "area_options": area_options,
+                    "manager_options": manager_options,
+                }
+            )
         else:
-            paired_tab_3.append(group)
+            paired_tab_3.append(
+                {
+                    **group,
+                    "unviewed": unviewed,
+                    "area_options": area_options,
+                    "manager_options": manager_options,
+                }
+            )
     result = []
 
     for item in general_data:

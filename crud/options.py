@@ -107,7 +107,7 @@ async def query_pair_loan_options(db: DB, p_application_header_id):
         AND
         p_application_banks.s_bank_id = {sbi_id}
     WHERE
-        p_application_headers.unsubcribed = 1
+        p_application_headers.unsubcribed is NULL
         AND
         p_application_headers.pair_loan_id is NULL
         AND
@@ -117,4 +117,5 @@ async def query_pair_loan_options(db: DB, p_application_header_id):
         AND
         p_application_headers.id != {p_application_header_id};
     """
+
     return await db.fetch_all(sql)
