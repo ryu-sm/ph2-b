@@ -42,15 +42,24 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
         p_application_headers.new_house_self_not_resident_reason,
         p_application_headers.new_house_planned_resident_overview,
         p_application_headers.property_business_type,
+        p_application_headers.property_postal_code,
         p_application_headers.property_prefecture,
         p_application_headers.property_city,
         p_application_headers.property_district,
         p_application_headers.property_apartment_and_room_no,
+        p_application_headers.property_address_kana,
         p_application_headers.property_private_area,
         p_application_headers.property_total_floor_area,
         p_application_headers.property_land_area,
         p_application_headers.property_floor_area,
         p_application_headers.property_land_type,
+        p_application_headers.property_type,
+        DATE_FORMAT(p_application_headers.property_land_acquire_date, '%Y/%m/%d') as property_land_acquire_date,
+        p_application_headers.property_joint_ownership_type,
+        p_application_headers.property_building_ratio_numerator,
+        p_application_headers.property_building_ratio_denominator,
+        p_application_headers.property_land_ratio_numerator,
+        p_application_headers.property_land_ratio_denominator,
         p_application_headers.property_purchase_type,
         p_application_headers.property_planning_area,
         p_application_headers.property_planning_area_other,
@@ -94,7 +103,13 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
         p_application_headers.pre_examination_status,
         p_application_banks.provisional_status,
         p_application_banks.provisional_result,
-        p_application_banks.provisional_after_result
+        p_application_banks.provisional_after_result,
+        p_application_headers.funding_self_amount,
+        p_application_headers.property_building_price,
+        p_application_headers.property_land_price,
+        p_application_headers.property_total_price,
+        p_application_headers.funding_other_refinance_amount,
+        p_application_headers.funding_other_loan_amount
     FROM
         p_application_headers
     LEFT JOIN
@@ -172,6 +187,7 @@ async def query_p_applicant_persons_for_ad(db: DB, p_application_header_id: int,
         nationality,
         mobile_phone,
         home_phone,
+        emergency_contact,
         postal_code,
         prefecture_kanji,
         city_kanji,
@@ -180,6 +196,7 @@ async def query_p_applicant_persons_for_ad(db: DB, p_application_header_id: int,
         prefecture_kana,
         city_kana,
         district_kana,
+        other_address_kana,
         email,
         office_occupation,
         office_occupation_other,
@@ -198,6 +215,7 @@ async def query_p_applicant_persons_for_ad(db: DB, p_application_header_id: int,
         office_prefecture_kana,
         office_city_kana,
         office_district_kana,
+        office_other_address_kana,
         office_employee_num,
         office_joining_date,
         last_year_income,
@@ -219,7 +237,16 @@ async def query_p_applicant_persons_for_ad(db: DB, p_application_header_id: int,
         maternity_paternity_leave_start_date,
         maternity_paternity_leave_end_date,
         nursing_leave,
-        identity_verification_type
+        identity_verification_type,
+        office_employment_type,
+        office_name_kana,
+        office_role,
+        office_head_location,
+        office_listed_division,
+        office_establishment_date,
+        office_capital_stock,
+        main_income_source,
+        before_last_year_bonus_income
     FROM
         p_applicant_persons
     WHERE
@@ -239,3 +266,96 @@ async def query_p_applicant_persons_for_ad(db: DB, p_application_header_id: int,
         else:
             temp[key] = value
     return none_to_blank(temp)
+
+
+async def query_p_join_guarantors_for_ad(db: DB, p_application_header_id: int):
+    sql = f"""
+    SELECT
+        CONVERT(id,CHAR) AS id,
+        last_name_kanji,
+        first_name_kanji,
+        last_name_kana,
+        first_name_kana,
+        gender,
+        rel_to_applicant_a_name,
+        rel_to_applicant_a,
+        rel_to_applicant_a_other,
+        DATE_FORMAT(birthday, '%Y/%m/%d') as birthday,
+        mobile_phone,
+        home_phone,
+        emergency_contact,
+        email,
+        postal_code,
+        prefecture_kanji,
+        city_kanji,
+        district_kanji,
+        other_address_kanji,
+        prefecture_kana,
+        city_kana,
+        district_kana,
+        other_address_kana
+    FROM
+        p_join_guarantors
+    WHERE
+        p_application_header_id = {p_application_header_id};
+    """
+    result = await db.fetch_all(sql)
+
+    return [none_to_blank(item) for item in result]
+
+
+async def query_p_residents_for_ad(db: DB, p_application_header_id: int):
+    sql = f"""
+    SELECT
+        CONVERT(id,CHAR) AS id,
+        last_name_kanji,
+        first_name_kanji,
+        last_name_kana,
+        first_name_kana,
+        rel_to_applicant_a,
+        rel_to_applicant_a_other,
+        birthday,
+        gender,
+        one_roof
+    FROM
+        p_residents
+    WHERE
+        p_application_header_id = {p_application_header_id};
+    """
+    result = await db.fetch_all(sql)
+
+    return [none_to_blank(item) for item in result]
+
+
+async def query_p_borrowings_for_ad(db: DB, p_application_header_id: int):
+    sql = f"""
+    SELECT
+        CONVERT(id,CHAR) AS id,
+        self_input,
+        borrower,
+        type,
+        lender,
+        borrowing_from_house_finance_agency,
+        loan_start_date,
+        loan_amount,
+        curr_loan_balance_amount,
+        annual_repayment_amount,
+        loan_end_date,
+        scheduled_loan_payoff,
+        scheduled_loan_payoff_date,
+        loan_business_target,
+        loan_business_target_other,
+        loan_purpose,
+        loan_purpose_other,
+        category,
+        card_expiry_date,
+        rental_room_num,
+        common_housing,
+        estate_setting,
+        include_in_examination
+    FROM
+        p_borrowings
+    WHERE
+        p_application_header_id = {p_application_header_id};
+    """
+    return await db.fetch_all(sql)

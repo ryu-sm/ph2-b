@@ -10,6 +10,7 @@ from apis.deps import get_db
 from apis.deps import get_token
 import crud
 import utils
+from core.config import settings
 
 
 router = APIRouter(route_class=LoggingContextRoute)
@@ -58,7 +59,11 @@ async def user_orgs(data_: dict, db=Depends(get_db), token: dict = Depends(get_t
             await crud.delete_p_draft_data(db, token["id"])
 
         apply_no = await crud.query_p_application_header_apply_no(db, p_application_header_id)
-
+        utils.send_email(
+            to="info-test@milibank.co.jp",
+            template="manager_new_apply_email",
+            link=f"{settings.FRONTEND_BASE_URL}/manager/edit-preliminary?id={p_application_header_id}",
+        )
         return JSONResponse(status_code=200, content={"apply_no": apply_no})
     except Exception as err:
         logger.exception(err)

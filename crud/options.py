@@ -6,6 +6,20 @@ async def query_bank_options(db: DB):
 
 
 async def query_child_area_options(db: DB, parent_id):
+    if parent_id is None:
+        sql = f"""
+        SELECT
+            CONVERT(s_sales_company_orgs.id,CHAR) as value,
+            s_sales_company_orgs.name as label
+        FROM
+            s_sales_company_orgs
+        WHERE
+            s_sales_company_orgs.category = 'B'
+            AND
+            s_sales_company_orgs.pid is NOT NULL;
+        """
+        return await db.fetch_all(sql)
+
     sql = f"""
     WITH RECURSIVE parents AS (
      SELECT id, pid, category, name FROM s_sales_company_orgs WHERE id = {parent_id}
@@ -58,7 +72,9 @@ async def query_sales_person_options(db: DB, parent_id):
     )
     SELECT DISTINCT
         CONVERT(s_sales_persons.id,CHAR) as value,
-        s_sales_persons.name_kanji as label
+        s_sales_persons.name_kanji as label,
+        s_sales_persons.mobile_phone as mobile_phone,
+        s_sales_persons.email as email
     FROM
         parents
     JOIN

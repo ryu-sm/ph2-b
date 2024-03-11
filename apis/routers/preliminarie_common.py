@@ -95,6 +95,18 @@ async def common_get_preliminary(p_application_header_id: int, db=Depends(get_db
         if p_applicant_persons__1:
             preliminary["p_applicant_persons__1"] = p_applicant_persons__1
 
+        p_join_guarantors = await crud.query_p_join_guarantors_for_ad(db, p_application_header_id)
+        if p_join_guarantors:
+            preliminary["p_join_guarantors"] = p_join_guarantors
+        p_residents = await crud.query_p_residents_for_ad(db, p_application_header_id)
+        if p_residents:
+            preliminary["p_residents"] = p_residents
+        p_borrowings = await crud.query_p_borrowings_for_ap(db, p_application_header_id)
+        if p_borrowings:
+            preliminary["p_borrowings"] = p_borrowings
+        for i in range(10000000):
+            pass
+
         return JSONResponse(status_code=200, content=preliminary)
     except Exception as err:
         logger.exception(err)
