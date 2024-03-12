@@ -19,7 +19,7 @@ router = APIRouter(route_class=LoggingContextRoute)
 
 
 @router.post("/sales-person/password/verify-email")
-async def manager_send_reset_password_verify_email(data: schemas.VerifyEmail, db=Depends(get_db)):
+async def sales_person_send_reset_password_verify_email(data: schemas.VerifyEmail, db=Depends(get_db)):
     try:
         is_exist = await crud.check_s_sales_person_with_email(db, email=data.email)
         if not is_exist:
@@ -30,7 +30,6 @@ async def manager_send_reset_password_verify_email(data: schemas.VerifyEmail, db
             template="sales_person_send_reset_password_verify_email",
             link=f"{settings.FRONTEND_BASE_URL}/sales-person/reset-password?token={token}",
         )
-        print(f"{settings.FRONTEND_BASE_URL}/sales-person/reset-password?token={token}")
         return JSONResponse(status_code=200, content={"message": "reset password email send successful."})
     except Exception as err:
         logger.exception(err)
@@ -40,7 +39,7 @@ async def manager_send_reset_password_verify_email(data: schemas.VerifyEmail, db
 
 
 @router.post("/sales-person/password")
-async def manager_reset_password(data: schemas.ResetPasswordManager, db=Depends(get_db)):
+async def sales_person_reset_password(data: schemas.ResetPasswordManager, db=Depends(get_db)):
     try:
         payload = utils.parse_token(data.token)
         if payload is None:
@@ -57,7 +56,7 @@ async def manager_reset_password(data: schemas.ResetPasswordManager, db=Depends(
 
 
 @router.put("/sales-person/password")
-async def manager_up_password(data: schemas.UpPasswordUser, db=Depends(get_db), token=Depends(get_token)):
+async def sales_person_up_password(data: schemas.UpPasswordUser, db=Depends(get_db), token=Depends(get_token)):
     try:
         if not utils.verify_password(data.password, await crud.query_s_sales_person_hashed_pwd(db, token["id"])):
             return JSONResponse(status_code=412, content={"massage": "curr password is wrong."})
@@ -73,7 +72,7 @@ async def manager_up_password(data: schemas.UpPasswordUser, db=Depends(get_db), 
 
 
 @router.post("/sales-person/token")
-async def manager_login(data: schemas.LoginManager, db=Depends(get_db)):
+async def sales_person_login(data: schemas.LoginManager, db=Depends(get_db)):
     try:
         is_exist = await crud.check_s_sales_person_with_email(db, email=data.email)
         if not is_exist:

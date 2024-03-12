@@ -88,13 +88,13 @@ async def user_orgs(apply_no: str, data: dict, db=Depends(get_db), token: dict =
             await crud.diff_update_p_applicant_persons_for_ap(
                 db, data["p_applicant_persons__0"], p_application_header_id, 0, token["role_type"], token["id"]
             )
-        if data.get("p_applicant_persons__1") is not None:
-            if data["p_application_headers"]["loan_type"] in ["3", "4"]:
-                await crud.diff_update_p_applicant_persons_for_ap(
-                    db, data["p_applicant_persons__1"], p_application_header_id, 1, token["role_type"], token["id"]
-                )
-            else:
-                await crud.delete_p_applicant_persons__1(db, p_application_header_id)
+        # if data.get("p_applicant_persons__1") is not None:
+        if data["p_application_headers"]["loan_type"] in ["3", "4"]:
+            await crud.diff_update_p_applicant_persons_for_ap(
+                db, data["p_applicant_persons__1"], p_application_header_id, 1, token["role_type"], token["id"]
+            )
+        else:
+            await crud.delete_p_applicant_persons__1(db, p_application_header_id)
         if data.get("p_borrowing_details__1") is not None:
             await crud.diff_update_p_borrowing_details_for_ap(
                 db, data["p_borrowing_details__1"], p_application_header_id, 1, token["role_type"], token["id"]

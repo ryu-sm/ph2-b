@@ -11,9 +11,7 @@ from apis.deps import get_token
 import crud
 import utils
 import schemas
-import asyncio
 
-from templates.user_register_init_message import INIT_MESSAGE
 
 router = APIRouter(route_class=LoggingContextRoute)
 
@@ -30,7 +28,6 @@ async def manager_send_reset_password_verify_email(data: schemas.VerifyEmail, db
             template="manager_send_reset_password_verify_email",
             link=f"{settings.FRONTEND_BASE_URL}/manager/reset-password?token={token}",
         )
-        print(f"{settings.FRONTEND_BASE_URL}/manager/reset-password?token={token}")
         return JSONResponse(status_code=200, content={"message": "reset password email send successful."})
     except Exception as err:
         logger.exception(err)

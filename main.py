@@ -19,7 +19,7 @@ from apis.routers.orgs import router as orgs_router
 from apis.routers.apply import router as apply_router
 from apis.routers.managers import router as managers_router
 from apis.routers.sales_persons import router as sales_persons_router
-from apis.routers.preliminarie_common import router as preliminarie_common_router
+from apis.routers.preliminaries import router as preliminaries_router
 
 
 # スタートアップ前のイベント
@@ -47,7 +47,7 @@ app.include_router(orgs_router)
 app.include_router(apply_router)
 app.include_router(managers_router)
 app.include_router(sales_persons_router)
-app.include_router(preliminarie_common_router)
+app.include_router(preliminaries_router)
 
 
 # カスタム認証例外追加
