@@ -88,13 +88,14 @@ async def user_orgs(apply_no: str, data: dict, db=Depends(get_db), token: dict =
             await crud.diff_update_p_applicant_persons_for_ap(
                 db, data["p_applicant_persons__0"], p_application_header_id, 0, token["role_type"], token["id"]
             )
-        # if data.get("p_applicant_persons__1") is not None:
-        if data["p_application_headers"]["loan_type"] in ["3", "4"]:
-            await crud.diff_update_p_applicant_persons_for_ap(
-                db, data["p_applicant_persons__1"], p_application_header_id, 1, token["role_type"], token["id"]
-            )
-        else:
-            await crud.delete_p_applicant_persons__1(db, p_application_header_id)
+        if data.get("p_applicant_persons__1") is not None:
+            if data["p_application_headers"]["loan_type"] in ["3", "4"]:
+                await crud.diff_update_p_applicant_persons_for_ap(
+                    db, data["p_applicant_persons__1"], p_application_header_id, 1, token["role_type"], token["id"]
+                )
+            else:
+                await crud.delete_p_applicant_persons__1(db, p_application_header_id)
+
         if data.get("p_borrowing_details__1") is not None:
             await crud.diff_update_p_borrowing_details_for_ap(
                 db, data["p_borrowing_details__1"], p_application_header_id, 1, token["role_type"], token["id"]
@@ -153,31 +154,25 @@ async def get_application(apply_no: str, db=Depends(get_db)):
         p_borrowing_details__1 = await crud.query_p_borrowing_details_for_ap(db, p_application_header_id, 1)
         temp["p_borrowing_details__1"] = p_borrowing_details__1
 
-        p_borrowing_details__2 = await crud.query_p_borrowing_details_for_ap(db, p_application_header_id, 2)
-        if p_borrowing_details__2:
-            temp["p_borrowing_details__2"] = p_borrowing_details__2
+        if p_application_headers["land_advance_plan"] == "1":
+            temp["p_borrowing_details__2"] = await crud.query_p_borrowing_details_for_ap(db, p_application_header_id, 2)
 
-        p_application_banks = await crud.query_p_application_banks_for_ap(db, p_application_header_id)
-        temp["p_application_banks"] = p_application_banks
+        temp["p_application_banks"] = await crud.query_p_application_banks_for_ap(db, p_application_header_id)
 
-        p_applicant_persons__0 = await crud.query_p_applicant_persons_for_ap(db, p_application_header_id, 0)
-        temp["p_applicant_persons__0"] = p_applicant_persons__0
+        temp["p_applicant_persons__0"] = await crud.query_p_applicant_persons_for_ap(db, p_application_header_id, 0)
 
-        p_applicant_persons__1 = await crud.query_p_applicant_persons_for_ap(db, p_application_header_id, 1)
-        if p_applicant_persons__1:
-            temp["p_applicant_persons__1"] = p_applicant_persons__1
+        if p_application_headers["loan_type"] in ["3", "4"]:
+            temp["p_applicant_persons__1"] = await crud.query_p_applicant_persons_for_ap(db, p_application_header_id, 1)
 
-        p_join_guarantors = await crud.query_p_join_guarantors_for_ap(db, p_application_header_id)
-        if p_join_guarantors:
-            temp["p_join_guarantors"] = p_join_guarantors
+        if p_application_headers["join_guarantor_umu"] == "1":
+            temp["p_join_guarantors"] = await crud.query_p_join_guarantors_for_ap(db, p_application_header_id)
 
         p_residents = await crud.query_p_residents_for_ap(db, p_application_header_id)
         if p_residents:
             temp["p_residents"] = p_residents
 
-        p_borrowings = await crud.query_p_borrowings_for_ap(db, p_application_header_id)
-        if p_borrowings:
-            temp["p_borrowings"] = p_borrowings
+        if p_application_headers["curr_borrowing_status"] == "1":
+            temp["p_borrowings"] = await crud.query_p_borrowings_for_ap(db, p_application_header_id)
 
         return JSONResponse(status_code=200, content=jsonable_encoder(temp))
     except Exception as err:
@@ -187,7 +182,7 @@ async def get_application(apply_no: str, db=Depends(get_db)):
         )
 
 
-@router.get("/application/img")
+@router.get("/application/file")
 async def get_application(apply_no: str, db=Depends(get_db)):
     try:
         p_application_header_id = await crud.query_p_application_header_id(db, apply_no)

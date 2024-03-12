@@ -1,38 +1,5 @@
-import json
 import crud
 from core.database import DB
-from utils import none_to_blank
-import crud
-
-
-# async def query_sales_person_access_p_application_headers(db: DB, status: int, orgs: list, role_id: int):
-#     p_application_headers = await crud.query_manager_access_p_application_headers(db, status, role_id)
-#     print(p_application_headers)
-#     all = []
-#     for org in orgs:
-#         if org["role"] == 1:  # 一般
-#             role_1_l = list(filter(lambda x: x["s_sales_person_id"] == role_id, p_application_headers))
-#             all = [*all, *role_1_l]
-
-#         if org["role"] == 9:  # 管理
-#             role_1_l = list(filter(lambda x: x["s_sales_person_id"] == role_id, p_application_headers))
-#             all = [*all, *role_1_l]
-#             s_sales_company_orgs = await crud.query_child_s_sales_company_orgs(
-#                 db, parent_id=org["s_sales_company_org_id"]
-#             )
-#             s_sales_company_orgs_id = [[item["id"] for item in s_sales_company_orgs]]
-#             orgs_l = list(
-#                 filter(
-#                     lambda x: x["sales_company_id"] in s_sales_company_orgs_id
-#                     or x["sales_area_id"] in s_sales_company_orgs_id
-#                     or x["sales_exhibition_hall_id"] in s_sales_company_orgs_id,
-#                     p_application_headers,
-#                 )
-#             )
-#             all = [*all, *orgs_l]
-
-#     unique_data = list({item["id"]: item for item in all}.values())
-#     return unique_data
 
 
 async def update_p_application_headers_s_manager_id(db: DB, p_application_header_id: int, s_manager_id: int):

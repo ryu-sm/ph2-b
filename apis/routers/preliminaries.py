@@ -78,28 +78,30 @@ async def common_get_preliminary(p_application_header_id: int, db=Depends(get_db
         p_borrowing_details__1 = await crud.query_p_borrowing_details_for_ad(db, p_application_header_id, 1)
         preliminary["p_borrowing_details__1"] = p_borrowing_details__1
 
-        p_borrowing_details__2 = await crud.query_p_borrowing_details_for_ad(db, p_application_header_id, 2)
-        if p_borrowing_details__2:
-            preliminary["p_borrowing_details__2"] = p_borrowing_details__2
-        p_application_banks = await crud.query_p_application_banks_for_ad(db, p_application_header_id)
-        preliminary["p_application_banks"] = p_application_banks
+        if p_application_headers["land_advance_plan"] == "1":
+            preliminary["p_borrowing_details__2"] = await crud.query_p_borrowing_details_for_ad(
+                db, p_application_header_id, 2
+            )
+
+        preliminary["p_application_banks"] = await crud.query_p_application_banks_for_ad(db, p_application_header_id)
 
         p_applicant_persons__0 = await crud.query_p_applicant_persons_for_ad(db, p_application_header_id, 0)
         preliminary["p_applicant_persons__0"] = p_applicant_persons__0
 
-        p_applicant_persons__1 = await crud.query_p_applicant_persons_for_ad(db, p_application_header_id, 1)
-        if p_applicant_persons__1:
-            preliminary["p_applicant_persons__1"] = p_applicant_persons__1
+        if p_application_headers["loan_type"] in ["3", "4"]:
+            preliminary["p_applicant_persons__1"] = await crud.query_p_applicant_persons_for_ad(
+                db, p_application_header_id, 1
+            )
 
-        p_join_guarantors = await crud.query_p_join_guarantors_for_ad(db, p_application_header_id)
-        if p_join_guarantors:
-            preliminary["p_join_guarantors"] = p_join_guarantors
+        if p_application_headers["join_guarantor_umu"] == "1":
+            preliminary["p_join_guarantors"] = await crud.query_p_join_guarantors_for_ad(db, p_application_header_id)
+
         p_residents = await crud.query_p_residents_for_ad(db, p_application_header_id)
         if p_residents:
             preliminary["p_residents"] = p_residents
-        p_borrowings = await crud.query_p_borrowings_for_ap(db, p_application_header_id)
-        if p_borrowings:
-            preliminary["p_borrowings"] = p_borrowings
+
+        if p_application_headers["curr_borrowing_status"] == "1":
+            preliminary["p_borrowings"] = await crud.query_p_borrowings_for_ap(db, p_application_header_id)
         for i in range(10000000):
             pass
 

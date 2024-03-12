@@ -110,6 +110,8 @@ async def delete_c_user(db: DB, id: int):
 
 
 async def query_c_user_token_payload(db: DB, c_user_id: int):
+    sbi = await db.fetch_one("SELECT id, name FROM s_banks WHERE code = '0038';")
+    sbi_id = sbi["id"]
     sql = f"""
     SELECT
         CONVERT(c_users.id,CHAR) AS id,
@@ -120,7 +122,8 @@ async def query_c_user_token_payload(db: DB, c_user_id: int):
         p_application_headers.apply_no,
         p_application_headers.pre_examination_status,
         s_sales_company_orgs.display_pdf,
-        1 as role_type
+        1 as role_type,
+        p_application_banks.provisional_result
     FROM
         c_users
     LEFT JOIN
@@ -131,6 +134,12 @@ async def query_c_user_token_payload(db: DB, c_user_id: int):
         p_application_headers
         ON
         p_application_headers.c_user_id = c_users.id
+    LEFT JOIN
+        p_application_banks
+        ON
+        p_application_banks.p_application_header_id = p_application_headers.id
+        AND
+        p_application_banks.s_bank_id = {sbi_id}
     LEFT JOIN
         s_sales_company_orgs
         ON
