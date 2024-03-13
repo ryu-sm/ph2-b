@@ -1,9 +1,15 @@
+import asyncio
+import base64
+from copy import deepcopy
 import json
+import typing
 import crud
 from core.database import DB
 from constant import JSON_FIELD_KEYS
 from utils import none_to_blank
 import crud
+from utils.common import blank_to_none
+from utils.s3 import delete_from_s3, download_from_s3, upload_to_s3
 
 
 async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
@@ -363,3 +369,554 @@ async def query_p_borrowings_for_ad(db: DB, p_application_header_id: int):
         p_application_header_id = {p_application_header_id};
     """
     return await db.fetch_all(sql)
+
+
+async def query_p_uploaded_files_for_ad(db: DB, p_application_header_id: int):
+    temp_files = {
+        "p_applicant_persons__0__H__a": [],
+        "p_applicant_persons__0__H__b": [],
+        "p_applicant_persons__1__H__a": [],
+        "p_applicant_persons__1__H__b": [],
+        "G": [],
+        "p_applicant_persons__0__A__01__a": [],
+        "p_applicant_persons__0__A__01__b": [],
+        "p_applicant_persons__0__A__02": [],
+        "p_applicant_persons__0__A__03__a": [],
+        "p_applicant_persons__0__A__03__b": [],
+        "p_applicant_persons__0__B__a": [],
+        "p_applicant_persons__0__B__b": [],
+        "p_applicant_persons__0__C__01": [],
+        "p_applicant_persons__0__C__02": [],
+        "p_applicant_persons__0__C__03": [],
+        "p_applicant_persons__0__C__04": [],
+        "p_applicant_persons__0__C__05": [],
+        "p_applicant_persons__0__D__01": [],
+        "p_applicant_persons__0__D__02": [],
+        "p_applicant_persons__0__D__03": [],
+        "p_applicant_persons__0__E": [],
+        "p_applicant_persons__0__F__01": [],
+        "p_applicant_persons__0__F__02": [],
+        "p_applicant_persons__0__F__03": [],
+        "p_applicant_persons__0__K": [],
+        "p_applicant_persons__1__A__01__a": [],
+        "p_applicant_persons__1__A__01__b": [],
+        "p_applicant_persons__1__A__02": [],
+        "p_applicant_persons__1__A__03__a": [],
+        "p_applicant_persons__1__A__03__b": [],
+        "p_applicant_persons__1__B__a": [],
+        "p_applicant_persons__1__B__b": [],
+        "p_applicant_persons__1__C__01": [],
+        "p_applicant_persons__1__C__02": [],
+        "p_applicant_persons__1__C__03": [],
+        "p_applicant_persons__1__C__04": [],
+        "p_applicant_persons__1__C__05": [],
+        "p_applicant_persons__1__D__01": [],
+        "p_applicant_persons__1__D__02": [],
+        "p_applicant_persons__1__D__03": [],
+        "p_applicant_persons__1__E": [],
+        "p_applicant_persons__1__F__01": [],
+        "p_applicant_persons__1__F__02": [],
+        "p_applicant_persons__1__F__03": [],
+        "p_applicant_persons__1__K": [],
+        "J": [],
+        "S": [],
+    }
+
+    for file_key in temp_files.keys():
+        sql = f"""
+        SELECT
+            CONVERT(id,CHAR) AS id,
+            file_name
+        FROM
+            p_uploaded_files
+        WHERE
+            p_application_header_id = {p_application_header_id}
+            AND
+            s3_key = '{p_application_header_id}/{file_key}';
+        """
+        files_info = await db.fetch_all(sql)
+        if len(files_info) > 0:
+            files = []
+            for file in files_info:
+                files.append({**download_from_s3(file["file_name"]), "id": file["id"]})
+            temp_files[file_key] = files
+
+    return temp_files
+
+
+async def diff_update_p_application_headers_for_ad(db: DB, data_: dict, p_application_header_id, role_type, role_id):
+    JOBS = []
+    data = deepcopy(data_)
+    if data_.get("loan_type") != "2":
+        data["pair_loan_last_name"] = ""
+        data["pair_loan_first_name"] = ""
+        data["pair_loan_rel_name"] = ""
+    old_p_application_headers = await query_p_application_headers_for_ad(db, p_application_header_id)
+
+    for key, value in data.items():
+        if key == "created_at":
+            continue
+        if key == "join_guarantor_umu" and value != "1":
+            sql = f"DELETE FROM p_join_guarantors WHERE p_application_header_id = {p_application_header_id};"
+            await db.execute(sql)
+        old_value = old_p_application_headers.get(key, "")
+        if value == old_value:
+            continue
+        if key in JSON_FIELD_KEYS:
+            temp = json.dumps(value, ensure_ascii=False)
+            if temp == old_value:
+                continue
+        operate_type = 1
+        if not value and old_value:
+            operate_type = 0
+        if value and not old_value:
+            operate_type = 2
+        content = value
+        if key in JSON_FIELD_KEYS:
+            content = json.dumps(value, ensure_ascii=False)
+        content = f"'{content}'" if content else f"'{old_value}'"
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', '{key}', {p_application_header_id}, {content}, {operate_type});
+        """
+        JOBS.append(db.execute(sql))
+        content = value
+        if key in JSON_FIELD_KEYS:
+            content = json.dumps(value, ensure_ascii=False)
+        content = f"'{content}'" if content else "null"
+        sql = f"UPDATE p_application_headers SET {key} = {content} WHERE id = {p_application_header_id}"
+        JOBS.append(db.execute(sql))
+    if JOBS:
+        await asyncio.wait(JOBS)
+
+
+async def diff_update_p_applicant_persons_for_ad(db: DB, data: dict, p_application_header_id, type, role_type, role_id):
+    JOBS = []
+    p_applicant_persons_basic = await db.fetch_one(
+        f"SELECT id FROM p_applicant_persons WHERE p_application_header_id = {p_application_header_id} AND type = {type}"
+    )
+    if p_applicant_persons_basic is None:
+        data_ = blank_to_none(data)
+        await crud.insert_p_applicant_persons(db, data_, p_application_header_id, type)
+        return None
+    p_applicant_persons_id = p_applicant_persons_basic["id"]
+    old_p_applicant_persons = await query_p_applicant_persons_for_ad(db, p_application_header_id, type)
+
+    for key, value in data.items():
+
+        old_value = old_p_applicant_persons.get(key, "")
+
+        if value == old_value:
+            continue
+        if key in JSON_FIELD_KEYS:
+            temp = json.dumps(value, ensure_ascii=False)
+            if temp == old_value:
+                continue
+
+        operate_type = 1
+        if not value and old_value:
+            operate_type = 0
+        if value and not old_value:
+            operate_type = 2
+
+        content = value
+        if key in JSON_FIELD_KEYS:
+            content = json.dumps(value, ensure_ascii=False)
+
+        content = f"'{content}'" if content else f"'{old_value}'"
+
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_applicant_persons', '{key}', {p_applicant_persons_id}, {content}, {operate_type});
+        """
+        JOBS.append(db.execute(sql))
+        content = value
+        if key in JSON_FIELD_KEYS:
+            content = json.dumps(value, ensure_ascii=False)
+        content = f"'{content}'" if content else "null"
+        sql = f"UPDATE p_applicant_persons SET {key} = {content} WHERE id = {p_applicant_persons_id}"
+        JOBS.append(db.execute(sql))
+    if JOBS:
+        await asyncio.wait(JOBS)
+
+
+async def diff_update_p_borrowing_details_for_ad(
+    db: DB, data: dict, p_application_header_id, time_type, role_type, role_id
+):
+    JOBS = []
+    p_borrowing_details_basic = await db.fetch_one(
+        f"SELECT id FROM p_borrowing_details WHERE p_application_header_id = {p_application_header_id} AND time_type = {time_type}"
+    )
+    if p_borrowing_details_basic is None:
+        data_ = blank_to_none(data)
+        await crud.insert_p_borrowing_details(db, data_, p_application_header_id, time_type)
+        return None
+    p_borrowing_details_id = p_borrowing_details_basic["id"]
+    old_p_borrowing_details = await query_p_borrowing_details_for_ad(db, p_application_header_id, time_type)
+
+    for key, value in data.items():
+
+        old_value = old_p_borrowing_details.get(key, "")
+
+        if value == old_value:
+            continue
+        if key in JSON_FIELD_KEYS:
+            temp = json.dumps(value, ensure_ascii=False)
+            if temp == old_value:
+                continue
+
+        operate_type = 1
+        if not value and old_value:
+            operate_type = 0
+        if value and not old_value:
+            operate_type = 2
+
+        content = value
+        if key in JSON_FIELD_KEYS:
+            content = json.dumps(value, ensure_ascii=False)
+
+        content = f"'{content}'" if content else f"'{old_value}'"
+
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowing_details', '{key}', {p_borrowing_details_id}, {content}, {operate_type});
+        """
+        JOBS.append(db.execute(sql))
+        content = value
+        if key in JSON_FIELD_KEYS:
+            content = json.dumps(value, ensure_ascii=False)
+        content = f"'{content}'" if content else "null"
+        sql = f"UPDATE p_borrowing_details SET {key} = {content} WHERE id = {p_borrowing_details_id}"
+        JOBS.append(db.execute(sql))
+
+    if JOBS:
+        await asyncio.wait(JOBS)
+
+
+async def diff_update_p_application_banks_for_ad(db: DB, data: list, p_application_header_id, role_type, role_id):
+    JOBS = []
+    old_p_application_banks = await query_p_application_banks_for_ad(db, p_application_header_id)
+    for s_bank_id in data:
+        if s_bank_id in old_p_application_banks:
+            continue
+
+        p_application_banks_id = await db.uuid_short()
+
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_banks', 's_bank_id', {p_application_banks_id}, '{s_bank_id}', 2);
+        """
+        JOBS.append(db.execute(sql))
+        sql = f"INSERT INTO p_application_banks (id, p_application_header_id, s_bank_id) VALUES ({p_application_banks_id}, {p_application_header_id}, {s_bank_id});"
+        JOBS.append(db.execute(sql))
+
+    for s_bank_id in old_p_application_banks:
+        if s_bank_id in data:
+            continue
+
+        p_application_banks_basic = await db.fetch_one(
+            f"SELECT id FROM p_application_banks WHERE p_application_header_id = {p_application_header_id} AND s_bank_id = {s_bank_id}"
+        )
+
+        p_application_banks_id = p_application_banks_basic["id"]
+
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_banks', null, {p_application_banks_id}, null, 0);
+        """
+        JOBS.append(db.execute(sql))
+        sql = f"DELETE FROM p_application_banks WHERE id = {p_application_banks_id};"
+        JOBS.append(db.execute(sql))
+    if JOBS:
+        await asyncio.wait(JOBS)
+
+
+async def diff_update_p_join_guarantors_for_ad(
+    db: DB, data: typing.List[dict], p_application_header_id, role_type, role_id
+):
+    JOBS = []
+    old_p_join_guarantors = await query_p_join_guarantors_for_ad(db, p_application_header_id)
+
+    for p_join_guarantor in data:
+        filter = [item for item in old_p_join_guarantors if item["id"] == p_join_guarantor["id"]]
+        if len(filter) == 0:
+            data_ = blank_to_none(p_join_guarantor)
+            await crud.insert_p_join_guarantors(db, [data_], p_application_header_id)
+            return None
+        [old_p_join_guarantor] = filter
+        for key, value in p_join_guarantor.items():
+
+            old_value = old_p_join_guarantor.get(key, "")
+
+            if value == old_value:
+                continue
+            if key in JSON_FIELD_KEYS:
+                temp = json.dumps(value, ensure_ascii=False)
+                if temp == old_value:
+                    continue
+
+            operate_type = 1
+            if not value and old_value:
+                operate_type = 0
+            if value and not old_value:
+                operate_type = 2
+
+            content = value
+            if key in JSON_FIELD_KEYS:
+                content = json.dumps(value, ensure_ascii=False)
+
+            content = f"'{content}'" if content else f"'{old_value}'"
+
+            id = await db.uuid_short()
+            sql = f"""
+            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+            VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_join_guarantors', '{key}', {old_p_join_guarantor["id"]}, {content}, {operate_type});
+            """
+            JOBS.append(db.execute(sql))
+            content = value
+            if key in JSON_FIELD_KEYS:
+                content = json.dumps(value, ensure_ascii=False)
+            content = f"'{content}'" if content else "null"
+            sql = f"UPDATE p_join_guarantors SET {key} = {content} WHERE id = {old_p_join_guarantor['id']}"
+            JOBS.append(db.execute(sql))
+
+    for old_p_join_guarantor in old_p_join_guarantors:
+        filter = [item for item in data if item["id"] == old_p_join_guarantor["id"]]
+        if len(filter) > 0:
+            continue
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_join_guarantors', null, {old_p_join_guarantor['id']}, null, 0);
+        """
+        JOBS.append(db.execute(sql))
+        sql = f"DELETE FROM p_join_guarantors WHERE id = {old_p_join_guarantor['id']};"
+        JOBS.append(db.execute(sql))
+    if JOBS:
+        await asyncio.wait(JOBS)
+
+
+async def diff_update_p_residents_for_ad(db: DB, data: typing.List[dict], p_application_header_id, role_type, role_id):
+    JOBS = []
+    old_p_residents = await query_p_residents_for_ad(db, p_application_header_id)
+
+    for p_resident in data:
+        filter = [item for item in old_p_residents if item["id"] == p_resident["id"]]
+        if len(filter) == 0:
+            data_ = blank_to_none(p_resident)
+            await crud.insert_p_residents(db, [data_], p_application_header_id)
+            return None
+        [old_p_resident] = filter
+        for key, value in old_p_resident.items():
+
+            old_value = old_p_resident.get(key, "")
+
+            if value == old_value:
+                continue
+            if key in JSON_FIELD_KEYS:
+                temp = json.dumps(value, ensure_ascii=False)
+                if temp == old_value:
+                    continue
+
+            operate_type = 1
+            if not value and old_value:
+                operate_type = 0
+            if value and not old_value:
+                operate_type = 2
+
+            content = value
+            if key in JSON_FIELD_KEYS:
+                content = json.dumps(value, ensure_ascii=False)
+
+            content = f"'{content}'" if content else f"'{old_value}'"
+
+            id = await db.uuid_short()
+            sql = f"""
+            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+            VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_residents', '{key}', {old_p_resident["id"]}, {content}, {operate_type});
+            """
+            JOBS.append(db.execute(sql))
+            content = value
+            if key in JSON_FIELD_KEYS:
+                content = json.dumps(value, ensure_ascii=False)
+            content = f"'{content}'" if content else "null"
+            sql = f"UPDATE p_residents SET {key} = {content} WHERE id = {old_p_resident['id']}"
+            JOBS.append(db.execute(sql))
+
+    for old_p_resident in old_p_residents:
+        filter = [item for item in data if item["id"] == old_p_resident["id"]]
+        if len(filter) > 0:
+            continue
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_residents', null, {old_p_resident['id']}, null, 0);
+        """
+        JOBS.append(db.execute(sql))
+        sql = f"DELETE FROM p_residents WHERE id = {old_p_resident['id']};"
+        JOBS.append(db.execute(sql))
+    if JOBS:
+        await asyncio.wait(JOBS)
+
+
+async def diff_update_p_borrowings_for_ad(db: DB, data: typing.List[dict], p_application_header_id, role_type, role_id):
+    JOBS = []
+
+    old_p_borrowings = await query_p_borrowings_for_ad(db, p_application_header_id)
+
+    for p_borrowing in data:
+        filter = [item for item in old_p_borrowings if item["id"] == p_borrowing["id"]]
+        if len(filter) == 0:
+            data_ = blank_to_none(p_borrowing)
+            await crud.insert_p_borrowings(db, [data_], p_application_header_id, role_type, role_id)
+            return None
+        [old_p_borrowing] = filter
+        for key, value in p_borrowing.items():
+            old_value = old_p_borrowing.get(key, [])
+
+            if value == old_value:
+                continue
+            if key in JSON_FIELD_KEYS:
+                temp = json.dumps(value, ensure_ascii=False)
+                if temp == old_value:
+                    continue
+
+            operate_type = 1
+            if not value and old_value:
+                operate_type = 0
+            if value and not old_value:
+                operate_type = 2
+
+            content = value
+            if key in JSON_FIELD_KEYS:
+                content = json.dumps(value, ensure_ascii=False)
+
+            content = f"'{content}'" if content else f"'{old_value}'"
+
+            id = await db.uuid_short()
+            sql = f"""
+            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+            VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', '{key}', {old_p_borrowing["id"]}, {content}, {operate_type});
+            """
+            JOBS.append(db.execute(sql))
+            content = value
+            if key in JSON_FIELD_KEYS:
+                content = json.dumps(value, ensure_ascii=False)
+            content = f"'{content}'" if content else "null"
+            sql = f"UPDATE p_borrowings SET {key} = {content} WHERE id = {old_p_borrowing['id']}"
+            JOBS.append(db.execute(sql))
+
+    for old_p_borrowing in old_p_borrowings:
+        filter = [item for item in data if item["id"] == old_p_borrowing["id"]]
+        if len(filter) > 0:
+            continue
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', null, {old_p_borrowing['id']}, null, 0);
+        """
+        JOBS.append(db.execute(sql))
+        sql = f"DELETE FROM p_borrowings WHERE id = {old_p_borrowing['id']};"
+        JOBS.append(db.execute(sql))
+
+    if JOBS:
+        await asyncio.wait(JOBS)
+
+
+async def diff_p_uploaded_files_for_ad(db: DB, data: dict, p_application_header_id, role_type, role_id):
+    JOBS = []
+
+    for key, value in data.items():
+        sql = f"""
+        SELECT
+            CONVERT(id,CHAR) AS id,
+            file_name
+        FROM
+            p_uploaded_files
+        WHERE
+            p_application_header_id = {p_application_header_id}
+            AND
+            s3_key = '{p_application_header_id}/{key}';
+        """
+        old_files = await db.fetch_all(sql)
+        old_files_id = [item["id"] for item in old_files]
+        un_update_files_id = []
+        print("old_files_id:", old_files_id)
+        for update_file in value:
+            if update_file["id"] in old_files_id:
+                un_update_files_id.append(update_file["id"])
+                continue
+            # new add
+            id = await db.uuid_short()
+            fields = ["id", "p_application_header_id", "owner_type", "owner_id"]
+            values = [f"{id}", f"{p_application_header_id}", f"{role_type}", f"{role_id}"]
+            s3_key = f"{p_application_header_id}/{key}"
+            file_name = f"{s3_key}/{update_file['name']}"
+            file_content = base64.b64decode(update_file["src"].split(",")[1])
+
+            upload_to_s3(file_name, file_content)
+
+            fields.append("s3_key")
+            fields.append("file_name")
+
+            values.append(f"'{s3_key}'")
+            values.append(f"'{file_name}'")
+
+            sql = f"INSERT INTO p_uploaded_files ({', '.join(fields)}) VALUES ({', '.join(values)});"
+            await db.execute(sql)
+        # delete file
+        delete_files_id = list(set(old_files_id) - set(un_update_files_id))
+        print("delete_files_id:", delete_files_id)
+        for old_file in old_files:
+            if old_file["id"] in delete_files_id:
+                delete_from_s3(old_file["file_name"])
+                sql = f"DELETE FROM p_uploaded_files WHERE id = '{old_file['id']}';"
+                await db.execute(sql)
+    if JOBS:
+        await asyncio.wait(JOBS)
+
+
+async def delete_p_borrowings_for_ad(db: DB, p_application_header_id):
+    old_p_borrowings = await query_p_borrowings_for_ad(db, p_application_header_id)
+    if len(old_p_borrowings) == 0:
+        return
+    files = await db.fetch_all(
+        f"""SELECT file_name FROM p_uploaded_files WHERE s3_key = '{p_application_header_id}/p_borrowings__I' AND owner_type = 1;"""
+    )
+    for file in files:
+        delete_from_s3(file["file_name"])
+
+    sql = f"DELETE FROM p_uploaded_files WHERE s3_key = '{p_application_header_id}/p_borrowings__I' AND owner_type = 1;"
+
+    await db.execute(sql)
+
+    sql = f"""DELETE FROM p_borrowings WHERE p_application_header_id = {p_application_header_id};"""
+    await db.execute(sql)
+
+
+async def delete_p_applicant_persons__1_for_ad(db: DB, p_application_header_id):
+    p_applicant_persons = await db.fetch_one(
+        f"SELECT id FROM p_applicant_persons WHERE p_application_header_id={p_application_header_id} AND type = 1;"
+    )
+    if p_applicant_persons is None:
+        return
+    p_applicant_persons_id = p_applicant_persons["id"]
+    sql = f"DELETE FROM p_applicant_persons WHERE id = {p_applicant_persons_id};"
+    await db.execute(sql)
+
+
+async def delete_p_borrowing_details__2_for_ad(db: DB, p_application_header_id):
+    sql = (
+        f"DELETE FROM p_borrowing_details WHERE p_application_header_id = {p_application_header_id} AND time_type = 2;"
+    )
+    await db.execute(sql)
+
+
+async def delete_p_join_guarantors(db: DB, p_application_header_id):
+    sql = f"DELETE FROM p_join_guarantors WHERE p_application_header_id = {p_application_header_id};"
+    await db.execute(sql)
