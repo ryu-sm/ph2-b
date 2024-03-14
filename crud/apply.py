@@ -183,7 +183,7 @@ async def insert_p_residents(db: DB, data: typing.List[dict], p_application_head
         await db.execute(sql)
 
 
-async def insert_p_uploaded_files_main(
+async def insert_p_uploaded_files(
     db: DB, data: typing.Dict[str, list], p_application_header_id: int, owner_type: int, owner_id: int
 ):
 

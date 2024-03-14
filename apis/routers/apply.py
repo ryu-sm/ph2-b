@@ -50,7 +50,7 @@ async def user_orgs(data_: dict, db=Depends(get_db), token: dict = Depends(get_t
                 db, data["p_borrowings"], p_application_header_id, token["role_type"], token["id"]
             )
 
-        await crud.insert_p_uploaded_files_main(
+        await crud.insert_p_uploaded_files(
             db, data["p_uploaded_files"], p_application_header_id, token["role_type"], token["id"]
         )
 

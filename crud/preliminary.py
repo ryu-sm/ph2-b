@@ -147,6 +147,7 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
 async def query_p_borrowing_details_for_ad(db: DB, p_application_header_id: int, time_type: int):
     sql = f"""
     SELECT
+        CONVERT(id,CHAR) AS id,
         DATE_FORMAT(desired_borrowing_date, '%Y/%m/%d') as desired_borrowing_date,
         desired_loan_amount,
         bonus_repayment_amount,
@@ -165,6 +166,7 @@ async def query_p_borrowing_details_for_ad(db: DB, p_application_header_id: int,
 
     sql = f"""
     SELECT
+        CONVERT(id,CHAR) AS id,
         DATE_FORMAT(desired_borrowing_date, '%Y/%m/%d') as desired_borrowing_date,
         desired_loan_amount,
         bonus_repayment_amount
@@ -187,6 +189,7 @@ async def query_p_application_banks_for_ad(db: DB, p_application_header_id: int)
 async def query_p_applicant_persons_for_ad(db: DB, p_application_header_id: int, type: int):
     sql = f"""
     SELECT
+        CONVERT(id,CHAR) AS id,
         rel_to_applicant_a_name,
         last_name_kanji,
         first_name_kanji,
@@ -368,7 +371,30 @@ async def query_p_borrowings_for_ad(db: DB, p_application_header_id: int):
     WHERE
         p_application_header_id = {p_application_header_id};
     """
-    return await db.fetch_all(sql)
+    basic_p_borrowings = await db.fetch_all(sql)
+    p_borrowings_with_files = []
+
+    for basic_p_borrowing in basic_p_borrowings:
+        sql = f"""
+        SELECT
+            CONVERT(p_uploaded_files.id,CHAR) AS id,
+            p_uploaded_files.file_name
+        FROM
+            p_uploaded_files
+        WHERE
+            p_uploaded_files.p_application_header_id = {p_application_header_id}
+            AND
+            p_uploaded_files.file_name LIKE '%{p_application_header_id}/p_borrowings__I/{basic_p_borrowing["id"]}%';
+        """
+        p_borrowing_files_info = await db.fetch_all(sql)
+        if len(p_borrowing_files_info) == 0:
+            p_borrowings_with_files.append(none_to_blank({**basic_p_borrowing, "p_borrowings__I": []}))
+        else:
+            files = []
+            for file in p_borrowing_files_info:
+                files.append({**download_from_s3(file["file_name"]), "id": file["id"]})
+            p_borrowings_with_files.append(none_to_blank({**basic_p_borrowing, "p_borrowings__I": files}))
+    return p_borrowings_with_files
 
 
 async def query_p_uploaded_files_for_ad(db: DB, p_application_header_id: int):
@@ -425,14 +451,14 @@ async def query_p_uploaded_files_for_ad(db: DB, p_application_header_id: int):
     for file_key in temp_files.keys():
         sql = f"""
         SELECT
-            CONVERT(id,CHAR) AS id,
-            file_name
+            CONVERT(p_uploaded_files.id,CHAR) AS id,
+            p_uploaded_files.file_name
         FROM
             p_uploaded_files
         WHERE
-            p_application_header_id = {p_application_header_id}
+            p_uploaded_files.p_application_header_id = {p_application_header_id}
             AND
-            s3_key = '{p_application_header_id}/{file_key}';
+            p_uploaded_files.s3_key = '{p_application_header_id}/{file_key}';
         """
         files_info = await db.fetch_all(sql)
         if len(files_info) > 0:
@@ -828,6 +854,55 @@ async def diff_update_p_borrowings_for_ad(db: DB, data: typing.List[dict], p_app
         await asyncio.wait(JOBS)
 
 
+async def diff_update_p_borrowings_files_for_ad(
+    db: DB, data: typing.List[dict], p_application_header_id, role_type, role_id
+):
+    for p_borrowing in data:
+        sql = f"""
+        SELECT
+            CONVERT(id,CHAR) AS id,
+            file_name
+        FROM
+            p_uploaded_files
+        WHERE
+            p_application_header_id = {p_application_header_id}
+            AND
+            file_name LIKE '%{p_application_header_id}/p_borrowings__I/{p_borrowing["id"]}%';
+        """
+        old_files = await db.fetch_all(sql)
+        old_files_id = [item["id"] for item in old_files]
+        un_update_files_id = []
+
+        for update_file in p_borrowing["p_borrowings__I"]:
+            if update_file["id"] in old_files_id:
+                un_update_files_id.append(update_file["id"])
+                continue
+            # new add
+            id = await db.uuid_short()
+            fields = ["id", "p_application_header_id", "owner_type", "owner_id"]
+            values = [f"{id}", f"{p_application_header_id}", f"{role_type}", f"{role_id}"]
+            s3_key = f"{p_application_header_id}/p_borrowings__I/{p_borrowing['id']}"
+            file_name = f"{s3_key}/{update_file['name']}"
+            file_content = base64.b64decode(update_file["src"].split(",")[1])
+
+            upload_to_s3(file_name, file_content)
+
+            fields.append("s3_key")
+            fields.append("file_name")
+
+            values.append(f"'{s3_key}'")
+            values.append(f"'{file_name}'")
+
+            sql = f"INSERT INTO p_uploaded_files ({', '.join(fields)}) VALUES ({', '.join(values)});"
+            await db.execute(sql)
+        delete_files_id = list(set(old_files_id) - set(un_update_files_id))
+        for old_file in old_files:
+            if old_file["id"] in delete_files_id:
+                delete_from_s3(old_file["file_name"])
+                sql = f"DELETE FROM p_uploaded_files WHERE id = '{old_file['id']}';"
+                await db.execute(sql)
+
+
 async def diff_p_uploaded_files_for_ad(db: DB, data: dict, p_application_header_id, role_type, role_id):
     JOBS = []
 
@@ -846,7 +921,6 @@ async def diff_p_uploaded_files_for_ad(db: DB, data: dict, p_application_header_
         old_files = await db.fetch_all(sql)
         old_files_id = [item["id"] for item in old_files]
         un_update_files_id = []
-        print("old_files_id:", old_files_id)
         for update_file in value:
             if update_file["id"] in old_files_id:
                 un_update_files_id.append(update_file["id"])
@@ -871,7 +945,6 @@ async def diff_p_uploaded_files_for_ad(db: DB, data: dict, p_application_header_
             await db.execute(sql)
         # delete file
         delete_files_id = list(set(old_files_id) - set(un_update_files_id))
-        print("delete_files_id:", delete_files_id)
         for old_file in old_files:
             if old_file["id"] in delete_files_id:
                 delete_from_s3(old_file["file_name"])
@@ -920,3 +993,170 @@ async def delete_p_borrowing_details__2_for_ad(db: DB, p_application_header_id):
 async def delete_p_join_guarantors(db: DB, p_application_header_id):
     sql = f"DELETE FROM p_join_guarantors WHERE p_application_header_id = {p_application_header_id};"
     await db.execute(sql)
+
+
+async def query_p_activities_for_ad(db: DB, p_application_header_id):
+    sql = f"""
+    SELECT DISTINCT
+        CONCAT(table_name, '.', field_name, '.', table_id) as update_history_key
+    FROM
+        p_activities
+    WHERE
+        p_application_header_id = {p_application_header_id}
+        AND
+        table_name IS NOT NULL
+        AND
+        field_name IS NOT NULL;
+    """
+    result = await db.fetch_all(sql)
+
+    return [item["update_history_key"] for item in result]
+
+
+async def query_field_uodate_histories_for_ad(db: DB, p_application_header_id: int, update_history_key: str):
+    [table_name, field_name, table_id] = update_history_key.split(".")
+    sql = f"""
+    SELECT
+        DATE_FORMAT(p_activities.created_at, '%Y/%m/%d %h:%m') as created_at,
+        p_activities.operator_type,
+        p_activities.content,
+        CONCAT(p_applicant_persons.last_name_kanji, ' ', p_applicant_persons.first_name_kanji) as p_applicant_person_name,
+        s_sales_persons.name_kanji as s_sales_person_name,
+        s_managers.name_kanji as s_manager_name
+    FROM
+        p_activities
+    JOIN
+        p_application_headers
+        ON
+        p_application_headers.id = p_activities.p_application_header_id
+    LEFT JOIN
+        p_applicant_persons
+        ON
+        p_applicant_persons.p_application_header_id = p_application_headers.id
+        AND
+        p_applicant_persons.type = 0
+    LEFT JOIN
+        s_sales_persons
+        ON
+        s_sales_persons.id = p_activities.operator_id
+    LEFT JOIN
+        s_managers
+        ON
+        s_managers.id = p_activities.operator_id
+    WHERE
+        p_activities.p_application_header_id = {p_application_header_id}
+        AND
+        p_activities.table_name = '{table_name}'
+        AND
+        p_activities.field_name = '{field_name}'
+        AND
+        p_activities.table_id = '{table_id}'
+    """
+
+    return await db.fetch_all(sql)
+
+
+async def query_p_borrowings_for_ad_view(db: DB, p_application_header_id: int):
+    sql = f"""
+    SELECT
+        CONVERT(id,CHAR) AS id
+    FROM
+        p_borrowings
+    WHERE
+        p_application_header_id = {p_application_header_id};
+    """
+    basic_p_borrowings = await db.fetch_all(sql)
+    p_borrowings_with_files = []
+
+    for basic_p_borrowing in basic_p_borrowings:
+        sql = f"""
+        SELECT
+            CONVERT(p_uploaded_files.id,CHAR) AS id,
+            p_uploaded_files.file_name,
+            p_uploaded_files.owner_type,
+            DATE_FORMAT(p_uploaded_files.created_at, '%Y/%m/%d %h:%m') as created_at,
+            p_uploaded_files.owner_type,
+            CONCAT(p_applicant_persons.last_name_kanji, ' ', p_applicant_persons.first_name_kanji) as p_applicant_person_name,
+            s_sales_persons.name_kanji as s_sales_person_name,
+            s_managers.name_kanji as s_manager_name
+        FROM
+            p_uploaded_files
+        JOIN
+            p_application_headers
+            ON
+            p_application_headers.id = p_uploaded_files.p_application_header_id
+        LEFT JOIN
+            p_applicant_persons
+            ON
+            p_applicant_persons.p_application_header_id = p_application_headers.id
+            AND
+            p_applicant_persons.type = 0
+        LEFT JOIN
+            s_sales_persons
+            ON
+            s_sales_persons.id = p_uploaded_files.owner_id
+        LEFT JOIN
+            s_managers
+            ON
+            s_managers.id = p_uploaded_files.owner_id
+        WHERE
+            p_uploaded_files.p_application_header_id = {p_application_header_id}
+            AND
+            p_uploaded_files.file_name LIKE '%{p_application_header_id}/p_borrowings__I/{basic_p_borrowing["id"]}%';
+        """
+        p_borrowing_files_info = await db.fetch_all(sql)
+        if len(p_borrowing_files_info) == 0:
+            p_borrowings_with_files.append(none_to_blank({**basic_p_borrowing, "p_borrowings__I": []}))
+        else:
+            files = []
+            for file in p_borrowing_files_info:
+                files.append({**download_from_s3(file["file_name"]), **file})
+            p_borrowings_with_files.append(none_to_blank({**basic_p_borrowing, "p_borrowings__I": files}))
+    return p_borrowings_with_files
+
+
+async def query_p_uploaded_files_for_ad_view(db: DB, p_application_header_id: int, category: str):
+    temp_files = {}
+    sql = f"""
+    SELECT
+        CONVERT(p_uploaded_files.id,CHAR) AS id,
+        p_uploaded_files.file_name,
+        p_uploaded_files.s3_key,
+        p_uploaded_files.owner_type,
+        DATE_FORMAT(p_uploaded_files.created_at, '%Y/%m/%d %h:%m') as created_at,
+        p_uploaded_files.owner_type,
+        CONCAT(p_applicant_persons.last_name_kanji, ' ', p_applicant_persons.first_name_kanji) as p_applicant_person_name,
+        s_sales_persons.name_kanji as s_sales_person_name,
+        s_managers.name_kanji as s_manager_name
+    FROM
+        p_uploaded_files
+    JOIN
+        p_application_headers
+        ON
+        p_application_headers.id = p_uploaded_files.p_application_header_id
+    LEFT JOIN
+        p_applicant_persons
+        ON
+        p_applicant_persons.p_application_header_id = p_application_headers.id
+        AND
+        p_applicant_persons.type = 0
+    LEFT JOIN
+        s_sales_persons
+        ON
+        s_sales_persons.id = p_uploaded_files.owner_id
+    LEFT JOIN
+        s_managers
+        ON
+        s_managers.id = p_uploaded_files.owner_id
+    WHERE
+        p_uploaded_files.p_application_header_id = {p_application_header_id}
+        AND
+        p_uploaded_files.s3_key LIKE '%{category}%';
+    """
+    files_info = await db.fetch_all(sql)
+    if len(files_info) > 0:
+        files = []
+        for file in files_info:
+            files.append({**download_from_s3(file["file_name"]), **file})
+        temp_files[file["s3_key"].split("/")[-1]] = files
+    return temp_files
