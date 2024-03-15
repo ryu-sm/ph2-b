@@ -257,7 +257,7 @@ async def common_get_preliminary(
     try:
         result = None
 
-        if category == "I":
+        if "I" in category:
             result = await crud.query_p_borrowings_for_ad_view(db, p_application_header_id)
         else:
             result = await crud.query_p_uploaded_files_for_ad_view(db, p_application_header_id, category)
