@@ -116,49 +116,6 @@ async def manager_get_access_applications(status: int, db=Depends(get_db), token
         )
 
 
-@router.put("/manager/preliminarie/s_manager_id")
-async def manager_update_preliminarie_s_manager_id(data: int, db=Depends(get_db), token=Depends(get_token)):
-
-    try:
-        await crud.update_p_application_headers_s_manager_id(db, data["p_application_header_id"], data["s_manager_id"])
-        return JSONResponse(status_code=200, content={"message": "successful"})
-    except Exception as err:
-        logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
-
-
-@router.put("/manager/preliminarie/s_sales_person_id")
-async def manager_update_preliminarie_s_sales_person_id(data: int, db=Depends(get_db), token=Depends(get_token)):
-
-    try:
-        await crud.update_p_application_headers_s_sales_person_id(
-            db, data["p_application_header_id"], data["s_sales_person_id"]
-        )
-        return JSONResponse(status_code=200, content={"message": "successful"})
-    except Exception as err:
-        logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
-
-
-@router.put("/manager/preliminarie/sales_area_id")
-async def manager_update_preliminarie_sales_area_id(data: int, db=Depends(get_db), token=Depends(get_token)):
-
-    try:
-        await crud.update_p_application_headers_sales_area_id(
-            db, data["p_application_header_id"], data["sales_area_id"]
-        )
-        return JSONResponse(status_code=200, content={"message": "successful"})
-    except Exception as err:
-        logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
-
-
 @router.put("/manager/un-pair-loan")
 async def un_pair_laon(data: dict, db=Depends(get_db), token=Depends(get_token)):
     try:
@@ -224,6 +181,54 @@ async def update_provisional_after_result(data: dict, db=Depends(get_db), token=
     try:
         await crud.update_p_application_banks_provisional_after_result(
             db, data["p_application_header_id"], data["s_bank_id"], data["provisional_after_result"]
+        )
+        return JSONResponse(status_code=200, content={"message": "successful"})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.put("/manager/provisional_result")
+async def update_provisional_result(data: dict, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        await crud.update_p_application_banks_pprovisional_result(
+            db,
+            data["p_application_header_id"],
+            data["s_bank_id"],
+            data["provisional_result"],
+            data["R"],
+            token["role_type"],
+            token["id"],
+        )
+        return JSONResponse(status_code=200, content={"message": "successful"})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.put("/manager/approver_confirmation")
+async def update_approver_confirmation(data: dict, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        await crud.update_p_application_headers_approver_confirmation(
+            db, data["p_application_header_id"], data["approver_confirmation"]
+        )
+        return JSONResponse(status_code=200, content={"message": "successful"})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.put("/manager/pre_examination_status")
+async def update_pre_examination_status(data: dict, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        await crud.update_p_application_headers_pre_examination_status(
+            db, data["p_application_header_id"], data["pre_examination_status"]
         )
         return JSONResponse(status_code=200, content={"message": "successful"})
     except Exception as err:

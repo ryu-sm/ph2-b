@@ -24,26 +24,44 @@ async def user_orgs(data_: dict, db=Depends(get_db), token: dict = Depends(get_t
         p_application_header_id = None
         if token["role_type"] == 1:
             p_application_header_id = await crud.insert_p_application_headers(
-                db, data["p_application_headers"], origin_data=data, c_user_id=token["id"]
+                db,
+                data["p_application_headers"],
+                origin_data=data,
+                role_type=token["role_type"],
+                role_id=token["id"],
+                c_user_id=token["id"],
             )
         if token["role_type"] == 2:
             p_application_header_id = await crud.insert_p_application_headers(
-                db, data["p_application_headers"], s_sales_person_id=token["id"]
+                db,
+                data["p_application_headers"],
+                role_type=token["role_type"],
+                origin_data=data,
+                role_id=token["id"],
+                s_sales_person_id=token["id"],
             )
 
-        await crud.insert_p_applicant_persons(db, data["p_applicant_persons__0"], p_application_header_id, 0)
-        if data["hasIncomeTotalizer"]:
-            await crud.insert_p_applicant_persons(db, data["p_applicant_persons__1"], p_application_header_id, 1)
+        await crud.insert_p_applicant_persons(
+            db, data["p_applicant_persons__0"], p_application_header_id, 0, token["role_type"], token["id"]
+        )
+        if data["p_application_headers"]["loan_type"] in ["1", "2"]:
+            await crud.insert_p_applicant_persons(
+                db, data["p_applicant_persons__1"], p_application_header_id, 1, token["role_type"], token["id"]
+            )
 
-        await crud.insert_p_borrowing_details(db, data["p_borrowing_details__1"], p_application_header_id, time_type=1)
+        await crud.insert_p_borrowing_details(
+            db, data["p_borrowing_details__1"], p_application_header_id, 1, token["role_type"], token["id"]
+        )
         if data["p_application_headers"]["land_advance_plan"] == "1":
             await crud.insert_p_borrowing_details(
-                db, data["p_borrowing_details__2"], p_application_header_id, time_type=2
+                db, data["p_borrowing_details__2"], p_application_header_id, 2, token["role_type"], token["id"]
             )
         await crud.instert_p_application_banks(db, data["p_application_banks"], p_application_header_id)
 
-        if data["hasJoinGuarantor"]:
-            await crud.insert_p_join_guarantors(db, data["p_join_guarantors"], p_application_header_id)
+        if data["p_application_headers"]["join_guarantor_umu"] == "1":
+            await crud.insert_p_join_guarantors(
+                db, data["p_join_guarantors"], p_application_header_id, token["role_type"], token["id"]
+            )
 
         if data["p_application_headers"]["curr_borrowing_status"] == "1":
             await crud.insert_p_borrowings(
@@ -55,7 +73,9 @@ async def user_orgs(data_: dict, db=Depends(get_db), token: dict = Depends(get_t
         )
 
         if data["p_residents"]:
-            await crud.insert_p_residents(db, data["p_residents"])
+            await crud.insert_p_residents(
+                db, data["p_residents"], p_application_header_id, token["role_type"], token["id"]
+            )
 
         if token["role_type"] == 1:
             await crud.update_c_user_agent_sended(db, token["id"])
@@ -182,12 +202,12 @@ async def get_application(apply_no: str, db=Depends(get_db)):
         )
 
 
-@router.get("/application/file")
+@router.get("/application/files")
 async def get_application(apply_no: str, db=Depends(get_db)):
     try:
         p_application_header_id = await crud.query_p_application_header_id(db, apply_no)
 
-        p_uploaded_files = await crud.query_p_uploaded_files_main(db, p_application_header_id)
+        p_uploaded_files = await crud.query_p_uploaded_files_for_ap(db, p_application_header_id)
 
         return JSONResponse(status_code=200, content=p_uploaded_files)
     except Exception as err:

@@ -1,7 +1,9 @@
+import base64
 import json
 from core.database import DB
 import crud
 from utils.common import none_to_blank
+from utils.s3 import upload_to_s3
 
 
 async def check_s_manager_with_email(db: DB, email: str):
@@ -206,3 +208,43 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
             x for x in result if x["unsubcribed"] == "1" or x["provisional_after_result"] in ["0", "2", "3", "4", "5"]
         ]
         return [*filted, *paired_tab_3]
+
+
+async def update_p_application_headers_approver_confirmation(
+    db: DB, p_application_header_id: int, approver_confirmation: int
+):
+    sql = f"UPDATE p_application_headers SET approver_confirmation = {approver_confirmation} WHERE id = {p_application_header_id};"
+    await db.execute(sql)
+
+
+async def update_p_application_banks_pprovisional_result(
+    db: DB, p_application_header_id: int, s_bank_id: int, provisional_result: int, R: list, owner_type, owner_id
+):
+    sql = f"UPDATE p_application_banks SET provisional_result = {provisional_result} WHERE p_application_header_id = {p_application_header_id} AND s_bank_id = {s_bank_id};"
+    await db.execute(sql)
+
+    for file in R:
+        p_uploaded_file_id = await db.uuid_short()
+        fields = ["id", "p_application_header_id", "owner_type", "owner_id"]
+        values = [f"{p_uploaded_file_id}", f"{p_application_header_id}", f"{owner_type}", f"{owner_id}"]
+        s3_key = f"{p_application_header_id}/R"
+        file_name = f"{s3_key}/{file['name']}"
+        file_content = base64.b64decode(file["src"].split(",")[1])
+
+        upload_to_s3(file_name, file_content)
+
+        fields.append("s3_key")
+        fields.append("file_name")
+
+        values.append(f"'{s3_key}'")
+        values.append(f"'{file_name}'")
+
+        sql = f"INSERT INTO p_uploaded_files ({', '.join(fields)}) VALUES ({', '.join(values)});"
+        await db.execute(sql)
+
+
+async def update_p_application_headers_pre_examination_status(
+    db: DB, p_application_header_id: int, pre_examination_status: int
+):
+    sql = f"UPDATE p_application_headers SET pre_examination_status = {pre_examination_status} WHERE id = {p_application_header_id};"
+    await db.execute(sql)

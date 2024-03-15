@@ -11,7 +11,7 @@ from copy import deepcopy
 
 
 async def insert_p_application_headers(
-    db: DB, data: dict, origin_data: dict, c_user_id="null", s_sales_person_id="null"
+    db: DB, data: dict, origin_data: dict, role_type, role_id, c_user_id="null", s_sales_person_id="null"
 ):
     sql = f"SELECT MAX(apply_no) no FROM p_application_headers WHERE created_at  >= '{datetime.strftime(datetime.now(),'%Y-%m-%d')} 00:00:00'"
     last_apply = await db.fetch_one(sql)
@@ -23,15 +23,16 @@ async def insert_p_application_headers(
         new_no = str(int(last_apply["no"][-3:]) + 1).zfill(3)
         new_apply_no = f"SET{datetime.strftime(datetime.now(),'%Y%m%d')}{new_no}"
 
-    id = await db.uuid_short()
+    p_application_header_id = await db.uuid_short()
     fields = ["id", "c_user_id", "s_sales_person_id", "apply_no", "origin_data"]
     values = [
-        f"{id}",
+        f"{p_application_header_id}",
         f"{c_user_id}",
         f"{s_sales_person_id}",
         f"'{new_apply_no}'",
         f"'{json.dumps(origin_data, ensure_ascii=False)}'",
     ]
+
     for key, value in data.items():
         if value is None:
             continue
@@ -43,13 +44,26 @@ async def insert_p_application_headers(
 
     sql = f"INSERT INTO p_application_headers ({', '.join(fields)}) VALUES ({', '.join(values)});"
     await db.execute(sql)
-    return id
+    JOBS = []
+    ignoreFields = ["id", "c_user_id", "s_sales_person_id", "apply_no", "origin_data"]
+    for field, value in zip(fields, values):
+        if field in ignoreFields:
+            continue
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', '{field}', {p_application_header_id}, {value}, 0);
+        """
+        JOBS.append(db.execute(sql))
+    if JOBS:
+        await asyncio.wait(JOBS)
+    return p_application_header_id
 
 
-async def insert_p_applicant_persons(db: DB, data: dict, p_application_header_id: int, type: int):
-    id = await db.uuid_short()
+async def insert_p_applicant_persons(db: DB, data: dict, p_application_header_id: int, type: int, role_type, role_id):
+    p_applicant_person_id = await db.uuid_short()
     fields = ["id", "p_application_header_id", "type"]
-    values = [f"{id}", f"{p_application_header_id}", f"{type}"]
+    values = [f"{p_applicant_person_id}", f"{p_application_header_id}", f"{type}"]
     for key, value in data.items():
         if value is None:
             continue
@@ -61,12 +75,27 @@ async def insert_p_applicant_persons(db: DB, data: dict, p_application_header_id
 
     sql = f"INSERT INTO p_applicant_persons ({', '.join(fields)}) VALUES ({', '.join(values)});"
     await db.execute(sql)
+    JOBS = []
+    ignoreFields = ["id", "p_application_header_id", "type"]
+    for field, value in zip(fields, values):
+        if field in ignoreFields:
+            continue
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_applicant_persons', '{field}', {p_applicant_person_id}, {value}, 0);
+        """
+        JOBS.append(db.execute(sql))
+    if JOBS:
+        await asyncio.wait(JOBS)
 
 
-async def insert_p_borrowing_details(db: DB, data: dict, p_application_header_id: int, time_type: int):
-    id = await db.uuid_short()
+async def insert_p_borrowing_details(
+    db: DB, data: dict, p_application_header_id: int, time_type: int, role_type, role_id
+):
+    p_borrowing_detail_id = await db.uuid_short()
     fields = ["id", "p_application_header_id", "time_type"]
-    values = [f"{id}", f"{p_application_header_id}", f"{time_type}"]
+    values = [f"{p_borrowing_detail_id}", f"{p_application_header_id}", f"{time_type}"]
     for key, value in data.items():
         if value is None:
             continue
@@ -78,6 +107,19 @@ async def insert_p_borrowing_details(db: DB, data: dict, p_application_header_id
 
     sql = f"INSERT INTO p_borrowing_details ({', '.join(fields)}) VALUES ({', '.join(values)});"
     await db.execute(sql)
+    JOBS = []
+    ignoreFields = ["id", "p_application_header_id", "type"]
+    for field, value in zip(fields, values):
+        if field in ignoreFields:
+            continue
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowing_details', '{field}', {p_borrowing_detail_id}, {value}, 0);
+        """
+        JOBS.append(db.execute(sql))
+    if JOBS:
+        await asyncio.wait(JOBS)
 
 
 async def instert_p_application_banks(db: DB, data: list, p_application_header_id: int):
@@ -89,11 +131,12 @@ async def instert_p_application_banks(db: DB, data: list, p_application_header_i
         await db.execute(sql)
 
 
-async def insert_p_join_guarantors(db: DB, data: typing.List[dict], p_application_header_id: int):
+async def insert_p_join_guarantors(db: DB, data: typing.List[dict], p_application_header_id: int, role_type, role_id):
+    JOBS = []
     for join_guarantor in data:
-        id = await db.uuid_short()
+        p_join_guarantor_id = await db.uuid_short()
         fields = ["id", "p_application_header_id"]
-        values = [f"{id}", f"{p_application_header_id}"]
+        values = [f"{p_join_guarantor_id}", f"{p_application_header_id}"]
 
         for key, value in join_guarantor.items():
             if key == "id":
@@ -108,15 +151,32 @@ async def insert_p_join_guarantors(db: DB, data: typing.List[dict], p_applicatio
 
         sql = f"INSERT INTO p_join_guarantors ({', '.join(fields)}) VALUES ({', '.join(values)});"
         await db.execute(sql)
+        ignoreFields = ["id", "p_application_header_id"]
+        for field, value in zip(fields, values):
+            if field in ignoreFields:
+                continue
+            id = await db.uuid_short()
+            sql = f"""
+            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+            VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_join_guarantors', '{field}', {p_join_guarantor_id}, {value}, 0);
+            """
+            JOBS.append(db.execute(sql))
+    if JOBS:
+        await asyncio.wait(JOBS)
 
 
 async def insert_p_borrowings(
-    db: DB, data: typing.List[dict], p_application_header_id: int, owner_type: int, owner_id: int
+    db: DB,
+    data: typing.List[dict],
+    p_application_header_id: int,
+    owner_type: int,
+    owner_id: int,
 ):
+    JOBS = []
     for borrowing in data:
-        id = await db.uuid_short()
+        p_borrowing_id = await db.uuid_short()
         fields = ["id", "p_application_header_id"]
-        values = [f"{id}", f"{p_application_header_id}"]
+        values = [f"{p_borrowing_id}", f"{p_application_header_id}"]
 
         for key, value in borrowing.items():
             if key == "id":
@@ -159,13 +219,27 @@ async def insert_p_borrowings(
 
         sql = f"INSERT INTO p_borrowings ({', '.join(fields)}) VALUES ({', '.join(values)});"
         await db.execute(sql)
+        ignoreFields = ["id", "p_application_header_id", "p_borrowings__I"]
+        for field, value in zip(fields, values):
+            if field in ignoreFields:
+                continue
+            id = await db.uuid_short()
+            sql = f"""
+            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+            VALUES ({id}, {p_application_header_id}, {owner_type}, {owner_type}, 'p_borrowings', '{field}', {p_borrowing_id}, {value}, 0);
+            """
+            JOBS.append(db.execute(sql))
+
+    if JOBS:
+        await asyncio.wait(JOBS)
 
 
-async def insert_p_residents(db: DB, data: typing.List[dict], p_application_header_id: int):
+async def insert_p_residents(db: DB, data: typing.List[dict], p_application_header_id: int, role_type, role_id):
+    JOBS = []
     for resident in data:
-        id = await db.uuid_short()
+        p_resident_id = await db.uuid_short()
         fields = ["id", "p_application_header_id"]
-        values = [f"{id}", f"{p_application_header_id}"]
+        values = [f"{p_resident_id}", f"{p_application_header_id}"]
 
         for key, value in resident.items():
             if key == "id":
@@ -181,21 +255,34 @@ async def insert_p_residents(db: DB, data: typing.List[dict], p_application_head
 
         sql = f"INSERT INTO p_residents ({', '.join(fields)}) VALUES ({', '.join(values)});"
         await db.execute(sql)
+        ignoreFields = ["id", "p_application_header_id"]
+        for field, value in zip(fields, values):
+            if field in ignoreFields:
+                continue
+            id = await db.uuid_short()
+            sql = f"""
+            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+            VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_residents', '{field}', {p_resident_id}, {value}, 0);
+            """
+            JOBS.append(db.execute(sql))
+
+    if JOBS:
+        await asyncio.wait(JOBS)
 
 
 async def insert_p_uploaded_files(
     db: DB, data: typing.Dict[str, list], p_application_header_id: int, owner_type: int, owner_id: int
 ):
-
+    JOBS = []
     for key, value in data.items():
 
         if len(value) == 0:
             continue
 
         for file in value:
-            id = await db.uuid_short()
+            p_uploaded_file_id = await db.uuid_short()
             fields = ["id", "p_application_header_id", "owner_type", "owner_id"]
-            values = [f"{id}", f"{p_application_header_id}", f"{owner_type}", f"{owner_id}"]
+            values = [f"{p_uploaded_file_id}", f"{p_application_header_id}", f"{owner_type}", f"{owner_id}"]
             s3_key = f"{p_application_header_id}/{key}"
             file_name = f"{s3_key}/{file['name']}"
             file_content = base64.b64decode(file["src"].split(",")[1])
@@ -210,6 +297,16 @@ async def insert_p_uploaded_files(
 
             sql = f"INSERT INTO p_uploaded_files ({', '.join(fields)}) VALUES ({', '.join(values)});"
             await db.execute(sql)
+
+            if "A" in key:
+                id = await db.uuid_short()
+                sql = f"""
+                INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+                VALUES ({id}, {p_application_header_id}, {owner_type}, {owner_id}, 'p_uploaded_files', '{key}', {p_uploaded_file_id}, {f"'{file_name}'"}, 0);
+                """
+                JOBS.append(db.execute(sql))
+    if JOBS:
+        await asyncio.wait(JOBS)
 
 
 async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
@@ -555,7 +652,7 @@ async def query_p_borrowings_for_ap(db: DB, p_application_header_id: int):
     return temp
 
 
-async def query_p_uploaded_files_main(db: DB, p_application_header_id: int):
+async def query_p_uploaded_files_for_ap(db: DB, p_application_header_id: int):
     temp_files = {
         "p_applicant_persons__0__H__a": [],
         "p_applicant_persons__0__H__b": [],

@@ -105,6 +105,7 @@ async def common_get_preliminary(p_application_header_id: int, db=Depends(get_db
 
         preliminary["p_uploaded_files"] = await crud.query_p_uploaded_files_for_ad(db, p_application_header_id)
         preliminary["p_activities"] = await crud.query_p_activities_for_ad(db, p_application_header_id)
+        preliminary["p_result"] = await crud.query_p_result(db, p_application_header_id)
 
         return JSONResponse(status_code=200, content=preliminary)
     except Exception as err:

@@ -446,6 +446,7 @@ async def query_p_uploaded_files_for_ad(db: DB, p_application_header_id: int):
         "p_applicant_persons__1__K": [],
         "J": [],
         "S": [],
+        "R": [],
     }
 
     for file_key in temp_files.keys():
@@ -1006,7 +1007,9 @@ async def query_p_activities_for_ad(db: DB, p_application_header_id):
         AND
         table_name IS NOT NULL
         AND
-        field_name IS NOT NULL;
+        field_name IS NOT NULL
+        AND
+        operate_type != 0;
     """
     result = await db.fetch_all(sql)
 
@@ -1160,3 +1163,30 @@ async def query_p_uploaded_files_for_ad_view(db: DB, p_application_header_id: in
             files.append({**download_from_s3(file["file_name"]), **file})
         temp_files[file["s3_key"].split("/")[-1]] = files
     return temp_files
+
+
+async def query_p_result(db: DB, p_application_header_id: int):
+    sbi = await db.fetch_one("SELECT id, name FROM s_banks WHERE code = '0038';")
+    sbi_id = sbi["id"]
+    sql = f"""
+    SELECT
+        CONVERT(p_application_banks.s_bank_id,CHAR) AS s_bank_id,
+        p_application_headers.pre_examination_status,
+        p_application_banks.provisional_status,
+        p_application_banks.provisional_result,
+        p_application_banks.provisional_after_result,
+        p_application_headers.approver_confirmation
+    FROM
+        p_application_headers
+    LEFT JOIN
+        p_application_banks
+        ON
+        p_application_banks.p_application_header_id = p_application_headers.id
+        AND
+        p_application_banks.s_bank_id = {sbi_id}
+    WHERE
+        p_application_headers.id = {p_application_header_id}
+    """
+    result = await db.fetch_one(sql)
+
+    return none_to_blank(result)
