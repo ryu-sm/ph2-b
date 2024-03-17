@@ -3,7 +3,7 @@ import json
 from core.database import DB
 import crud
 from utils.common import none_to_blank
-from utils.s3 import upload_to_s3
+from utils.s3 import delete_from_s3, upload_to_s3
 
 
 async def check_s_manager_with_email(db: DB, email: str):
@@ -247,4 +247,35 @@ async def update_p_application_headers_pre_examination_status(
     db: DB, p_application_header_id: int, pre_examination_status: int
 ):
     sql = f"UPDATE p_application_headers SET pre_examination_status = {pre_examination_status} WHERE id = {p_application_header_id};"
+    await db.execute(sql)
+
+
+async def delete_p_application_banks_pprovisional_result(
+    db: DB, p_application_header_id: int, s_bank_id: int, p_uploaded_file_id: int
+):
+    p_uploaded_file = await db.fetch_one(f"SELECT file_name FROM p_uploaded_files WHERE id = {p_uploaded_file_id}")
+
+    delete_from_s3(p_uploaded_file["file_name"])
+
+    await db.execute(f"DELETE FROM p_uploaded_files WHERE id = {p_uploaded_file_id}")
+
+    sql = f"""
+    UPDATE p_application_headers
+    SET
+        pre_examination_status = 4,
+        approver_confirmation = NULL
+    WHERE
+        id = {p_application_header_id};
+    """
+    await db.execute(sql)
+
+    sql = f"""
+    UPDATE p_application_banks
+    SET
+        provisional_result = NULL
+    WHERE
+        p_application_header_id = {p_application_header_id}
+        AND
+        s_bank_id = {s_bank_id};
+    """
     await db.execute(sql)

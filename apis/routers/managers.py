@@ -210,6 +210,23 @@ async def update_provisional_result(data: dict, db=Depends(get_db), token=Depend
         )
 
 
+@router.patch("/manager/provisional_result")
+async def delete_provisional_result(data: dict, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        await crud.delete_p_application_banks_pprovisional_result(
+            db,
+            data["p_application_header_id"],
+            data["s_bank_id"],
+            data["p_uploaded_file_id"],
+        )
+        return JSONResponse(status_code=200, content={"message": "successful"})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
 @router.put("/manager/approver_confirmation")
 async def update_approver_confirmation(data: dict, db=Depends(get_db), token=Depends(get_token)):
     try:

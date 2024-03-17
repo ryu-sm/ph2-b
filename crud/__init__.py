@@ -7,3 +7,4 @@ from .manages import *
 from .sales_persons import *
 from .preliminaries import *
 from .preliminary import *
+from .c_archive_files import *

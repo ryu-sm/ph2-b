@@ -1,6 +1,9 @@
+import base64
 import json
+import uuid
 from core.database import DB
 import crud
+from utils.s3 import upload_to_s3
 
 
 async def check_s_sales_person_with_email(db: DB, email: str):
