@@ -119,3 +119,20 @@ async def query_pair_loan_options(db: DB, p_application_header_id):
     """
 
     return await db.fetch_all(sql)
+
+
+async def query_s_sales_company_id_for_category(db: DB, category):
+    sql = f"""
+    SELECT
+        CONVERT(id,CHAR) as value,
+        name as label
+    FROM
+        s_sales_company_orgs
+    WHERE
+        category = '{category}';
+    """
+    return await db.fetch_all(sql)
+
+
+async def query_all_sales_person_options(db: DB):
+    return await db.fetch_all("SELECT CONVERT(id,CHAR) as value, name_kanji as label FROM s_sales_persons;")

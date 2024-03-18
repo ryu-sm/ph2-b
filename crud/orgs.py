@@ -74,7 +74,3 @@ async def query_child_s_sales_company_orgs(db: DB, parent_id: int):
         parents.pid is NOT NULL;
     """
     return await db.fetch_all(sql)
-
-
-async def query_s_sales_company_id_for_c(db: DB, id: int):
-    pass

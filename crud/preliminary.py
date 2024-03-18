@@ -19,7 +19,7 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
     SELECT
         CONVERT(p_application_headers.id,CHAR) AS id,
         p_application_headers.apply_no,
-        DATE_FORMAT(p_application_headers.created_at, '%Y/%m/%d %h:%m') as created_at,
+        DATE_FORMAT(p_application_headers.created_at, '%Y/%m/%d %H:%i') as created_at,
         DATE_FORMAT(p_application_headers.apply_date, '%Y/%m/%d') as apply_date,
         p_application_headers.move_scheduled_date,
         p_application_headers.loan_target,
@@ -1020,7 +1020,7 @@ async def query_field_uodate_histories_for_ad(db: DB, p_application_header_id: i
     [table_name, field_name, table_id] = update_history_key.split(".")
     sql = f"""
     SELECT
-        DATE_FORMAT(p_activities.created_at, '%Y/%m/%d %h:%m') as created_at,
+        DATE_FORMAT(p_activities.created_at, '%Y/%m/%d %H:%i') as created_at,
         p_activities.operator_type,
         p_activities.content,
         CONCAT(p_applicant_persons.last_name_kanji, ' ', p_applicant_persons.first_name_kanji) as p_applicant_person_name,
@@ -1077,7 +1077,7 @@ async def query_p_borrowings_for_ad_view(db: DB, p_application_header_id: int):
             CONVERT(p_uploaded_files.id,CHAR) AS id,
             p_uploaded_files.file_name,
             p_uploaded_files.owner_type,
-            DATE_FORMAT(p_uploaded_files.created_at, '%Y/%m/%d %h:%m') as created_at,
+            DATE_FORMAT(p_uploaded_files.created_at, '%Y/%m/%d %H:%i') as created_at,
             p_uploaded_files.owner_type,
             CONCAT(p_applicant_persons.last_name_kanji, ' ', p_applicant_persons.first_name_kanji) as p_applicant_person_name,
             s_sales_persons.name_kanji as s_sales_person_name,
@@ -1126,7 +1126,7 @@ async def query_p_uploaded_files_for_ad_view(db: DB, p_application_header_id: in
         p_uploaded_files.file_name,
         p_uploaded_files.s3_key,
         p_uploaded_files.owner_type,
-        DATE_FORMAT(p_uploaded_files.created_at, '%Y/%m/%d %h:%m') as created_at,
+        DATE_FORMAT(p_uploaded_files.created_at, '%Y/%m/%d %H:%i') as created_at,
         p_uploaded_files.owner_type,
         CONCAT(p_applicant_persons.last_name_kanji, ' ', p_applicant_persons.first_name_kanji) as p_applicant_person_name,
         s_sales_persons.name_kanji as s_sales_person_name,

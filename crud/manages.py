@@ -55,7 +55,7 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
     SELECT
         CONVERT(p_application_headers.id,CHAR) AS id,
         p_application_headers.apply_no,
-        DATE_FORMAT(p_application_headers.created_at, '%Y/%m/%d %h:%m:%S') as created_at,
+        DATE_FORMAT(p_application_headers.created_at, '%Y/%m/%d %H:%i:%S') as created_at,
         p_application_headers.pre_examination_status,
         CONVERT(p_application_headers.s_sales_person_id,CHAR) AS s_sales_person_id,
         CONVERT(p_application_headers.s_manager_id,CHAR) AS s_manager_id,

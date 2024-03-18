@@ -29,7 +29,7 @@ async def query_c_archive_files_for_s_sales_person(db: DB, s_sales_company_org_i
     sql = f"""
     SELECT
         CONVERT(c_archive_files.id,CHAR) AS id,
-        DATE_FORMAT(c_archive_files.created_at, '%Y/%m/%d %h:%m') as created_at,
+        DATE_FORMAT(c_archive_files.created_at, '%Y/%m/%d %H:%i') as created_at,
         s_sales_persons.name_kanji as s_sales_person_name,
         c_archive_files.file_names as file_names,
         c_archive_files.note as note,
@@ -62,11 +62,13 @@ async def query_c_archive_files_for_manager(db: DB):
     sql = f"""
     SELECT
         CONVERT(c_archive_files.id,CHAR) AS id,
-        DATE_FORMAT(c_archive_files.created_at, '%Y/%m/%d %h:%m') as created_at,
+        DATE_FORMAT(c_archive_files.created_at, '%Y/%m/%d %H:%i') as created_at,
         s_sales_persons.name_kanji as s_sales_person_name,
         c_archive_files.file_names as file_names,
         c_archive_files.note as note,
-        s_sales_company_orgs.name as org_name
+        s_sales_company_orgs.name as org_name,
+        CONVERT(s_sales_company_orgs.id,CHAR) as org_id,
+        CONVERT(s_sales_persons.id,CHAR) as s_sales_person_id
     FROM
         c_archive_files
     LEFT JOIN
