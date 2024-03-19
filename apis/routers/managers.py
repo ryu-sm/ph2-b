@@ -11,6 +11,7 @@ from apis.deps import get_token
 import crud
 import utils
 import schemas
+from utils.data_check import manager_data_check
 
 
 router = APIRouter(route_class=LoggingContextRoute)
@@ -244,6 +245,11 @@ async def update_approver_confirmation(data: dict, db=Depends(get_db), token=Dep
 @router.put("/manager/pre_examination_status")
 async def update_pre_examination_status(data: dict, db=Depends(get_db), token=Depends(get_token)):
     try:
+        if data["pre_examination_status"] == 3:
+            errors = manager_data_check(data["preliminary"])
+
+            if errors:
+                return JSONResponse(status_code=400, content=errors)
         await crud.update_p_application_headers_pre_examination_status(
             db, data["p_application_header_id"], data["pre_examination_status"]
         )
