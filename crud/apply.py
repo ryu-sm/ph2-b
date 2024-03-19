@@ -5,6 +5,7 @@ import asyncio
 from datetime import datetime
 from core.database import DB
 from constant import JSON_FIELD_KEYS
+import crud
 from utils import upload_to_s3, download_from_s3, none_to_blank, delete_from_s3
 import utils
 from copy import deepcopy
@@ -1182,7 +1183,7 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
 async def diff_p_uploaded_files_for_ap(db: DB, data: dict, p_application_header_id, role_type, role_id):
     JOBS = []
 
-    old_p_uploaded_files = await query_p_uploaded_files_main(db, p_application_header_id)
+    old_p_uploaded_files = await query_p_uploaded_files_for_ap(db, p_application_header_id)
 
     for key, value in data.items():
         old_value = old_p_uploaded_files.get(key, [])
