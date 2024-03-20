@@ -259,7 +259,7 @@ async def query_p_applicant_persons_for_ad(db: DB, p_application_header_id: int,
         office_establishment_date,
         office_capital_stock,
         main_income_source,
-        before_last_year_bonus_income
+        before_last_year_income
     FROM
         p_applicant_persons
     WHERE

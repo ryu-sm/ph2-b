@@ -44,7 +44,7 @@ async def user_orgs(data_: dict, db=Depends(get_db), token: dict = Depends(get_t
         await crud.insert_p_applicant_persons(
             db, data["p_applicant_persons__0"], p_application_header_id, 0, token["role_type"], token["id"]
         )
-        if data["p_application_headers"]["loan_type"] in ["1", "2"]:
+        if data["p_application_headers"]["loan_type"] in ["3", "4"]:
             await crud.insert_p_applicant_persons(
                 db, data["p_applicant_persons__1"], p_application_header_id, 1, token["role_type"], token["id"]
             )
