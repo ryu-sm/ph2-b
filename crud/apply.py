@@ -317,6 +317,7 @@ async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
         DATE_FORMAT(apply_date, '%Y/%m/%d') as apply_date,
         move_scheduled_date,
         loan_target,
+        loan_target_type,
         land_advance_plan,
         loan_type,
         pair_loan_last_name,

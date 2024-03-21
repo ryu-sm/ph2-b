@@ -23,6 +23,7 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
         DATE_FORMAT(p_application_headers.apply_date, '%Y/%m/%d') as apply_date,
         p_application_headers.move_scheduled_date,
         p_application_headers.loan_target,
+        p_application_headers.loan_target_type,
         p_application_headers.land_advance_plan,
         p_application_headers.loan_type,
         p_application_headers.pair_loan_id,
