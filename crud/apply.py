@@ -195,7 +195,7 @@ async def insert_p_borrowings(
                         f"{owner_id}",
                     ]
                     s3_key = f"{p_application_header_id}/{key}"
-                    file_name = f"{s3_key}/{id}/{file['name']}"
+                    file_name = f"{s3_key}/{p_uploaded_files_id}/{file['name']}"
                     file_content = base64.b64decode(file["src"].split(",")[1])
 
                     upload_to_s3(file_name, file_content)
