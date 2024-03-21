@@ -391,7 +391,8 @@ async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
         sales_area_id,
         sales_exhibition_hall_id,
         vendor_name,
-        vendor_phone
+        vendor_phone,
+        vendor_business_card
     FROM
         p_application_headers
     WHERE
