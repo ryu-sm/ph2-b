@@ -82,6 +82,7 @@ async def user_orgs(data_: dict, db=Depends(get_db), token: dict = Depends(get_t
             await crud.delete_p_draft_data(db, token["id"])
 
         apply_no = await crud.query_p_application_header_apply_no(db, p_application_header_id)
+        await crud.update_messages_for_user(db, token["id"], p_application_header_id)
         utils.send_email(
             to="info-test@milibank.co.jp",
             template="manager_new_apply_email",

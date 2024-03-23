@@ -21,6 +21,7 @@ from apis.routers.managers import router as managers_router
 from apis.routers.sales_persons import router as sales_persons_router
 from apis.routers.preliminaries import router as preliminaries_router
 from apis.routers.c_archive_files import router as c_archive_files_router
+from apis.routers.messages import router as messages_router
 
 
 # スタートアップ前のイベント
@@ -50,6 +51,7 @@ app.include_router(managers_router)
 app.include_router(sales_persons_router)
 app.include_router(preliminaries_router)
 app.include_router(c_archive_files_router)
+app.include_router(messages_router)
 
 
 # カスタム認証例外追加
