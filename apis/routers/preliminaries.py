@@ -7,6 +7,7 @@ from core.custom import LoggingContextRoute
 from apis.deps import get_db
 from apis.deps import get_token
 import crud
+from utils.s3 import download_from_s3
 
 
 router = APIRouter(route_class=LoggingContextRoute)
@@ -263,6 +264,19 @@ async def common_get_preliminary(
         else:
             result = await crud.query_p_uploaded_files_for_ad_view(db, p_application_header_id, category)
         return JSONResponse(status_code=200, content=result)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.get("/row_data/{p_application_header_id}")
+async def get_raw_data(p_application_header_id: int, token: dict = Depends(get_token)):
+    try:
+
+        file = download_from_s3(f"{p_application_header_id}/row_data.xlsx")
+        return JSONResponse(status_code=200, content=file)
     except Exception as err:
         logger.exception(err)
         return JSONResponse(

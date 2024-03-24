@@ -31,3 +31,7 @@ def download_from_s3(file_name):
     base64_encoded_data = base64.b64encode(file_content).decode("utf-8")
     src = f"data:{mime_type};base64,{base64_encoded_data}"
     return {"name": file_name.split("/")[-1], "src": src}
+
+
+def upload_buffer_to_s3(file_name, excel_buffer):
+    s3_client.upload_fileobj(excel_buffer, Bucket=settings.AWS_BUCKET_NAME, Key=file_name)

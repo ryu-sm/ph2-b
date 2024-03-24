@@ -1,3 +1,4 @@
+import json
 from loguru import logger
 from fastapi import APIRouter
 from fastapi import Depends
@@ -88,6 +89,7 @@ async def user_orgs(data_: dict, db=Depends(get_db), token: dict = Depends(get_t
             template="manager_new_apply_email",
             link=f"{settings.FRONTEND_BASE_URL}/manager/edit-preliminary?id={p_application_header_id}",
         )
+        await utils.gen_row_data(p_application_header_id, data_)
         return JSONResponse(status_code=200, content={"apply_no": apply_no})
     except Exception as err:
         logger.exception(err)
@@ -231,3 +233,10 @@ async def get_application(apply_no: str, db=Depends(get_db)):
         return JSONResponse(
             status_code=500, content={"message": "An unknown exception occurred, please try again later."}
         )
+
+
+@router.get("/test")
+async def test():
+    with open("mock_data.json", mode="r", encoding="utf8") as f:
+        mock_data = json.load(f)
+        await utils.gen_row_data(mock_data)
