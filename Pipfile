@@ -16,6 +16,8 @@ passlib = "*"
 cryptography = "*"
 python-magic = "*"
 bcrypt = "==4.0.1"
+pandas = "*"
+openpyxl = "*"
 
 [dev-packages]
 
