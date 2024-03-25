@@ -207,8 +207,14 @@ async def insert_p_borrowings(
                     p_uploaded_files_values.append(f"'{file_name}'")
 
                     sql = f"INSERT INTO p_uploaded_files ({', '.join(p_uploaded_files_fields)}) VALUES ({', '.join(p_uploaded_files_values)});"
-
                     await db.execute(sql)
+                    p_activities_id = await db.uuid_short()
+                    sql = f"""
+                    INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+                    VALUES ({p_activities_id}, {p_application_header_id}, {owner_type}, {owner_type}, 'p_borrowings', 'p_borrowings__I', {p_borrowing_id}, '{file["name"]}', 0);
+                    """
+                    JOBS.append(db.execute(sql))
+
                 continue
             if value is None:
                 continue
@@ -299,13 +305,12 @@ async def insert_p_uploaded_files(
             sql = f"INSERT INTO p_uploaded_files ({', '.join(fields)}) VALUES ({', '.join(values)});"
             await db.execute(sql)
 
-            if "A" in key:
-                id = await db.uuid_short()
-                sql = f"""
-                INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-                VALUES ({id}, {p_application_header_id}, {owner_type}, {owner_id}, 'p_uploaded_files', '{key}', {p_uploaded_file_id}, {f"'{file_name}'"}, 0);
-                """
-                JOBS.append(db.execute(sql))
+            p_activities_id = await db.uuid_short()
+            sql = f"""
+            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+            VALUES ({p_activities_id}, {p_application_header_id}, {owner_type}, {owner_id}, 'p_uploaded_files', '{key}', {p_uploaded_file_id}, '{file["name"]}', 0);
+            """
+            JOBS.append(db.execute(sql))
     if JOBS:
         await asyncio.wait(JOBS)
 
@@ -380,6 +385,7 @@ async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
         required_funds_total_amount,
         funding_saving_amount,
         funding_estate_sale_amount,
+        funding_self_amount,
         funding_other_saving_amount,
         funding_relative_donation_amount,
         funding_loan_amount,
@@ -1089,7 +1095,7 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
             return None
         [old_p_borrowing] = filter
         for key, value in p_borrowing.items():
-            if key == "p_borrowings__I" and len(value) > 0:
+            if key == "p_borrowings__I":
                 files_name = [item["name"] for item in old_p_borrowing["p_borrowings__I"]]
 
                 for file in value:
@@ -1118,6 +1124,12 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
                     sql = f"INSERT INTO p_uploaded_files ({', '.join(p_uploaded_files_fields)}) VALUES ({', '.join(p_uploaded_files_values)});"
 
                     await db.execute(sql)
+                    p_activities_id = await db.uuid_short()
+                    sql = f"""
+                    INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+                    VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', 'p_borrowings__I', {old_p_borrowing["id"]}, '{file["name"]}', 2);
+                    """
+                    JOBS.append(db.execute(sql))
 
                 new_files_name = [item["name"] for item in value]
 
@@ -1129,6 +1141,13 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
                     delete_from_s3(old_file_name)
                     sql = f"DELETE FROM p_uploaded_files WHERE file_name = '{old_file_name}';"
                     await db.execute(sql)
+                    p_activities_id = await db.uuid_short()
+                    sql = f"""
+                    INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+                    VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', 'p_borrowings__I', {old_p_borrowing["id"]}, '{old_file["name"]}', 9);
+                    """
+                    JOBS.append(db.execute(sql))
+
                 continue
 
             old_value = old_p_borrowing.get(key, [])
@@ -1162,6 +1181,7 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
             if key in JSON_FIELD_KEYS:
                 content = json.dumps(value, ensure_ascii=False)
             content = f"'{content}'" if content else "null"
+
             sql = f"UPDATE p_borrowings SET {key} = {content} WHERE id = {old_p_borrowing['id']}"
             JOBS.append(db.execute(sql))
 
@@ -1177,6 +1197,12 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
         JOBS.append(db.execute(sql))
         sql = f"DELETE FROM p_borrowings WHERE id = {old_p_borrowing['id']};"
         JOBS.append(db.execute(sql))
+        for old_file in old_p_borrowing["p_borrowings__I"]:
+            old_s3_key = f"{p_application_header_id}/{key}"
+            old_file_name = f"{old_s3_key}/{old_p_borrowing['id']}/{old_file['name']}"
+            delete_from_s3(old_file_name)
+            sql = f"DELETE FROM p_uploaded_files WHERE file_name = '{old_file_name}';"
+            await db.execute(sql)
 
     if JOBS:
         await asyncio.wait(JOBS)
@@ -1191,17 +1217,21 @@ async def diff_p_uploaded_files_for_ap(db: DB, data: dict, p_application_header_
         old_value = old_p_uploaded_files.get(key, [])
         if json.dumps(value, ensure_ascii=False) == json.dumps(old_value, ensure_ascii=False):
             continue
-        operate_type = 1
         if len(value) == 0 and len(old_value) > 0:
-            operate_type = 0
             for old_file in old_value:
                 old_s3_key = f"{p_application_header_id}/{key}"
                 old_file_name = f"{old_s3_key}/{old_file['name']}"
                 delete_from_s3(old_file_name)
                 sql = f"DELETE FROM p_uploaded_files WHERE file_name = '{old_file_name}';"
                 await db.execute(sql)
+                p_activities_id = await db.uuid_short()
+                sql = f"""
+                INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_uploaded_files', '{key}', null, '{old_file["name"]}', 9);
+                """
+                JOBS.append(db.execute(sql))
+
         if len(value) > 0 and len(old_value) == 0:
-            operate_type = 2
             for file in value:
                 p_uploaded_files_id = await db.uuid_short()
                 p_uploaded_files_fields = ["id", "p_application_header_id", "owner_type", "owner_id"]
@@ -1221,6 +1251,13 @@ async def diff_p_uploaded_files_for_ap(db: DB, data: dict, p_application_header_
                 p_uploaded_files_values.append(f"'{file_name}'")
                 sql = f"INSERT INTO p_uploaded_files ({', '.join(p_uploaded_files_fields)}) VALUES ({', '.join(p_uploaded_files_values)});"
                 await db.execute(sql)
+                p_activities_id = await db.uuid_short()
+                sql = f"""
+                INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_uploaded_files', '{key}', null, '{file["name"]}', 2);
+                """
+                JOBS.append(db.execute(sql))
+
         if len(value) > 0 and len(old_value) > 0:
             files_name = [item["name"] for item in old_value]
             for file in value:
@@ -1244,6 +1281,13 @@ async def diff_p_uploaded_files_for_ap(db: DB, data: dict, p_application_header_
                 p_uploaded_files_values.append(f"'{file_name}'")
                 sql = f"INSERT INTO p_uploaded_files ({', '.join(p_uploaded_files_fields)}) VALUES ({', '.join(p_uploaded_files_values)});"
                 await db.execute(sql)
+                p_activities_id = await db.uuid_short()
+                sql = f"""
+                INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_uploaded_files', '{key}', null, '{file["name"]}', 2);
+                """
+                JOBS.append(db.execute(sql))
+
             new_files_name = [item["name"] for item in value]
 
             for old_file in old_value:
@@ -1255,13 +1299,13 @@ async def diff_p_uploaded_files_for_ap(db: DB, data: dict, p_application_header_
                 delete_from_s3(old_file_name)
                 sql = f"DELETE FROM p_uploaded_files WHERE file_name = '{old_file_name}';"
                 await db.execute(sql)
+                p_activities_id = await db.uuid_short()
+                sql = f"""
+                INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_uploaded_files', '{key}', null, '{old_file["name"]}', 9);
+                """
+                JOBS.append(db.execute(sql))
 
-        id = await db.uuid_short()
-        sql = f"""
-        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_uploaded_files', null, null, '{key}', {operate_type});
-        """
-        JOBS.append(db.execute(sql))
     if JOBS:
         await asyncio.wait(JOBS)
 

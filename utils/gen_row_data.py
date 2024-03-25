@@ -1818,8 +1818,11 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             "big_class": "新しい住居（融資対象物件）の事業性※該当する方のみお答えください。",
             "class": "",
             "field_name": "融資対象物件の事業性",
-            "filed_value": CODE_CONFIGS["p_application_headers.property_business_type"].get(
-                data["p_application_headers"]["property_business_type"], ""
+            "filed_value": ", ".join(
+                [
+                    CODE_CONFIGS["p_application_headers.property_business_type"].get(item, "")
+                    for item in data["p_application_headers"]["property_business_type"]
+                ]
             ),
         }
     )

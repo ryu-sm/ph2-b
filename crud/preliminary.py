@@ -41,7 +41,7 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
         p_application_headers.curr_house_owner_rel,
         p_application_headers.curr_house_schedule_disposal_type,
         p_application_headers.curr_house_schedule_disposal_type_other,
-        DATE_FORMAT(p_application_headers.curr_house_shell_scheduled_date, '%Y/%m/%d') as curr_house_shell_scheduled_date,
+        p_application_headers.curr_house_shell_scheduled_date,
         p_application_headers.curr_house_shell_scheduled_price,
         p_application_headers.curr_house_loan_balance_type,
         p_application_headers.property_publish_url,
@@ -328,7 +328,7 @@ async def query_p_residents_for_ad(db: DB, p_application_header_id: int):
         first_name_kana,
         rel_to_applicant_a,
         rel_to_applicant_a_other,
-        birthday,
+        DATE_FORMAT(birthday, '%Y/%m/%d') as birthday,
         gender,
         one_roof
     FROM
@@ -496,13 +496,13 @@ async def diff_update_p_application_headers_for_ad(db: DB, data_: dict, p_applic
                 continue
         operate_type = 1
         if not value and old_value:
-            operate_type = 0
+            operate_type = 9
         if value and not old_value:
             operate_type = 2
         content = value
         if key in JSON_FIELD_KEYS:
             content = json.dumps(value, ensure_ascii=False)
-        content = f"'{content}'" if content else f"'{old_value}'"
+        content = f"'{content}'" if content else "null"
         id = await db.uuid_short()
         sql = f"""
         INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
@@ -544,7 +544,7 @@ async def diff_update_p_applicant_persons_for_ad(db: DB, data: dict, p_applicati
 
         operate_type = 1
         if not value and old_value:
-            operate_type = 0
+            operate_type = 9
         if value and not old_value:
             operate_type = 2
 
@@ -552,7 +552,7 @@ async def diff_update_p_applicant_persons_for_ad(db: DB, data: dict, p_applicati
         if key in JSON_FIELD_KEYS:
             content = json.dumps(value, ensure_ascii=False)
 
-        content = f"'{content}'" if content else f"'{old_value}'"
+        content = f"'{content}'" if content else "null"
 
         id = await db.uuid_short()
         sql = f"""
@@ -597,7 +597,7 @@ async def diff_update_p_borrowing_details_for_ad(
 
         operate_type = 1
         if not value and old_value:
-            operate_type = 0
+            operate_type = 9
         if value and not old_value:
             operate_type = 2
 
@@ -605,7 +605,7 @@ async def diff_update_p_borrowing_details_for_ad(
         if key in JSON_FIELD_KEYS:
             content = json.dumps(value, ensure_ascii=False)
 
-        content = f"'{content}'" if content else f"'{old_value}'"
+        content = f"'{content}'" if content else "null"
 
         id = await db.uuid_short()
         sql = f"""
@@ -690,7 +690,7 @@ async def diff_update_p_join_guarantors_for_ad(
 
             operate_type = 1
             if not value and old_value:
-                operate_type = 0
+                operate_type = 9
             if value and not old_value:
                 operate_type = 2
 
@@ -698,7 +698,7 @@ async def diff_update_p_join_guarantors_for_ad(
             if key in JSON_FIELD_KEYS:
                 content = json.dumps(value, ensure_ascii=False)
 
-            content = f"'{content}'" if content else f"'{old_value}'"
+            content = f"'{content}'" if content else "null"
 
             id = await db.uuid_short()
             sql = f"""
@@ -740,7 +740,8 @@ async def diff_update_p_residents_for_ad(db: DB, data: typing.List[dict], p_appl
             await crud.insert_p_residents(db, [data_], p_application_header_id, role_type, role_id)
             return None
         [old_p_resident] = filter
-        for key, value in old_p_resident.items():
+
+        for key, value in p_resident.items():
 
             old_value = old_p_resident.get(key, "")
 
@@ -753,7 +754,7 @@ async def diff_update_p_residents_for_ad(db: DB, data: typing.List[dict], p_appl
 
             operate_type = 1
             if not value and old_value:
-                operate_type = 0
+                operate_type = 9
             if value and not old_value:
                 operate_type = 2
 
@@ -761,7 +762,7 @@ async def diff_update_p_residents_for_ad(db: DB, data: typing.List[dict], p_appl
             if key in JSON_FIELD_KEYS:
                 content = json.dumps(value, ensure_ascii=False)
 
-            content = f"'{content}'" if content else f"'{old_value}'"
+            content = f"'{content}'" if content else "null"
 
             id = await db.uuid_short()
             sql = f"""
@@ -816,7 +817,7 @@ async def diff_update_p_borrowings_for_ad(db: DB, data: typing.List[dict], p_app
 
             operate_type = 1
             if not value and old_value:
-                operate_type = 0
+                operate_type = 9
             if value and not old_value:
                 operate_type = 2
 
@@ -824,7 +825,7 @@ async def diff_update_p_borrowings_for_ad(db: DB, data: typing.List[dict], p_app
             if key in JSON_FIELD_KEYS:
                 content = json.dumps(value, ensure_ascii=False)
 
-            content = f"'{content}'" if content else f"'{old_value}'"
+            content = f"'{content}'" if content else "null"
 
             id = await db.uuid_short()
             sql = f"""
@@ -897,12 +898,25 @@ async def diff_update_p_borrowings_files_for_ad(
 
             sql = f"INSERT INTO p_uploaded_files ({', '.join(fields)}) VALUES ({', '.join(values)});"
             await db.execute(sql)
+            p_activities_id = await db.uuid_short()
+            sql = f"""
+            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+            VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', 'p_borrowings__I', {p_borrowing["id"]}, '{update_file["name"]}', 2);
+            """
+            await db.execute(sql)
+
         delete_files_id = list(set(old_files_id) - set(un_update_files_id))
         for old_file in old_files:
             if old_file["id"] in delete_files_id:
                 delete_from_s3(old_file["file_name"])
                 sql = f"DELETE FROM p_uploaded_files WHERE id = '{old_file['id']}';"
                 await db.execute(sql)
+                p_activities_id = await db.uuid_short()
+                sql = f"""
+                INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', 'p_borrowings__I', {p_borrowing["id"]}, '{old_file["name"].split("/")[-1]}', 9);
+                """
+                db.execute(sql)
 
 
 async def diff_p_uploaded_files_for_ad(db: DB, data: dict, p_application_header_id, role_type, role_id):
@@ -945,6 +959,12 @@ async def diff_p_uploaded_files_for_ad(db: DB, data: dict, p_application_header_
 
             sql = f"INSERT INTO p_uploaded_files ({', '.join(fields)}) VALUES ({', '.join(values)});"
             await db.execute(sql)
+            p_activities_id = await db.uuid_short()
+            sql = f"""
+            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+            VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_uploaded_files', '{key}', null, '{update_file["name"]}', 2);
+            """
+            JOBS.append(db.execute(sql))
         # delete file
         delete_files_id = list(set(old_files_id) - set(un_update_files_id))
         for old_file in old_files:
@@ -952,6 +972,14 @@ async def diff_p_uploaded_files_for_ad(db: DB, data: dict, p_application_header_
                 delete_from_s3(old_file["file_name"])
                 sql = f"DELETE FROM p_uploaded_files WHERE id = '{old_file['id']}';"
                 await db.execute(sql)
+
+                p_activities_id = await db.uuid_short()
+                sql = f"""
+                INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_uploaded_files', '{key}', null, '{old_file["name"].split("/")[-1]}', 9);
+                """
+                JOBS.append(db.execute(sql))
+
     if JOBS:
         await asyncio.wait(JOBS)
 
