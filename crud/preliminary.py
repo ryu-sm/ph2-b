@@ -526,7 +526,7 @@ async def diff_update_p_applicant_persons_for_ad(db: DB, data: dict, p_applicati
     )
     if p_applicant_persons_basic is None:
         data_ = blank_to_none(data)
-        await crud.insert_p_applicant_persons(db, data_, p_application_header_id, type)
+        await crud.insert_p_applicant_persons(db, data_, p_application_header_id, type, role_type, role_id)
         return None
     p_applicant_persons_id = p_applicant_persons_basic["id"]
     old_p_applicant_persons = await query_p_applicant_persons_for_ad(db, p_application_header_id, type)
@@ -579,7 +579,7 @@ async def diff_update_p_borrowing_details_for_ad(
     )
     if p_borrowing_details_basic is None:
         data_ = blank_to_none(data)
-        await crud.insert_p_borrowing_details(db, data_, p_application_header_id, time_type)
+        await crud.insert_p_borrowing_details(db, data_, p_application_header_id, time_type, role_type, role_id)
         return None
     p_borrowing_details_id = p_borrowing_details_basic["id"]
     old_p_borrowing_details = await query_p_borrowing_details_for_ad(db, p_application_header_id, time_type)
@@ -737,7 +737,7 @@ async def diff_update_p_residents_for_ad(db: DB, data: typing.List[dict], p_appl
         filter = [item for item in old_p_residents if item["id"] == p_resident["id"]]
         if len(filter) == 0:
             data_ = blank_to_none(p_resident)
-            await crud.insert_p_residents(db, [data_], p_application_header_id)
+            await crud.insert_p_residents(db, [data_], p_application_header_id, role_type, role_id)
             return None
         [old_p_resident] = filter
         for key, value in old_p_resident.items():
