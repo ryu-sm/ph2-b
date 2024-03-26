@@ -259,17 +259,3 @@ async def update_pre_examination_status(data: dict, db=Depends(get_db), token=De
         return JSONResponse(
             status_code=500, content={"message": "An unknown exception occurred, please try again later."}
         )
-
-
-@router.get("/manager/edit_histories/{p_application_header_id}")
-async def get_update_hitories(
-    p_application_header_id: int, update_history_key: str, db=Depends(get_db), token=Depends(get_token)
-):
-    try:
-        histories = await crud.query_field_uodate_histories_for_ad(db, p_application_header_id, update_history_key)
-        return JSONResponse(status_code=200, content=histories)
-    except Exception as err:
-        logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )

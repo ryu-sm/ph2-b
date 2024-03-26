@@ -379,7 +379,8 @@ async def query_p_borrowings_for_ad(db: DB, p_application_header_id: int):
         sql = f"""
         SELECT
             CONVERT(p_uploaded_files.id,CHAR) AS id,
-            p_uploaded_files.file_name
+            p_uploaded_files.file_name,
+            p_uploaded_files.owner_type
         FROM
             p_uploaded_files
         WHERE
@@ -393,7 +394,9 @@ async def query_p_borrowings_for_ad(db: DB, p_application_header_id: int):
         else:
             files = []
             for file in p_borrowing_files_info:
-                files.append({**download_from_s3(file["file_name"]), "id": file["id"]})
+                files.append(
+                    {**download_from_s3(file["file_name"]), "id": file["id"], "owner_type": f'{file["owner_type"]}'}
+                )
             p_borrowings_with_files.append(none_to_blank({**basic_p_borrowing, "p_borrowings__I": files}))
     return p_borrowings_with_files
 
@@ -454,7 +457,8 @@ async def query_p_uploaded_files_for_ad(db: DB, p_application_header_id: int):
         sql = f"""
         SELECT
             CONVERT(p_uploaded_files.id,CHAR) AS id,
-            p_uploaded_files.file_name
+            p_uploaded_files.file_name,
+            p_uploaded_files.owner_type
         FROM
             p_uploaded_files
         WHERE
@@ -466,7 +470,9 @@ async def query_p_uploaded_files_for_ad(db: DB, p_application_header_id: int):
         if len(files_info) > 0:
             files = []
             for file in files_info:
-                files.append({**download_from_s3(file["file_name"]), "id": file["id"]})
+                files.append(
+                    {**download_from_s3(file["file_name"]), "id": file["id"], "owner_type": f'{file["owner_type"]}'}
+                )
             temp_files[file_key] = files
 
     return temp_files
@@ -914,7 +920,7 @@ async def diff_update_p_borrowings_files_for_ad(
                 p_activities_id = await db.uuid_short()
                 sql = f"""
                 INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', 'p_borrowings__I', {p_borrowing["id"]}, '{old_file["name"].split("/")[-1]}', 9);
+                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', 'p_borrowings__I', {p_borrowing["id"]}, '{old_file["file_name"].split("/")[-1]}', 9);
                 """
                 db.execute(sql)
 
@@ -976,7 +982,7 @@ async def diff_p_uploaded_files_for_ad(db: DB, data: dict, p_application_header_
                 p_activities_id = await db.uuid_short()
                 sql = f"""
                 INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_uploaded_files', '{key}', null, '{old_file["name"].split("/")[-1]}', 9);
+                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_uploaded_files', '{key}', null, '{old_file["file_name"].split("/")[-1]}', 9);
                 """
                 JOBS.append(db.execute(sql))
 
@@ -1045,12 +1051,33 @@ async def query_p_activities_for_ad(db: DB, p_application_header_id):
     return [item["update_history_key"] for item in result]
 
 
+async def query_files_p_activities_for_ad(db: DB, p_application_header_id):
+    sql = f"""
+    SELECT DISTINCT
+        CONCAT(table_name, '.', field_name) as update_history_key
+    FROM
+        p_activities
+    WHERE
+        p_application_header_id = {p_application_header_id}
+        AND
+        table_name IS NOT NULL
+        AND
+        field_name IS NOT NULL
+        AND
+        operate_type != 0;
+    """
+    result = await db.fetch_all(sql)
+
+    return [item["update_history_key"] for item in result]
+
+
 async def query_field_uodate_histories_for_ad(db: DB, p_application_header_id: int, update_history_key: str):
     [table_name, field_name, table_id] = update_history_key.split(".")
     sql = f"""
     SELECT
         DATE_FORMAT(p_activities.created_at, '%Y/%m/%d %H:%i') as created_at,
         p_activities.operator_type,
+        p_activities.operate_type,
         p_activities.content,
         CONCAT(p_applicant_persons.last_name_kanji, ' ', p_applicant_persons.first_name_kanji) as p_applicant_person_name,
         s_sales_persons.name_kanji as s_sales_person_name,
@@ -1083,6 +1110,48 @@ async def query_field_uodate_histories_for_ad(db: DB, p_application_header_id: i
         p_activities.field_name = '{field_name}'
         AND
         p_activities.table_id = '{table_id}'
+    """
+
+    return await db.fetch_all(sql)
+
+
+async def query_files_field_uodate_histories_for_ad(db: DB, p_application_header_id: int, update_history_key: str):
+    [table_name, field_name] = update_history_key.split(".")
+    sql = f"""
+    SELECT
+        DATE_FORMAT(p_activities.created_at, '%Y/%m/%d %H:%i') as created_at,
+        p_activities.operator_type,
+        p_activities.operate_type,
+        p_activities.content,
+        CONCAT(p_applicant_persons.last_name_kanji, ' ', p_applicant_persons.first_name_kanji) as p_applicant_person_name,
+        s_sales_persons.name_kanji as s_sales_person_name,
+        s_managers.name_kanji as s_manager_name
+    FROM
+        p_activities
+    JOIN
+        p_application_headers
+        ON
+        p_application_headers.id = p_activities.p_application_header_id
+    LEFT JOIN
+        p_applicant_persons
+        ON
+        p_applicant_persons.p_application_header_id = p_application_headers.id
+        AND
+        p_applicant_persons.type = 0
+    LEFT JOIN
+        s_sales_persons
+        ON
+        s_sales_persons.id = p_activities.operator_id
+    LEFT JOIN
+        s_managers
+        ON
+        s_managers.id = p_activities.operator_id
+    WHERE
+        p_activities.p_application_header_id = {p_application_header_id}
+        AND
+        p_activities.table_name = '{table_name}'
+        AND
+        p_activities.field_name = '{field_name}'
     """
 
     return await db.fetch_all(sql)

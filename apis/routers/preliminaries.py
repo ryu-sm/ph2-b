@@ -106,6 +106,7 @@ async def common_get_preliminary(p_application_header_id: int, db=Depends(get_db
 
         preliminary["p_uploaded_files"] = await crud.query_p_uploaded_files_for_ad(db, p_application_header_id)
         preliminary["p_activities"] = await crud.query_p_activities_for_ad(db, p_application_header_id)
+        preliminary["files_p_activities"] = await crud.query_files_p_activities_for_ad(db, p_application_header_id)
         preliminary["p_result"] = await crud.query_p_result(db, p_application_header_id)
 
         return JSONResponse(status_code=200, content=preliminary)
@@ -205,6 +206,9 @@ async def user_orgs(p_application_header_id: str, data: dict, db=Depends(get_db)
             await crud.diff_update_p_borrowings_files_for_ad(
                 db, data["p_borrowings"], p_application_header_id, token["role_type"], token["id"]
             )
+            await crud.diff_update_p_applicant_persons_for_ad(
+                db, data["p_applicant_persons__0"], p_application_header_id, 0, token["role_type"], token["id"]
+            )
 
         if main_tab == 2 and sub_tab in [2, 3]:
             await crud.diff_update_p_applicant_persons_for_ad(
@@ -277,6 +281,36 @@ async def get_raw_data(p_application_header_id: int, token: dict = Depends(get_t
 
         file = download_from_s3(f"{p_application_header_id}/row_data.xlsx")
         return JSONResponse(status_code=200, content=file)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.get("/edit_histories/{p_application_header_id}")
+async def get_update_hitories(
+    p_application_header_id: int, update_history_key: str, db=Depends(get_db), token=Depends(get_token)
+):
+    try:
+        histories = await crud.query_field_uodate_histories_for_ad(db, p_application_header_id, update_history_key)
+        return JSONResponse(status_code=200, content=histories)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.get("/edit_histories/files/{p_application_header_id}")
+async def get_update_hitories(
+    p_application_header_id: int, update_history_key: str, db=Depends(get_db), token=Depends(get_token)
+):
+    try:
+        histories = await crud.query_files_field_uodate_histories_for_ad(
+            db, p_application_header_id, update_history_key
+        )
+        return JSONResponse(status_code=200, content=histories)
     except Exception as err:
         logger.exception(err)
         return JSONResponse(

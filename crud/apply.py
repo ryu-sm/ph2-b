@@ -646,6 +646,8 @@ async def query_p_borrowings_for_ap(db: DB, p_application_header_id: int):
         WHERE
             p_application_header_id = {p_application_header_id}
             AND
+            owner_type = 1
+            AND
             file_name LIKE '%{p_application_header_id}/p_borrowings__I/{borrowing["id"]}%';
         """
         files_info = await db.fetch_all(sql)
@@ -793,7 +795,7 @@ async def diff_update_p_application_headers_for_ap(db: DB, data_: dict, p_applic
         content = value
         if key in JSON_FIELD_KEYS:
             content = json.dumps(value, ensure_ascii=False)
-        content = f"'{content}'" if content else f"'{old_value}'"
+        content = f"'{content}'" if content else "null"
         id = await db.uuid_short()
         sql = f"""
         INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
@@ -843,7 +845,7 @@ async def diff_update_p_applicant_persons_for_ap(db: DB, data: dict, p_applicati
         if key in JSON_FIELD_KEYS:
             content = json.dumps(value, ensure_ascii=False)
 
-        content = f"'{content}'" if content else f"'{old_value}'"
+        content = f"'{content}'" if content else "null"
 
         id = await db.uuid_short()
         sql = f"""
@@ -896,7 +898,7 @@ async def diff_update_p_borrowing_details_for_ap(
         if key in JSON_FIELD_KEYS:
             content = json.dumps(value, ensure_ascii=False)
 
-        content = f"'{content}'" if content else f"'{old_value}'"
+        content = f"'{content}'" if content else "null"
 
         id = await db.uuid_short()
         sql = f"""
@@ -988,7 +990,7 @@ async def diff_update_p_join_guarantors_for_ap(
             if key in JSON_FIELD_KEYS:
                 content = json.dumps(value, ensure_ascii=False)
 
-            content = f"'{content}'" if content else f"'{old_value}'"
+            content = f"'{content}'" if content else "null"
 
             id = await db.uuid_short()
             sql = f"""
@@ -1051,7 +1053,7 @@ async def diff_update_p_residents_for_ap(db: DB, data: typing.List[dict], p_appl
             if key in JSON_FIELD_KEYS:
                 content = json.dumps(value, ensure_ascii=False)
 
-            content = f"'{content}'" if content else f"'{old_value}'"
+            content = f"'{content}'" if content else "null"
 
             id = await db.uuid_short()
             sql = f"""
@@ -1169,7 +1171,7 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
             if key in JSON_FIELD_KEYS:
                 content = json.dumps(value, ensure_ascii=False)
 
-            content = f"'{content}'" if content else f"'{old_value}'"
+            content = f"'{content}'" if content else "null"
 
             id = await db.uuid_short()
             sql = f"""
@@ -1302,7 +1304,7 @@ async def diff_p_uploaded_files_for_ap(db: DB, data: dict, p_application_header_
                 p_activities_id = await db.uuid_short()
                 sql = f"""
                 INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_uploaded_files', '{key}', null, '{old_file["name"]}', 9);
+                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_uploaded_files', '{key}', null, '{old_file['name']}', 9);
                 """
                 JOBS.append(db.execute(sql))
 
