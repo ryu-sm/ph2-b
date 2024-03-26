@@ -326,6 +326,7 @@ async def query_p_residents_for_ad(db: DB, p_application_header_id: int):
         first_name_kanji,
         last_name_kana,
         first_name_kana,
+        rel_to_applicant_a_name,
         rel_to_applicant_a,
         rel_to_applicant_a_other,
         DATE_FORMAT(birthday, '%Y/%m/%d') as birthday,
