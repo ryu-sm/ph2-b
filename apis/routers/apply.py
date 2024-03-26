@@ -237,6 +237,6 @@ async def get_application(apply_no: str, db=Depends(get_db)):
 
 @router.get("/test")
 async def test():
-    with open("mock_data.json", mode="r", encoding="utf8") as f:
+    with open("tttt.json", mode="r", encoding="utf8") as f:
         mock_data = json.load(f)
-        await utils.gen_row_data(mock_data)
+        await utils.gen_row_data(1, mock_data)

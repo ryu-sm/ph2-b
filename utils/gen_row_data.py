@@ -9,6 +9,43 @@ from utils.s3 import upload_buffer_to_s3
 
 
 async def gen_row_data(p_application_header_id: int, data: dict):
+
+    def get_step_code(id):
+        step_list = [
+            1,
+            2,
+            3,
+        ]
+        if data["p_application_headers"]["loan_type"] in ["3", "4"]:
+            step_list = [
+                *step_list,
+                4,
+                5,
+            ]
+        if data["p_application_headers"]["join_guarantor_umu"] == "1":
+            step_list = [
+                *step_list,
+                6,
+            ]
+        step_list = [
+            *step_list,
+            7,
+            8,
+            9,
+            10,
+        ]
+        if data["p_application_headers"]["loan_type"] in ["3", "4"]:
+            step_list = [
+                *step_list,
+                11,
+            ]
+        step_list = [
+            *step_list,
+            12,
+        ]
+        index = step_list.index(id)
+        return str(index + 1).zfill(2)
+
     json_string = json.dumps(data, indent=4)  # indent for pretty printing
 
     # Specify the file path
@@ -28,7 +65,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     # step01
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "申込日時",
             "class": "",
             "field_name": "申込日時",
@@ -37,7 +74,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "同意日",
             "class": "",
             "field_name": "同意日",
@@ -46,7 +83,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "入居予定年月",
             "class": "",
             "field_name": "入居予定年月",
@@ -61,7 +98,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
 
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "仮審査を申し込む金融機関を選択してください。※複数選択可",
             "class": "",
             "field_name": "申し込む金融機関",
@@ -70,7 +107,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "お借入の目的",
             "class": "",
             "field_name": "お借入の目的",
@@ -81,7 +118,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "資金の使いみち",
             "class": "",
             "field_name": "資金の使いみち",
@@ -92,7 +129,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "土地先行プランをご希望ですか？",
             "class": "",
             "field_name": "土地先行プラン希望",
@@ -103,7 +140,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "お借入形態",
             "class": "",
             "field_name": "お借入形態",
@@ -114,7 +151,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "ペアローンのお相手について",
             "class": "お名前　姓",
             "field_name": "ペアローンの申込人名前　姓",
@@ -123,7 +160,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "",
             "class": "お名前　名",
             "field_name": "ペアローンの申込人名前　名",
@@ -132,7 +169,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "",
             "class": "続柄",
             "field_name": "続柄",
@@ -141,7 +178,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "お借入内容",
             "class": "お借入内容 1回目の融資",
             "field_name": "借入希望日",
@@ -150,7 +187,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "",
             "class": "お借入希望額",
             "field_name": "仮入り希望金額",
@@ -159,7 +196,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "",
             "class": "うち、ボーナス返済分",
             "field_name": "うち、ボーナス返済分",
@@ -168,7 +205,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "",
             "class": "ボーナス返済月",
             "field_name": "ボーナス併用払い",
@@ -179,7 +216,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "",
             "class": "お借入期間 年",
             "field_name": "お借入期間 年",
@@ -188,7 +225,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "",
             "class": "返済方法",
             "field_name": "返済方法",
@@ -201,7 +238,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_application_headers"]["land_advance_plan"] == "1":
         json_data.append(
             {
-                "step": "STEP 01：お借入のご希望",
+                "step": f"STEP {get_step_code(1)}：お借入のご希望",
                 "big_class": "お借入内容",
                 "class": "お借入内容 2回目の融資",
                 "field_name": "借入希望日",
@@ -210,7 +247,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 01：お借入のご希望",
+                "step": f"STEP {get_step_code(1)}：お借入のご希望",
                 "big_class": "",
                 "class": "お借入希望額",
                 "field_name": "仮入り希望金額",
@@ -219,7 +256,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 01：お借入のご希望",
+                "step": f"STEP {get_step_code(1)}：お借入のご希望",
                 "big_class": "",
                 "class": "うち、ボーナス返済分",
                 "field_name": "うち、ボーナス返済分",
@@ -228,7 +265,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "担保提供者がいる方のみ、チェックをつけてください。",
             "class": "",
             "field_name": "担保提供者（共有者）の有無",
@@ -237,7 +274,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 01：お借入のご希望",
+            "step": f"STEP {get_step_code(1)}：お借入のご希望",
             "big_class": "住信SBIネット銀行の「住宅ローンプラス」を申し込みますか？",
             "class": "",
             "field_name": "住信SBIネット銀行の「住宅ローンプラス」を申し込みますか？",
@@ -248,7 +285,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     # step02
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "お名前",
             "class": "姓",
             "field_name": "姓　漢字",
@@ -257,7 +294,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "",
             "class": "名",
             "field_name": "名　漢字",
@@ -266,7 +303,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "お名前（フリガナ）",
             "class": "セイ",
             "field_name": "姓　カナ",
@@ -275,7 +312,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "",
             "class": "メイ",
             "field_name": "名　カナ",
@@ -284,7 +321,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "性別",
             "class": "",
             "field_name": "性別",
@@ -295,7 +332,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "生年月日",
             "class": "",
             "field_name": "生年月日",
@@ -304,7 +341,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "現在の国籍",
             "class": "",
             "field_name": "国籍",
@@ -316,7 +353,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__H__a"]:
         json_data.append(
             {
-                "step": "STEP 02：あなたの情報",
+                "step": f"STEP {get_step_code(2)}：あなたの情報",
                 "big_class": "在留カードまたは特別永住者証明書を添付してください。",
                 "class": "",
                 "field_name": "在留カードまたは特別永住者証明書〈表面〉",
@@ -328,7 +365,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__H__b"]:
         json_data.append(
             {
-                "step": "STEP 02：あなたの情報",
+                "step": f"STEP {get_step_code(2)}：あなたの情報",
                 "big_class": "在留カードまたは特別永住者証明書を添付してください。",
                 "class": "",
                 "field_name": "在留カードまたは特別永住者証明書〈表面〉",
@@ -340,7 +377,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
 
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "電話番号",
             "class": "携帯",
             "field_name": "携帯電話番号",
@@ -349,7 +386,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "",
             "class": "自宅",
             "field_name": "自宅電話番号",
@@ -358,7 +395,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "現住所",
             "class": "郵便番号",
             "field_name": "現住所　郵便番号",
@@ -367,7 +404,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "",
             "class": "都道府県",
             "field_name": "現住所　都道府県　漢字",
@@ -376,7 +413,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "",
             "class": "市区町村郡",
             "field_name": "現住所　市区町村郡",
@@ -385,7 +422,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "",
             "class": "町村丁目",
             "field_name": "現住所　町村丁目",
@@ -394,7 +431,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "",
             "class": "丁目以下・建物名・部屋番号",
             "field_name": "現住所　丁目以下・建物名・部屋番号",
@@ -403,7 +440,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "現住所（フリガナ）",
             "class": "都道府県（フリガナ）",
             "field_name": "現住所　都道府県　漢字　カナ",
@@ -412,7 +449,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "",
             "class": "市区町村郡（フリガナ）",
             "field_name": "現住所　市区町村郡　カナ",
@@ -421,7 +458,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "",
             "class": "町村丁目（フリガナ）",
             "field_name": "現住所　町村丁目　カナ",
@@ -430,7 +467,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "",
             "class": "丁目以下・建物名・部屋番号（フリガナ）",
             "field_name": "現住所　丁目以下・建物名・部屋番号　カナ",
@@ -439,7 +476,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 02：あなたの情報",
+            "step": f"STEP {get_step_code(2)}：あなたの情報",
             "big_class": "ご連絡先用メールアドレス",
             "class": "",
             "field_name": "メールアドレス",
@@ -450,7 +487,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     # tep03
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "ご職業",
             "class": "",
             "field_name": "勤務先　職業",
@@ -461,7 +498,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "その他",
             "field_name": "勤務先　職業（その他）",
@@ -470,7 +507,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "業種",
             "class": "",
             "field_name": "勤務先　業種",
@@ -481,7 +518,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "その他",
             "field_name": "勤務先　業種（その他）",
@@ -490,7 +527,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "職種",
             "class": "",
             "field_name": "勤務先　職種",
@@ -501,7 +538,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "その他",
             "field_name": "勤務先　職種（その他）",
@@ -510,7 +547,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "勤務先名",
             "class": "",
             "field_name": "勤務先　名　漢字",
@@ -519,7 +556,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "所属部課",
             "class": "",
             "field_name": "勤務先　所属部署",
@@ -528,7 +565,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "勤務先の電話番号",
             "class": "",
             "field_name": "勤務先　電話番号",
@@ -537,7 +574,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "勤務先の住所",
             "class": "郵便番号",
             "field_name": "勤務先　郵便番号",
@@ -546,7 +583,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "都道府県",
             "field_name": "勤務先　都道府県　漢字",
@@ -555,7 +592,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "市区町村郡",
             "field_name": "勤務先　市区町村郡　漢字",
@@ -564,7 +601,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "町村丁目",
             "field_name": "勤務先　町村丁目　漢字",
@@ -573,7 +610,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "丁目以下・建物名・部屋番号",
             "field_name": "丁目以下・建物名・部屋番号",
@@ -582,7 +619,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "勤務先の住所（フリガナ）",
             "class": "都道府県（フリガナ）",
             "field_name": "勤務先　都道府県　カナ",
@@ -591,7 +628,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "市区町村郡（フリガナ）",
             "field_name": "勤務先　市区町村郡　カナ",
@@ -600,7 +637,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "町村丁目（フリガナ）",
             "field_name": "勤務先　町村丁目　カナ",
@@ -609,7 +646,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "丁目以下・建物名・部屋番号（フリガナ）",
             "field_name": "勤務先　丁目以下・建物名・部屋番号　カナ",
@@ -618,7 +655,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "従業員数",
             "class": "",
             "field_name": "勤務先　従業員数",
@@ -627,7 +664,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "入社年月",
             "class": "",
             "field_name": "入社年月",
@@ -636,7 +673,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "ご年収",
             "class": "前年度年収",
             "field_name": "ご年収　前年度年収",
@@ -645,7 +682,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "うち、ボーナス",
             "field_name": "ご年収　うち、ボーナス",
@@ -654,7 +691,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "前々年度年収 （MCJ固有項目）",
             "field_name": "ご年収　前々年度年収 （MCJ固有項目）",
@@ -663,7 +700,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "収入源",
             "class": "",
             "field_name": "収入源",
@@ -677,7 +714,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "確定申告をしていますか？",
             "class": "",
             "field_name": "確定申告をしていますか？",
@@ -688,7 +725,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "確定申告の理由",
             "class": "",
             "field_name": "確定申告の理由",
@@ -702,7 +739,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "確定申告の理由（その他）",
             "class": "",
             "field_name": "確定申告の理由（その他）",
@@ -711,7 +748,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "現在、出向（派遣）していますか？",
             "class": "",
             "field_name": "出向（派遣）有無",
@@ -722,7 +759,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "出向（派遣）勤務先名",
             "class": "",
             "field_name": "出向（派遣）先　名　漢字",
@@ -731,7 +768,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "出向（派遣）勤務先名（フリガナ）",
             "class": "",
             "field_name": "出向（派遣）先　名　カナ",
@@ -740,7 +777,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "出向（派遣）先　電話番号",
             "class": "",
             "field_name": "出向（派遣）先　電話番号",
@@ -749,7 +786,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "出向（派遣）先　住所",
             "class": "郵便番号",
             "field_name": "出向（派遣）先　郵便番号",
@@ -758,7 +795,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "都道府県",
             "field_name": "出向（派遣）先　都道府県　漢字",
@@ -767,7 +804,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "市区町村郡",
             "field_name": "出向（派遣）先　市区町村郡　漢字",
@@ -776,7 +813,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "町村丁目",
             "field_name": "出向（派遣）先　町村丁目　漢字",
@@ -785,7 +822,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "",
             "class": "丁目以下・建物名・部屋番号",
             "field_name": "出向（派遣）先　丁目以下・建物名・部屋番号",
@@ -794,7 +831,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "産休・育休の取得状況※該当する方のみお答えください。",
             "class": "",
             "field_name": "産休・育休の取得状況",
@@ -805,7 +842,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "取得開始時期",
             "class": "",
             "field_name": "産休・育休取得開始期間",
@@ -814,7 +851,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "取得終了時期",
             "class": "",
             "field_name": "産休・育休取得終了期間",
@@ -823,7 +860,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 03：あなたのご職業",
+            "step": f"STEP {get_step_code(3)}：あなたのご職業",
             "big_class": "介護休暇の取得状況（MCJ固有項目）※該当する方のみお答えください。",
             "class": "",
             "field_name": "介護休取得状況",
@@ -837,7 +874,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         # step04
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "お名前",
                 "class": "姓",
                 "field_name": "姓　漢字",
@@ -846,7 +883,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "",
                 "class": "名",
                 "field_name": "名　漢字",
@@ -855,7 +892,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "お名前（フリガナ）",
                 "class": "セイ",
                 "field_name": "姓　カナ",
@@ -864,7 +901,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "",
                 "class": "メイ",
                 "field_name": "名　カナ",
@@ -873,7 +910,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "性別",
                 "class": "",
                 "field_name": "性別",
@@ -884,7 +921,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "生年月日",
                 "class": "",
                 "field_name": "生年月日",
@@ -893,7 +930,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "現在の国籍",
                 "class": "",
                 "field_name": "国籍",
@@ -905,7 +942,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__H__a"]:
             json_data.append(
                 {
-                    "step": "STEP 04：収入合算者",
+                    "step": f"STEP {get_step_code(4)}：収入合算者",
                     "big_class": "在留カードまたは特別永住者証明書を添付してください。",
                     "class": "",
                     "field_name": "在留カードまたは特別永住者証明書〈表面〉",
@@ -917,7 +954,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__H__b"]:
             json_data.append(
                 {
-                    "step": "STEP 04：収入合算者",
+                    "step": f"STEP {get_step_code(4)}：収入合算者",
                     "big_class": "在留カードまたは特別永住者証明書を添付してください。",
                     "class": "",
                     "field_name": "在留カードまたは特別永住者証明書〈表面〉",
@@ -930,7 +967,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         # TODO: 国籍图片
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "電話番号",
                 "class": "携帯",
                 "field_name": "携帯電話番号",
@@ -939,7 +976,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "",
                 "class": "自宅",
                 "field_name": "自宅電話番号",
@@ -948,7 +985,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "現住所",
                 "class": "郵便番号",
                 "field_name": "現住所　郵便番号",
@@ -957,7 +994,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "",
                 "class": "都道府県",
                 "field_name": "現住所　都道府県　漢字",
@@ -966,7 +1003,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "",
                 "class": "市区町村郡",
                 "field_name": "現住所　市区町村郡",
@@ -975,7 +1012,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "",
                 "class": "町村丁目",
                 "field_name": "現住所　町村丁目",
@@ -984,7 +1021,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "",
                 "class": "丁目以下・建物名・部屋番号",
                 "field_name": "現住所　丁目以下・建物名・部屋番号",
@@ -993,7 +1030,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "現住所（フリガナ）",
                 "class": "都道府県（フリガナ）",
                 "field_name": "現住所　都道府県　漢字　カナ",
@@ -1002,7 +1039,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "",
                 "class": "市区町村郡（フリガナ）",
                 "field_name": "現住所　市区町村郡　カナ",
@@ -1011,7 +1048,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "",
                 "class": "町村丁目（フリガナ）",
                 "field_name": "現住所　町村丁目　カナ",
@@ -1020,7 +1057,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 04：収入合算者",
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "",
                 "class": "丁目以下・建物名・部屋番号（フリガナ）",
                 "field_name": "現住所　丁目以下・建物名・部屋番号　カナ",
@@ -1031,7 +1068,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         # tep05
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "ご職業",
                 "class": "",
                 "field_name": "勤務先　職業",
@@ -1042,7 +1079,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "その他",
                 "field_name": "勤務先　職業（その他）",
@@ -1051,7 +1088,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "業種",
                 "class": "",
                 "field_name": "勤務先　業種",
@@ -1062,7 +1099,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "その他",
                 "field_name": "勤務先　業種（その他）",
@@ -1071,7 +1108,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "職種",
                 "class": "",
                 "field_name": "勤務先　職種",
@@ -1082,7 +1119,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "その他",
                 "field_name": "勤務先　職種（その他）",
@@ -1091,7 +1128,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "勤務先名",
                 "class": "",
                 "field_name": "勤務先　名　漢字",
@@ -1100,7 +1137,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "所属部課",
                 "class": "",
                 "field_name": "勤務先　所属部署",
@@ -1109,7 +1146,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "勤務先の電話番号",
                 "class": "",
                 "field_name": "勤務先　電話番号",
@@ -1118,7 +1155,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "勤務先の住所",
                 "class": "郵便番号",
                 "field_name": "勤務先　郵便番号",
@@ -1127,7 +1164,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "都道府県",
                 "field_name": "勤務先　都道府県　漢字",
@@ -1136,7 +1173,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "市区町村郡",
                 "field_name": "勤務先　市区町村郡　漢字",
@@ -1145,7 +1182,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "町村丁目",
                 "field_name": "勤務先　町村丁目　漢字",
@@ -1154,7 +1191,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "丁目以下・建物名・部屋番号",
                 "field_name": "丁目以下・建物名・部屋番号",
@@ -1163,7 +1200,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "勤務先の住所（フリガナ）",
                 "class": "都道府県（フリガナ）",
                 "field_name": "勤務先　都道府県　カナ",
@@ -1172,7 +1209,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "市区町村郡（フリガナ）",
                 "field_name": "勤務先　市区町村郡　カナ",
@@ -1181,7 +1218,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "町村丁目（フリガナ）",
                 "field_name": "勤務先　町村丁目　カナ",
@@ -1190,7 +1227,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "丁目以下・建物名・部屋番号（フリガナ）",
                 "field_name": "勤務先　丁目以下・建物名・部屋番号　カナ",
@@ -1199,7 +1236,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "従業員数",
                 "class": "",
                 "field_name": "勤務先　従業員数",
@@ -1208,7 +1245,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "入社年月",
                 "class": "",
                 "field_name": "入社年月",
@@ -1217,7 +1254,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "ご年収",
                 "class": "前年度年収",
                 "field_name": "ご年収　前年度年収",
@@ -1226,7 +1263,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "うち、ボーナス",
                 "field_name": "ご年収　うち、ボーナス",
@@ -1235,7 +1272,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "前々年度年収 （MCJ固有項目）",
                 "field_name": "ご年収　前々年度年収 （MCJ固有項目）",
@@ -1244,7 +1281,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "収入源",
                 "class": "",
                 "field_name": "収入源",
@@ -1258,7 +1295,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "確定申告をしていますか？",
                 "class": "",
                 "field_name": "確定申告をしていますか？",
@@ -1269,7 +1306,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "確定申告の理由",
                 "class": "",
                 "field_name": "確定申告の理由",
@@ -1283,7 +1320,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "確定申告の理由（その他）",
                 "class": "",
                 "field_name": "確定申告の理由（その他）",
@@ -1292,7 +1329,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "現在、出向（派遣）していますか？",
                 "class": "",
                 "field_name": "出向（派遣）有無",
@@ -1303,7 +1340,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "出向（派遣）勤務先名",
                 "class": "",
                 "field_name": "出向（派遣）先　名　漢字",
@@ -1312,7 +1349,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "出向（派遣）勤務先名（フリガナ）",
                 "class": "",
                 "field_name": "出向（派遣）先　名　カナ",
@@ -1321,7 +1358,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "出向（派遣）先　電話番号",
                 "class": "",
                 "field_name": "出向（派遣）先　電話番号",
@@ -1330,7 +1367,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "出向（派遣）先　住所",
                 "class": "郵便番号",
                 "field_name": "出向（派遣）先　郵便番号",
@@ -1339,7 +1376,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "都道府県",
                 "field_name": "出向（派遣）先　都道府県　漢字",
@@ -1348,7 +1385,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "市区町村郡",
                 "field_name": "出向（派遣）先　市区町村郡　漢字",
@@ -1357,7 +1394,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "町村丁目",
                 "field_name": "出向（派遣）先　町村丁目　漢字",
@@ -1366,7 +1403,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "",
                 "class": "丁目以下・建物名・部屋番号",
                 "field_name": "出向（派遣）先　丁目以下・建物名・部屋番号",
@@ -1375,7 +1412,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "産休・育休の取得状況※該当する方のみお答えください。",
                 "class": "",
                 "field_name": "産休・育休の取得状況",
@@ -1386,7 +1423,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "取得開始時期",
                 "class": "",
                 "field_name": "産休・育休取得開始期間",
@@ -1397,7 +1434,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "取得終了時期",
                 "class": "",
                 "field_name": "産休・育休取得終了期間",
@@ -1406,7 +1443,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 05：収入合算者の職業",
+                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
                 "big_class": "介護休暇の取得状況（MCJ固有項目）※該当する方のみお答えください。",
                 "class": "",
                 "field_name": "介護休取得状況",
@@ -1420,7 +1457,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         for p_join_guarantor in data["p_join_guarantors"]:
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "担保提供者の氏名",
                     "class": "姓",
                     "field_name": "担保提供者　姓　漢字",
@@ -1429,7 +1466,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "",
                     "class": "名",
                     "field_name": "担保提供者　名　漢字",
@@ -1438,7 +1475,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "担保提供者の氏名（フリガナ）",
                     "class": "セイ",
                     "field_name": "担保提供者　姓　メイ",
@@ -1447,7 +1484,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "",
                     "class": "メイ",
                     "field_name": "担保提供者　名　メイ",
@@ -1456,7 +1493,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "性別",
                     "class": "",
                     "field_name": "性別",
@@ -1465,7 +1502,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "続柄",
                     "class": "",
                     "field_name": "担保提供者　続柄",
@@ -1474,7 +1511,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "生年月日",
                     "class": "",
                     "field_name": "生年月日",
@@ -1483,7 +1520,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "電話番号",
                     "class": "携帯",
                     "field_name": "携帯電話番号",
@@ -1492,7 +1529,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "",
                     "class": "自宅",
                     "field_name": "自宅電話番号",
@@ -1501,7 +1538,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "担保提供者の住所",
                     "class": "郵便番号",
                     "field_name": "郵便番号",
@@ -1510,7 +1547,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "",
                     "class": "都道府県",
                     "field_name": "都道府県　漢字",
@@ -1519,7 +1556,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "",
                     "class": "市区町村郡",
                     "field_name": "市区町村郡　漢字",
@@ -1528,7 +1565,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "",
                     "class": "町村丁目",
                     "field_name": "町村丁目　漢字",
@@ -1537,7 +1574,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "",
                     "class": "丁目以下・建物名・部屋番号",
                     "field_name": "丁目以下・建物名・部屋番号　漢字",
@@ -1547,7 +1584,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
 
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "担保提供者の住所（フリガナ）",
                     "class": "都道府県（フリガナ）",
                     "field_name": "都道府県　カナ",
@@ -1556,7 +1593,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "",
                     "class": "市区町村郡（フリガナ）",
                     "field_name": "市区町村郡　カナ",
@@ -1565,7 +1602,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "",
                     "class": "町村丁目（フリガナ）",
                     "field_name": "町村丁目　カナ",
@@ -1574,7 +1611,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 06：担保提供者",
+                    "step": f"STEP {get_step_code(6)}：担保提供者",
                     "big_class": "",
                     "class": "丁目以下・建物名・部屋番号（フリガナ）",
                     "field_name": "丁目以下・建物名・部屋番号　カナ",
@@ -1584,7 +1621,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     # step07
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "現在のお住まいの居住年数",
             "class": "現在居住　居住年数（年）",
             "field_name": "現在居住　居住年数（年）",
@@ -1593,7 +1630,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "現在居住　居住年数（ヶ月）",
             "field_name": "現在居住　居住年数（ヶ月）",
@@ -1602,7 +1639,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "現在のお住まいの種類",
             "class": "",
             "field_name": "現在のお住まいの種類",
@@ -1613,7 +1650,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "所有者の氏名",
             "class": "",
             "field_name": "現在居住　所有者の氏名",
@@ -1622,7 +1659,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "続柄",
             "class": "",
             "field_name": "現在居住　所有者の続柄",
@@ -1631,7 +1668,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "持ち家の処分方法",
             "class": "",
             "field_name": "持家　処分方法",
@@ -1642,7 +1679,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "その他の方は詳細を入力ください。",
             "field_name": "持家　処分方法（その他）",
@@ -1651,7 +1688,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "売却予定時期",
             "class": "",
             "field_name": "持家　売却予定時期",
@@ -1660,7 +1697,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "売却予定価格",
             "class": "",
             "field_name": "持家　売却予定価格",
@@ -1669,7 +1706,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "ローン残高",
             "class": "",
             "field_name": "持家　ローン残高有無",
@@ -1680,7 +1717,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "※チラシ等がない場合物件情報が掲載されたURL添付",
             "class": "",
             "field_name": "物件情報が掲載されたURL",
@@ -1689,7 +1726,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "新しい住居を必要とする理由",
             "class": "",
             "field_name": "住宅取得理由",
@@ -1700,7 +1737,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "その他の方は詳細を入力ください。",
             "field_name": "住宅取得理由（その他）",
@@ -1709,7 +1746,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "新しい住居に、あなたは居住しますか？",
             "class": "",
             "field_name": "新しい住居に、あなたは居住しますか？",
@@ -1720,7 +1757,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "「いいえ」の方は理由を入力ください。",
             "field_name": "新しい住居に、居住しない理由",
@@ -1753,7 +1790,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
 
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "あなた以外の入居予定者※該当する方のみお答えください。",
             "class": "入居予定者",
             "field_name": "入居予定者",
@@ -1762,7 +1799,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "子ども　　人",
             "field_name": "居住予定　子供",
@@ -1773,7 +1810,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "兄弟姉妹　　人",
             "field_name": "居住予定　兄弟姉妹",
@@ -1784,7 +1821,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "その他　　人",
             "field_name": "居住予定　人数 (その他)",
@@ -1795,7 +1832,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "その他の方は続柄をご入力ください。",
             "field_name": "居住予定　続柄 (その他)",
@@ -1804,17 +1841,17 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "ご本人を除き、合計",
             "field_name": "ご本人を除き、合計",
             "filed_value": format_ja_numeric(count, "人"),
         }
     )
-    # TODO 入居者
+
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "新しい住居（融資対象物件）の事業性※該当する方のみお答えください。",
             "class": "",
             "field_name": "融資対象物件の事業性",
@@ -1828,7 +1865,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "ご購入物件の所在地",
             "class": "都道府県",
             "field_name": "融資対象物件　都道府県",
@@ -1837,7 +1874,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "市区町村郡",
             "field_name": "融資対象物件　市区町村郡",
@@ -1846,7 +1883,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "以下地番",
             "field_name": "融資対象物件　地番",
@@ -1855,7 +1892,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "マンション名・部屋番号",
             "field_name": "融資対象物件　マンション名・部屋番号",
@@ -1864,7 +1901,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "ご購入物件の面積",
             "class": "専有面積",
             "field_name": "融資対象物件　専有面積",
@@ -1877,7 +1914,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "マンション全体の延べ床面積",
             "field_name": "融資対象物件　マンション全体の延べ床面積",
@@ -1890,7 +1927,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "土地の敷地面積",
             "field_name": "融資対象物件　土地の敷地面積",
@@ -1903,7 +1940,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "建物の延べ床面積",
             "field_name": "融資対象物件　建物の延べ床面積",
@@ -1916,7 +1953,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "現在のお住まいの床面積 (MCJ固有項目)",
             "class": "",
             "field_name": "現在居住　床面積",
@@ -1927,9 +1964,141 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             ),
         }
     )
+    # TODO 入居者
+
+    for p_resident in data["p_residents"]:
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "ご入居予定者の情報 (MCJ固有項目)",
+                "class": "入居予定者の氏名　姓",
+                "field_name": "入居予定者　姓　漢字",
+                "filed_value": p_resident["last_name_kanji"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "入居予定者の氏名　名",
+                "field_name": "入居予定者　名　漢字",
+                "filed_value": p_resident["first_name_kanji"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "入居予定者の氏名（フリガナ）　セイ",
+                "field_name": "入居予定者　姓　カナ",
+                "filed_value": p_resident["last_name_kana"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "入居予定者の氏名（フリガナ）　メイ",
+                "field_name": "入居予定者　名　カナ",
+                "filed_value": p_resident["first_name_kana"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "続柄",
+                "field_name": "続柄",
+                "filed_value": p_resident["rel_to_applicant_a_name"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "国籍",
+                "field_name": "国籍",
+                "filed_value": CODE_CONFIGS["p_residents.nationality"].get(p_resident["nationality"], ""),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "生年月日",
+                "field_name": "入居予定者　生年月日",
+                "filed_value": format_js_date_ymd(p_resident["birthday"]),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "住宅金融支援機構（旧：公庫）からの融資の有無",
+                "field_name": "住宅金融支援機構（旧：公庫）からの融資の有無",
+                "filed_value": CODE_CONFIGS["p_residents.loan_from_japan_house_finance_agency"].get(
+                    p_resident["loan_from_japan_house_finance_agency"], ""
+                ),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "電話番号",
+                "field_name": "電話番号",
+                "filed_value": p_resident["contact_phone"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "住所　郵便番号",
+                "field_name": "郵便番号",
+                "filed_value": p_resident["postal_code"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "住所　都道府県",
+                "field_name": "現住所　都道府県　漢字",
+                "filed_value": p_resident["prefecture_kanji"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "住所　市区町村郡",
+                "field_name": "現住所　市区町村郡　漢字",
+                "filed_value": p_resident["city_kanji"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "住所　町村丁目",
+                "field_name": "現住所　町村丁目　漢字",
+                "filed_value": p_resident["district_kanji"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "住所　丁目以下・建物名・部屋番号",
+                "field_name": "現住所　丁目以下・建物名・部屋番号　漢字",
+                "filed_value": p_resident["other_address_kanji"],
+            }
+        )
+
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "ご購入物件の土地権利※該当する方のみお答えください。(MCJ固有項目)",
             "class": "",
             "field_name": "土地の情報　土地権利",
@@ -1940,7 +2109,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "買戻・保留地・仮換地※該当する方のみお答えください。(MCJ固有項目)",
             "class": "",
             "field_name": "土地の情報　買戻・保留地・仮換地",
@@ -1951,7 +2120,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "都市計画区域等 (MCJ固有項目)※「市街化区域」以外の方のみお答えください。",
             "class": "",
             "field_name": "土地の情報　都市計画区域",
@@ -1962,7 +2131,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "その他の方は詳細を入力ください。",
             "field_name": "土地の情報　都市計画区域（その他）",
@@ -1971,7 +2140,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "上記に該当する場合の「再建築理由」を教えてください。※該当する方のみお答えください。(MCJ固有項目)",
             "class": "",
             "field_name": "土地の情報　再建築理由",
@@ -1982,7 +2151,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "",
             "class": "その他の方は詳細を入力ください。",
             "field_name": "土地の情報　再建築理由（その他）",
@@ -1991,7 +2160,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "フラット35S（優良住宅取得支援制度）対象項目※該当する方のみお答えください。(MCJ固有項目)",
             "class": "",
             "field_name": "その他物件情報　フラット35S適用プラン",
@@ -2002,7 +2171,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "維持保全型※該当する方のみお答えください。(MCJ固有項目)",
             "class": "",
             "field_name": "その他物件情報　維持保全型",
@@ -2013,7 +2182,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "フラット35S（優良住宅取得支援制度）対象項目②※該当する方のみお答えください。(MCJ固有項目)",
             "class": "",
             "field_name": "その他物件情報　フラット35S満たす技術基準",
@@ -2024,7 +2193,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 07：お住まいについて",
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "地域連携型・地方移住支援型※該当する方のみお答えください。(MCJ固有項目)",
             "class": "",
             "field_name": "その他物件情報　地域連携型・地方移住支援型",
@@ -2036,7 +2205,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     # step08
     json_data.append(
         {
-            "step": "STEP 08：現在のお借入状況",
+            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
             "big_class": "あなたや連帯保証人予定者に、現在お借入はありますか？",
             "class": "",
             "field_name": "あなたや連帯保証人予定者に、現在お借入はありますか？",
@@ -2048,7 +2217,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     for p_borrowing in data["p_borrowings"]:
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "借入名義人",
                 "class": "",
                 "field_name": "借入名義人",
@@ -2057,7 +2226,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "お借入の種類は？",
                 "class": "",
                 "field_name": "借入分類",
@@ -2066,7 +2235,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "借入先（金融機関）",
                 "class": "",
                 "field_name": "借入先（金融機関）",
@@ -2075,7 +2244,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "住宅金融支援機構からの借入ですか？",
                 "class": "",
                 "field_name": "住宅金融支援機構からの借入ですか？",
@@ -2087,7 +2256,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if p_borrowing["type"] != "4":
             json_data.append(
                 {
-                    "step": "STEP 08：現在のお借入状況",
+                    "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                     "big_class": "お借入の目的",
                     "class": "",
                     "field_name": "お借入の目的",
@@ -2096,7 +2265,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 08：現在のお借入状況",
+                    "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                     "big_class": "お借入の目的",
                     "class": "その他の方は詳細を入力ください。",
                     "field_name": "資金使途（その他）",
@@ -2107,7 +2276,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if p_borrowing["type"] == "4":
             json_data.append(
                 {
-                    "step": "STEP 08：現在のお借入状況",
+                    "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                     "big_class": "お借入の目的",
                     "class": "",
                     "field_name": "お借入の目的",
@@ -2118,7 +2287,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
             json_data.append(
                 {
-                    "step": "STEP 08：現在のお借入状況",
+                    "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                     "big_class": "お借入の目的",
                     "class": "その他の方は詳細を入力ください。",
                     "field_name": "資金使途（その他）",
@@ -2127,7 +2296,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "借入区分",
                 "class": "",
                 "field_name": "借入区分",
@@ -2136,7 +2305,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "当初カード契約年月当初借入年月",
                 "class": "",
                 "field_name": "当初借入日／カード契約年",
@@ -2145,7 +2314,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "借入限度額当初借入額",
                 "class": "",
                 "field_name": "借入限度額／当初借入額",
@@ -2154,7 +2323,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "現在の残高",
                 "class": "",
                 "field_name": "現在の残高",
@@ -2163,7 +2332,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "年間返済額",
                 "class": "",
                 "field_name": "年間返済額",
@@ -2172,7 +2341,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "カード有効期限",
                 "class": "",
                 "field_name": "カード有効期限",
@@ -2181,7 +2350,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "今回のお借入までに完済の予定はありますか？",
                 "class": "",
                 "field_name": "今回のお借入までに完済の予定はありますか？",
@@ -2192,7 +2361,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "完済（予定）年月最終期限最終返済年月",
                 "class": "",
                 "field_name": "最終期限／最終返済年月",
@@ -2201,7 +2370,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "完済（予定）年月",
                 "class": "",
                 "field_name": "完済（予定）年月",
@@ -2210,7 +2379,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "賃貸戸（室）数",
                 "class": "",
                 "field_name": "賃貸戸（室）数",
@@ -2219,7 +2388,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "共同住宅",
                 "class": "",
                 "field_name": "共同住宅",
@@ -2228,7 +2397,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
         json_data.append(
             {
-                "step": "STEP 08：現在のお借入状況",
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
                 "big_class": "不動産担保設定",
                 "class": "",
                 "field_name": "不動産担保設定",
@@ -2237,7 +2406,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         )
     json_data.append(
         {
-            "step": "STEP 08：現在のお借入状況",
+            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
             "big_class": "完済予定のお借入がある場合の完済原資について教えてください。（MCJ固有項目）",
             "class": "完済原資の種類",
             "field_name": "完済原資",
@@ -2251,7 +2420,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 08：現在のお借入状況",
+            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
             "big_class": "",
             "class": "その他の方は詳細を入力ください。",
             "field_name": "完済原資（その他）",
@@ -2260,7 +2429,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 08：現在のお借入状況",
+            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
             "big_class": "",
             "class": "完済原資の内容 ※金融機関・預貯金種類など",
             "field_name": "完済原資　内容",
@@ -2269,7 +2438,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 08：現在のお借入状況",
+            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
             "big_class": "",
             "class": "完済原資の金額 ※金融機関・預貯金種類など",
             "field_name": "完済原資　金額",
@@ -2278,7 +2447,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 08：現在のお借入状況",
+            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
             "big_class": "今回の住宅取得後も継続する支払地代・支払家賃があれば記入してください。（MCJ固有項目）",
             "class": "支払地代",
             "field_name": "支払いをしている方",
@@ -2289,7 +2458,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 08：現在のお借入状況",
+            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
             "big_class": "",
             "class": "支払地代",
             "field_name": "月間の支払金額",
@@ -2298,7 +2467,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 08：現在のお借入状況",
+            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
             "big_class": "",
             "class": "支払家賃",
             "field_name": "支払いをしている方",
@@ -2309,7 +2478,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 08：現在のお借入状況",
+            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
             "big_class": "",
             "class": "支払家賃",
             "field_name": "月間の支払金額",
@@ -2319,7 +2488,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     # step09
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "必要資金",
             "class": "物件価格建物マンション価格",
             "field_name": "必要資金内訳　物件価格／マンション価格",
@@ -2328,7 +2497,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "諸費用等",
             "field_name": "必要資金内訳　諸費用等",
@@ -2337,7 +2506,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "住宅ローンプラス利用",
             "field_name": "必要資金内訳　住宅ローンプラス利用",
@@ -2346,7 +2515,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "土地",
             "field_name": "必要資金内訳　土地",
@@ -2355,7 +2524,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "付帯設備",
             "field_name": "必要資金内訳　付帯設備",
@@ -2364,7 +2533,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "借換対象ローン残債",
             "field_name": "必要資金内訳　借換対象ローン残債",
@@ -2375,7 +2544,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "増改築費",
             "field_name": "必要資金内訳　増改築",
@@ -2384,7 +2553,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "必要資金　合計",
             "field_name": "必要資金　合計",
@@ -2394,7 +2563,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
 
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "調達資金",
             "class": "預貯金",
             "field_name": "調達資金内訳　預貯金(金融機関1)",
@@ -2403,7 +2572,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "不動産売却代金",
             "field_name": "調達資金内訳　不動産売却代金",
@@ -2412,7 +2581,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "有価証券売却など",
             "field_name": "調達資金内訳　有価証券売却など",
@@ -2421,7 +2590,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "親族からの贈与",
             "field_name": "調達資金内訳　親族からの贈与",
@@ -2430,7 +2599,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "本件ローン",
             "field_name": "調達資金内訳　本件ローン",
@@ -2439,7 +2608,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "ペアローン",
             "field_name": "調達資金内訳　ペアローン",
@@ -2448,7 +2617,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "その他",
             "field_name": "調達資金内訳　その他額",
@@ -2457,7 +2626,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "",
             "field_name": "調達資金内訳　その他額（明細）",
@@ -2466,7 +2635,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 09：資金計画について",
+            "step": f"STEP {get_step_code(9)}：資金計画について",
             "big_class": "",
             "class": "調達資金　合計",
             "field_name": "調達資金　合計",
@@ -2476,7 +2645,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     # step10
     json_data.append(
         {
-            "step": "STEP 10：書類添付",
+            "step": f"STEP {get_step_code(10)}：書類添付",
             "big_class": "本人確認書類",
             "class": "",
             "field_name": "本人確認書類",
@@ -2489,7 +2658,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__A__01__a"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "運転免許証〈表面〉",
                 "class": "",
                 "field_name": "運転免許証〈表面〉",
@@ -2501,7 +2670,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__A__01__b"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "運転免許証〈裏面〉",
                 "class": "",
                 "field_name": "運転免許証〈裏面〉",
@@ -2513,7 +2682,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__A__02"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "マイナンバーカード",
                 "class": "",
                 "field_name": "マイナンバーカード",
@@ -2525,7 +2694,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__A__03__a"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "住民基本台帳カード（顔写真付き）〈表面〉",
                 "class": "",
                 "field_name": "住民基本台帳カード（顔写真付き）〈表面〉",
@@ -2537,7 +2706,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__A__03__b"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "住民基本台帳カード（顔写真付き）〈裏面〉",
                 "class": "",
                 "field_name": "住民基本台帳カード（顔写真付き）〈裏面〉",
@@ -2549,7 +2718,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__B__a"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "健康保険証〈表面〉",
                 "class": "",
                 "field_name": "健康保険証〈表面〉",
@@ -2561,7 +2730,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__B__b"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "健康保険証〈裏面〉",
                 "class": "",
                 "field_name": "健康保険証〈裏面〉",
@@ -2573,7 +2742,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__C__01"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "収入に関する書類",
                 "class": "",
                 "field_name": "源泉徴収票（前年度分）",
@@ -2585,7 +2754,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__C__02"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "源泉徴収票（前々年度分）",
@@ -2597,7 +2766,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__C__03"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "確定申告書（1期前）",
@@ -2609,7 +2778,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__C__04"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "確定申告書（2期前）",
@@ -2621,7 +2790,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__C__05"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "確定申告書（3期前）",
@@ -2633,7 +2802,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__D__01"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "非上場企業の役員の方は下記の書類も添付してください。",
                 "class": "",
                 "field_name": "会社の決算報告書（1期前）",
@@ -2645,7 +2814,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__D__02"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "会社の決算報告書（2期前）",
@@ -2657,7 +2826,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__D__03"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "会社の決算報告書（3期前）",
@@ -2669,7 +2838,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__E"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "雇用契約に関する書類",
                 "class": "",
                 "field_name": "雇用契約書",
@@ -2681,7 +2850,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__F__01"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "親族経営の会社等にご勤務の方は下記の書類も添付してください。",
                 "class": "",
                 "field_name": "会社の決算報告書または経営する親族の確定申告書（1期前）",
@@ -2693,7 +2862,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__F__02"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "会社の決算報告書または経営する親族の確定申告書（2期前）",
@@ -2705,7 +2874,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__F__03"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "会社の決算報告書または経営する親族の確定申告書（3期前）",
@@ -2717,7 +2886,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_uploaded_files"]["p_applicant_persons__0__K"]:
         json_data.append(
             {
-                "step": "STEP 10：書類添付",
+                "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "その他の書類",
                 "class": "",
                 "field_name": "その他の書類",
@@ -2731,7 +2900,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     if data["p_application_headers"]["loan_type"] in ["3", "4"]:
         json_data.append(
             {
-                "step": "STEP 11：収入合算者の書類",
+                "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                 "big_class": "本人確認書類",
                 "class": "",
                 "field_name": "本人確認書類",
@@ -2744,7 +2913,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__A__01__a"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "運転免許証〈表面〉",
                     "class": "",
                     "field_name": "運転免許証〈表面〉",
@@ -2756,7 +2925,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__A__01__b"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "運転免許証〈裏面〉",
                     "class": "",
                     "field_name": "運転免許証〈裏面〉",
@@ -2768,7 +2937,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__A__02"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "マイナンバーカード",
                     "class": "",
                     "field_name": "マイナンバーカード",
@@ -2780,7 +2949,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__A__03__a"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "住民基本台帳カード（顔写真付き）〈表面〉",
                     "class": "",
                     "field_name": "住民基本台帳カード（顔写真付き）〈表面〉",
@@ -2792,7 +2961,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__A__03__b"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "住民基本台帳カード（顔写真付き）〈裏面〉",
                     "class": "",
                     "field_name": "住民基本台帳カード（顔写真付き）〈裏面〉",
@@ -2804,7 +2973,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__B__a"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "健康保険証〈表面〉",
                     "class": "",
                     "field_name": "健康保険証〈表面〉",
@@ -2816,7 +2985,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__B__b"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "健康保険証〈裏面〉",
                     "class": "",
                     "field_name": "健康保険証〈裏面〉",
@@ -2828,7 +2997,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__C__01"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "収入に関する書類",
                     "class": "",
                     "field_name": "源泉徴収票（前年度分）",
@@ -2840,7 +3009,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__C__02"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "源泉徴収票（前々年度分）",
@@ -2852,7 +3021,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__C__03"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "確定申告書（1期前）",
@@ -2864,7 +3033,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__C__04"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "確定申告書（2期前）",
@@ -2876,7 +3045,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__C__05"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "確定申告書（3期前）",
@@ -2888,7 +3057,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__D__01"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "非上場企業の役員の方は下記の書類も添付してください。",
                     "class": "",
                     "field_name": "会社の決算報告書（1期前）",
@@ -2900,7 +3069,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__D__02"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "会社の決算報告書（2期前）",
@@ -2912,7 +3081,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__D__03"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "会社の決算報告書（3期前）",
@@ -2924,7 +3093,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__E"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "雇用契約に関する書類",
                     "class": "",
                     "field_name": "雇用契約書",
@@ -2936,7 +3105,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__F__01"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "親族経営の会社等にご勤務の方は下記の書類も添付してください。",
                     "class": "",
                     "field_name": "会社の決算報告書または経営する親族の確定申告書（1期前）",
@@ -2948,7 +3117,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__F__02"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "会社の決算報告書または経営する親族の確定申告書（2期前）",
@@ -2960,7 +3129,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__F__03"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "会社の決算報告書または経営する親族の確定申告書（3期前）",
@@ -2972,7 +3141,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         if data["p_uploaded_files"]["p_applicant_persons__1__K"]:
             json_data.append(
                 {
-                    "step": "STEP 11：収入合算者の書類",
+                    "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "その他の書類",
                     "class": "",
                     "field_name": "その他の書類",
@@ -2985,7 +3154,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     # step12
     json_data.append(
         {
-            "step": "STEP 12：担当者情報",
+            "step": f"STEP {get_step_code(12)}：担当者情報",
             "big_class": "担当者の名刺はありますか？※名刺添付で入力を省略できます",
             "class": "",
             "field_name": "提携会社の担当者名刺",
@@ -2995,7 +3164,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     target = list(filter(lambda x: x["id"] == data["p_application_headers"]["sales_company_id"], orgs))
     json_data.append(
         {
-            "step": "STEP 12：担当者情報",
+            "step": f"STEP {get_step_code(12)}：担当者情報",
             "big_class": "提携会社（不動産会社・住宅メーカー等）",
             "class": "",
             "field_name": "提携会社（不動産会社・住宅メーカー等）",
@@ -3005,7 +3174,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     target = list(filter(lambda x: x["id"] == data["p_application_headers"]["sales_area_id"], orgs))
     json_data.append(
         {
-            "step": "STEP 12：担当者情報",
+            "step": f"STEP {get_step_code(12)}：担当者情報",
             "big_class": "エリア",
             "class": "",
             "field_name": "エリア",
@@ -3015,7 +3184,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     target = list(filter(lambda x: x["id"] == data["p_application_headers"]["sales_exhibition_hall_id"], orgs))
     json_data.append(
         {
-            "step": "STEP 12：担当者情報",
+            "step": f"STEP {get_step_code(12)}：担当者情報",
             "big_class": "展示場",
             "class": "",
             "field_name": "展示場",
@@ -3024,7 +3193,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 12：担当者情報",
+            "step": f"STEP {get_step_code(12)}：担当者情報",
             "big_class": "担当者名",
             "class": "",
             "field_name": "担当者名",
@@ -3033,7 +3202,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     )
     json_data.append(
         {
-            "step": "STEP 12：担当者情報",
+            "step": f"STEP {get_step_code(12)}：担当者情報",
             "big_class": "携帯電話番号",
             "class": "",
             "field_name": "携帯電話番号",
@@ -3041,11 +3210,18 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         }
     )
 
+    # df = pd.DataFrame(
+    #     json_data,
+    # )
+
+    # excel_file_path = "data.xlsx"
+
+    # df.to_excel(excel_file_path, header=False, index=False)
+
     df = pd.DataFrame(
         json_data,
     )
     excel_buffer = BytesIO()
-    excel_file_path = "data.xlsx"
 
     df.to_excel(excel_buffer, header=False, index=False)
     excel_buffer.seek(0)

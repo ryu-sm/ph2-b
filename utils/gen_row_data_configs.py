@@ -279,4 +279,6 @@ CODE_CONFIGS = {
         "2": "マイナンバーカード",
         "3": "住民基本台帳カード（顔写真付き）",
     },
+    "p_residents.nationality": {"1": "日本国籍", "2": "外国籍"},
+    "p_residents.loan_from_japan_house_finance_agency": {"1": "有", "0": "無"},
 }
