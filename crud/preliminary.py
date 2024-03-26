@@ -1255,6 +1255,7 @@ async def query_p_uploaded_files_for_ad_view(db: DB, p_application_header_id: in
         p_uploaded_files.s3_key LIKE '%{category}%';
     """
     files_info = await db.fetch_all(sql)
+    print(files_info)
     if len(files_info) > 0:
         files = []
         for file in files_info:

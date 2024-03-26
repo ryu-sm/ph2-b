@@ -12,7 +12,7 @@ from copy import deepcopy
 
 
 async def insert_p_application_headers(
-    db: DB, data: dict, origin_data: dict, role_type, role_id, c_user_id="null", s_sales_person_id="null"
+    db: DB, data: dict, role_type, role_id, c_user_id="null", s_sales_person_id="null"
 ):
     sql = f"SELECT MAX(apply_no) no FROM p_application_headers WHERE created_at  >= '{datetime.strftime(datetime.now(),'%Y-%m-%d')} 00:00:00'"
     last_apply = await db.fetch_one(sql)
@@ -25,13 +25,12 @@ async def insert_p_application_headers(
         new_apply_no = f"SET{datetime.strftime(datetime.now(),'%Y%m%d')}{new_no}"
 
     p_application_header_id = await db.uuid_short()
-    fields = ["id", "c_user_id", "s_sales_person_id", "apply_no", "origin_data"]
+    fields = ["id", "c_user_id", "s_sales_person_id", "apply_no"]
     values = [
         f"{p_application_header_id}",
         f"{c_user_id}",
         f"{s_sales_person_id}",
         f"'{new_apply_no}'",
-        f"'{json.dumps(origin_data, ensure_ascii=False)}'",
     ]
 
     for key, value in data.items():

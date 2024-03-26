@@ -262,11 +262,20 @@ async def common_get_preliminary(
 ):
     try:
         result = None
-
+        if "G" in category:
+            result = await crud.query_p_uploaded_files_for_ad_view(db, p_application_header_id, "/G")
+            return JSONResponse(status_code=200, content=result)
+        if "J" in category:
+            result = await crud.query_p_uploaded_files_for_ad_view(db, p_application_header_id, "/J")
+            return JSONResponse(status_code=200, content=result)
+        if "S" in category:
+            result = await crud.query_p_uploaded_files_for_ad_view(db, p_application_header_id, "/S")
+            return JSONResponse(status_code=200, content=result)
         if "I" in category:
             result = await crud.query_p_borrowings_for_ad_view(db, p_application_header_id)
-        else:
-            result = await crud.query_p_uploaded_files_for_ad_view(db, p_application_header_id, category)
+            return JSONResponse(status_code=200, content=result)
+
+        result = await crud.query_p_uploaded_files_for_ad_view(db, p_application_header_id, category)
         return JSONResponse(status_code=200, content=result)
     except Exception as err:
         logger.exception(err)

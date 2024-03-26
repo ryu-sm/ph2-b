@@ -27,7 +27,6 @@ async def user_orgs(data_: dict, db=Depends(get_db), token: dict = Depends(get_t
             p_application_header_id = await crud.insert_p_application_headers(
                 db,
                 data["p_application_headers"],
-                origin_data=data,
                 role_type=token["role_type"],
                 role_id=token["id"],
                 c_user_id=token["id"],
@@ -37,7 +36,6 @@ async def user_orgs(data_: dict, db=Depends(get_db), token: dict = Depends(get_t
                 db,
                 data["p_application_headers"],
                 role_type=token["role_type"],
-                origin_data=data,
                 role_id=token["id"],
                 s_sales_person_id=token["id"],
             )
