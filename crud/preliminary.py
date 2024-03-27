@@ -331,7 +331,18 @@ async def query_p_residents_for_ad(db: DB, p_application_header_id: int):
         rel_to_applicant_a_other,
         DATE_FORMAT(birthday, '%Y/%m/%d') as birthday,
         gender,
-        one_roof
+        one_roof,
+        loan_from_japan_house_finance_agency,
+        contact_phone,
+        postal_code,
+        prefecture_kanji,
+        city_kanji,
+        district_kanji,
+        other_address_kanji,
+        prefecture_kana,
+        city_kana,
+        district_kana,
+        nationality
     FROM
         p_residents
     WHERE
