@@ -100,7 +100,7 @@ def manager_data_check(data: dict):
         if not result:
             tab2_errors.append("電話番号携帯")
     if data["p_applicant_persons__0"]["home_phone"]:
-        result = re.fullmatch(REGEX["home_phone"], data["p_applicant_persons__0"]["mobile_phone"])
+        result = re.fullmatch(REGEX["home_phone"], data["p_applicant_persons__0"]["home_phone"])
         if not result:
             tab2_errors.append("電話番号自宅")
     if data["p_applicant_persons__0"]["emergency_contact"]:
@@ -440,7 +440,7 @@ def manager_data_check(data: dict):
                 if not result:
                     tab4_errors.append("電話番号携帯")
             if p_join_guarantor["home_phone"]:
-                result = re.fullmatch(REGEX["home_phone"], p_join_guarantor["mobile_phone"])
+                result = re.fullmatch(REGEX["home_phone"], p_join_guarantor["home_phone"])
                 if not result:
                     tab4_errors.append("電話番号自宅")
             if p_join_guarantor["emergency_contact"]:
@@ -670,7 +670,7 @@ def manager_data_check(data: dict):
             if not result:
                 tab2_1_errors.append("電話番号携帯")
         if data["p_applicant_persons__1"]["home_phone"]:
-            result = re.fullmatch(REGEX["home_phone"], data["p_applicant_persons__1"]["mobile_phone"])
+            result = re.fullmatch(REGEX["home_phone"], data["p_applicant_persons__1"]["home_phone"])
             if not result:
                 tab2_1_errors.append("電話番号自宅")
         if data["p_applicant_persons__1"]["emergency_contact"]:
