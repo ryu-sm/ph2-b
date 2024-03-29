@@ -8,13 +8,13 @@ from apis.deps import get_db
 from apis.deps import get_token
 import crud
 from utils.s3 import download_from_s3
-
+from utils import blank_to_none
 
 router = APIRouter(route_class=LoggingContextRoute)
 
 
-@router.put("/preliminaries/s_manager_id")
-async def common_update_preliminaries_s_manager_id(data: dict, db=Depends(get_db), token=Depends(get_token)):
+@router.put("/preliminary/s_manager_id")
+async def common_update_preliminary_s_manager_id(data: dict, db=Depends(get_db), token=Depends(get_token)):
     try:
         await crud.update_p_application_headers_s_manager_id(db, data["p_application_header_id"], data["s_manager_id"])
         return JSONResponse(status_code=200, content={"message": "successful"})
@@ -25,11 +25,11 @@ async def common_update_preliminaries_s_manager_id(data: dict, db=Depends(get_db
         )
 
 
-@router.put("/preliminaries/s_sales_person_id")
-async def common_update_preliminaries_s_sales_person_id(data: dict, db=Depends(get_db), token=Depends(get_token)):
+@router.put("/preliminary/s_sales_person_id")
+async def common_update_preliminary_s_sales_person_id(data: dict, db=Depends(get_db), token=Depends(get_token)):
     try:
         await crud.update_p_application_headers_s_sales_person_id(
-            db, data["p_application_header_id"], data["s_sales_person_id"]
+            db, blank_to_none(data), token["role_type"], token["id"]
         )
         return JSONResponse(status_code=200, content={"message": "successful"})
     except Exception as err:
@@ -39,11 +39,11 @@ async def common_update_preliminaries_s_sales_person_id(data: dict, db=Depends(g
         )
 
 
-@router.put("/preliminaries/sales_area_id")
-async def common_update_preliminaries_sales_area_id(data: dict, db=Depends(get_db), token=Depends(get_token)):
+@router.put("/preliminary/sales_area_id")
+async def common_update_preliminary_sales_area_id(data: dict, db=Depends(get_db), token=Depends(get_token)):
     try:
         result = await crud.update_p_application_headers_sales_area_id(
-            db, data["p_application_header_id"], data["sales_area_id"], data["sales_exhibition_hall_id"]
+            db, blank_to_none(data), token["role_type"], token["id"]
         )
         return JSONResponse(status_code=200, content=result)
     except Exception as err:
@@ -53,13 +53,11 @@ async def common_update_preliminaries_sales_area_id(data: dict, db=Depends(get_d
         )
 
 
-@router.put("/preliminaries/sales_exhibition_hall_id")
-async def common_update_preliminaries_sales_exhibition_hall_id(
-    data: dict, db=Depends(get_db), token=Depends(get_token)
-):
+@router.put("/preliminary/sales_exhibition_hall_id")
+async def common_update_preliminary_sales_exhibition_hall_id(data: dict, db=Depends(get_db), token=Depends(get_token)):
     try:
         result = await crud.update_p_application_headers_sales_exhibition_hall_id(
-            db, data["p_application_header_id"], data["sales_exhibition_hall_id"], data["s_sales_person_id"]
+            db, blank_to_none(data), token["role_type"], token["id"]
         )
         return JSONResponse(status_code=200, content=result)
     except Exception as err:

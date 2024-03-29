@@ -108,8 +108,8 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
             continue
         [pair_b] = filter
         paired_b_ids.append(pair_b["id"])
-        sales_company_id = pair_b["sales_company_id"]
-        area_options = await crud.query_child_area_options(db, sales_company_id)
+        # sales_company_id = pair_b["sales_company_id"]
+        # area_options = await crud.query_child_area_options(db, sales_company_id)
         p_application_header_id = pair_b["id"]
 
         messages = await db.fetch_all(
@@ -127,7 +127,7 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
                     "pair_loan_data": {
                         **none_to_blank(pair_b),
                         "unviewed": unviewed,
-                        "area_options": area_options,
+                        # "area_options": area_options,
                         "manager_options": manager_options,
                     },
                 }
@@ -138,8 +138,8 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
     paired_tab_2 = []
     paired_tab_3 = []
     for group in paired:
-        sales_company_id = group["sales_company_id"]
-        area_options = await crud.query_child_area_options(db, sales_company_id)
+        # sales_company_id = group["sales_company_id"]
+        # area_options = await crud.query_child_area_options(db, sales_company_id)
         p_application_header_id = group["id"]
         messages = await db.fetch_all(
             f"SELECT CONVERT(id,CHAR) AS id, viewed FROM c_messages WHERE p_application_header_id = {p_application_header_id}"
@@ -156,7 +156,7 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
                 {
                     **group,
                     "unviewed": unviewed,
-                    "area_options": area_options,
+                    # "area_options": area_options,
                     "manager_options": manager_options,
                 }
             )
@@ -165,7 +165,7 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
                 {
                     **group,
                     "unviewed": unviewed,
-                    "area_options": area_options,
+                    # "area_options": area_options,
                     "manager_options": manager_options,
                 }
             )
@@ -174,14 +174,14 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
                 {
                     **group,
                     "unviewed": unviewed,
-                    "area_options": area_options,
+                    # "area_options": area_options,
                     "manager_options": manager_options,
                 }
             )
     result = []
     for item in general_data:
-        sales_company_id = item["sales_company_id"]
-        area_options = await crud.query_child_area_options(db, sales_company_id)
+        # sales_company_id = item["sales_company_id"]
+        # area_options = await crud.query_child_area_options(db, sales_company_id)
         p_application_header_id = item["id"]
         messages = await db.fetch_all(
             f"SELECT CONVERT(id,CHAR) AS id, viewed FROM c_messages WHERE p_application_header_id = {p_application_header_id}"
@@ -193,7 +193,12 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
             unviewed += 1
         result.append(
             none_to_blank(
-                {**item, "unviewed": unviewed, "area_options": area_options, "manager_options": manager_options}
+                {
+                    **item,
+                    "unviewed": unviewed,
+                    # "area_options": area_options,
+                    "manager_options": manager_options,
+                }
             )
         )
 

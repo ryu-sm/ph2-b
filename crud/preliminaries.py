@@ -3,43 +3,156 @@ from core.database import DB
 
 
 async def update_p_application_headers_s_manager_id(db: DB, p_application_header_id: int, s_manager_id: int):
+    calc_s_manager_id = s_manager_id if s_manager_id else "NULL"
     await db.execute(
-        f"UPDATE p_application_headers SET s_manager_id = {s_manager_id if s_manager_id else 'null'} WHERE id = {p_application_header_id}"
+        f"UPDATE p_application_headers SET s_manager_id = {calc_s_manager_id} WHERE id = {p_application_header_id}"
     )
 
 
-async def update_p_application_headers_s_sales_person_id(db: DB, p_application_header_id: int, s_sales_person_id: int):
-    await db.execute(
-        f"UPDATE p_application_headers SET s_sales_person_id = {s_sales_person_id if s_sales_person_id else 'null'} WHERE id = {p_application_header_id}"
-    )
+async def update_p_application_headers_s_sales_person_id(db: DB, data: dict, role_type, role_id):
+    p_application_header_id = data.get("p_application_header_id")
+    s_sales_person_id = data.get("s_sales_person_id")
+    if s_sales_person_id:
+        await db.execute(
+            f"UPDATE p_application_headers SET s_sales_person_id = {s_sales_person_id} WHERE id = {p_application_header_id}"
+        )
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', 's_sales_person_id', {p_application_header_id}, '{s_sales_person_id}', 2);
+        """
+        await db.execute(sql)
+    else:
+        await db.execute(
+            f"UPDATE p_application_headers SET s_sales_person_id = NULL WHERE id = {p_application_header_id}"
+        )
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', 's_sales_person_id', {p_application_header_id}, NULL, 9);
+        """
+        await db.execute(sql)
 
 
-async def update_p_application_headers_sales_area_id(
-    db: DB, p_application_header_id: int, sales_area_id: int, sales_exhibition_hall_id: int
-):
-    sales_exhibition_halls = await crud.query_child_exhibition_hall_options(db, sales_area_id)
-    subUpdate = ""
-    if sales_exhibition_hall_id not in [item["value"] for item in sales_exhibition_halls]:
-        subUpdate = ", sales_exhibition_hall_id = NULL"
-    await db.execute(
-        f"UPDATE p_application_headers SET sales_area_id = {sales_area_id if sales_area_id else 'null'} {subUpdate}  WHERE id = {p_application_header_id}"
-    )
+async def update_p_application_headers_sales_area_id(db: DB, data: dict, role_type, role_id):
+    initResult = {"sales_exhibition_hall_id": "", "s_sales_person_id": ""}
 
-    return {"sales_exhibition_hall_id": sales_exhibition_hall_id if not subUpdate else subUpdate}
+    p_application_header_id = data.get("p_application_header_id")
+    sales_company_id = data.get("sales_company_id")
+    sales_area_id = data.get("sales_area_id")
+    sales_exhibition_hall_id = data.get("sales_exhibition_hall_id")
+    s_sales_person_id = data.get("s_sales_person_id")
+
+    if sales_area_id:
+        subUpdate = ""
+        subUpdateKeys = []
+
+        sales_exhibition_halls = await crud.query_children_s_sales_company_orgs_with_category(db, sales_area_id, "E")
+        if sales_exhibition_hall_id not in [item["value"] for item in sales_exhibition_halls]:
+            subUpdate += ", sales_exhibition_hall_id = NULL"
+            subUpdateKeys.append("sales_exhibition_hall_id")
+
+            orgs_id = sales_area_id or sales_company_id
+            s_sales_persons = await crud.query_orgs_access_s_sales_persons(db, orgs_id)
+            if s_sales_person_id not in [item["value"] for item in s_sales_persons]:
+                subUpdate += ", s_sales_person_id = NULL"
+                subUpdateKeys.append("s_sales_person_id")
+            else:
+                initResult["s_sales_person_id"] = s_sales_person_id
+
+        else:
+            initResult["sales_exhibition_hall_id"] = sales_exhibition_hall_id
+
+            orgs_id = sales_exhibition_hall_id or sales_area_id or sales_company_id
+            s_sales_persons = await crud.query_orgs_access_s_sales_persons(db, orgs_id)
+            if s_sales_person_id not in [item["value"] for item in s_sales_persons]:
+
+                subUpdate += ", s_sales_person_id = NULL"
+                subUpdateKeys.append("s_sales_person_id")
+            else:
+                initResult["s_sales_person_id"] = s_sales_person_id
+
+        await db.execute(
+            f"UPDATE p_application_headers SET sales_area_id = {sales_area_id} {subUpdate} WHERE id = {p_application_header_id}"
+        )
+
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', 'sales_area_id', {p_application_header_id}, '{sales_area_id}', 2);
+        """
+        await db.execute(sql)
+
+        for key in subUpdateKeys:
+            id = await db.uuid_short()
+            sql = f"""
+            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+            VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', '{key}', {p_application_header_id}, NULL, 9);
+            """
+            await db.execute(sql)
+
+    else:
+        initResult["sales_exhibition_hall_id"] = sales_exhibition_hall_id
+        initResult["s_sales_person_id"] = s_sales_person_id
+        await db.execute(f"UPDATE p_application_headers SET sales_area_id = NULL WHERE id = {p_application_header_id}")
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', 'sales_area_id', {p_application_header_id}, NULL, 9);
+        """
+        await db.execute(sql)
+    return initResult
 
 
-async def update_p_application_headers_sales_exhibition_hall_id(
-    db: DB, p_application_header_id: int, sales_exhibition_hall_id: int, s_sales_person_id: int
-):
-    sales_persons = await crud.query_sales_person_options(db, sales_exhibition_hall_id)
-    subUpdate = ""
-    if s_sales_person_id not in [item["value"] for item in sales_persons]:
-        subUpdate = ", s_sales_person_id = NULL"
-    await db.execute(
-        f"UPDATE p_application_headers SET sales_exhibition_hall_id = {sales_exhibition_hall_id if sales_exhibition_hall_id else 'null'} {subUpdate}  WHERE id = {p_application_header_id}"
-    )
+async def update_p_application_headers_sales_exhibition_hall_id(db: DB, data: dict, role_type, role_id):
+    initResult = {"s_sales_person_id": ""}
 
-    return {"s_sales_person_id": s_sales_person_id if not subUpdate else subUpdate}
+    p_application_header_id = data.get("p_application_header_id")
+    sales_company_id = data.get("sales_company_id")
+    sales_area_id = data.get("sales_area_id")
+    sales_exhibition_hall_id = data.get("sales_exhibition_hall_id")
+    s_sales_person_id = data.get("s_sales_person_id")
+
+    if sales_exhibition_hall_id:
+        subUpdate = ""
+        subUpdateKeys = []
+        s_sales_persons = await crud.query_orgs_access_s_sales_persons(db, sales_exhibition_hall_id)
+        if s_sales_person_id not in [item["value"] for item in s_sales_persons]:
+            subUpdate += ", s_sales_person_id = NULL"
+            subUpdateKeys.append("s_sales_person_id")
+        else:
+            initResult["s_sales_person_id"] = s_sales_person_id
+
+        await db.execute(
+            f"UPDATE p_application_headers SET sales_exhibition_hall_id = {sales_exhibition_hall_id} {subUpdate} WHERE id = {p_application_header_id}"
+        )
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', 'sales_exhibition_hall_id', {p_application_header_id}, '{sales_area_id}', 2);
+        """
+        await db.execute(sql)
+
+        for key in subUpdateKeys:
+            id = await db.uuid_short()
+            sql = f"""
+            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+            VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', '{key}', {p_application_header_id}, NULL, 9);
+            """
+            await db.execute(sql)
+
+    else:
+        await db.execute(
+            f"UPDATE p_application_headers SET sales_exhibition_hall_id = NULL  WHERE id = {p_application_header_id}"
+        )
+        id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', 'sales_exhibition_hall_id', {p_application_header_id}, NULL, 9);
+        """
+        await db.execute(sql)
+
+    return initResult
 
 
 async def delete_pair_laon(db: DB, ids: list):
