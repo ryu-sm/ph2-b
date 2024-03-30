@@ -108,8 +108,6 @@ async def update_p_application_headers_sales_exhibition_hall_id(db: DB, data: di
     initResult = {"s_sales_person_id": ""}
 
     p_application_header_id = data.get("p_application_header_id")
-    sales_company_id = data.get("sales_company_id")
-    sales_area_id = data.get("sales_area_id")
     sales_exhibition_hall_id = data.get("sales_exhibition_hall_id")
     s_sales_person_id = data.get("s_sales_person_id")
 
@@ -129,7 +127,7 @@ async def update_p_application_headers_sales_exhibition_hall_id(db: DB, data: di
         id = await db.uuid_short()
         sql = f"""
         INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', 'sales_exhibition_hall_id', {p_application_header_id}, '{sales_area_id}', 2);
+        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', 'sales_exhibition_hall_id', {p_application_header_id}, '{sales_exhibition_hall_id}', 2);
         """
         await db.execute(sql)
 
