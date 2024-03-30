@@ -693,7 +693,7 @@ async def diff_update_p_join_guarantors_for_ad(
         if len(filter) == 0:
             data_ = blank_to_none(p_join_guarantor)
             await crud.insert_p_join_guarantors(db, [data_], p_application_header_id)
-            return None
+            continue
         [old_p_join_guarantor] = filter
         for key, value in p_join_guarantor.items():
 
@@ -756,7 +756,7 @@ async def diff_update_p_residents_for_ad(db: DB, data: typing.List[dict], p_appl
         if len(filter) == 0:
             data_ = blank_to_none(p_resident)
             await crud.insert_p_residents(db, [data_], p_application_header_id, role_type, role_id)
-            return None
+            continue
         [old_p_resident] = filter
 
         for key, value in p_resident.items():
@@ -821,7 +821,7 @@ async def diff_update_p_borrowings_for_ad(db: DB, data: typing.List[dict], p_app
         if len(filter) == 0:
             data_ = blank_to_none(p_borrowing)
             await crud.insert_p_borrowings(db, [data_], p_application_header_id, role_type, role_id)
-            return None
+            continue
         [old_p_borrowing] = filter
         for key, value in p_borrowing.items():
             old_value = old_p_borrowing.get(key, [])
