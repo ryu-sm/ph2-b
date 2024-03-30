@@ -140,6 +140,7 @@ async def update_p_application_headers_sales_exhibition_hall_id(db: DB, data: di
             await db.execute(sql)
 
     else:
+        initResult["s_sales_person_id"] = s_sales_person_id
         await db.execute(
             f"UPDATE p_application_headers SET sales_exhibition_hall_id = NULL  WHERE id = {p_application_header_id}"
         )
