@@ -83,3 +83,20 @@ async def query_sales_person_access_p_application_headers(db: DB, status: int, o
             all = [*all, *orgs_l]
     unique_data = list({item["id"]: item for item in all}.values())
     return unique_data
+
+
+async def query_sales_person_basic_info(db: DB, s_sales_person_id: int):
+    sql = f"""
+    SELECT
+        CONVERT(id,CHAR) AS id,
+        email,
+        name_kanji,
+        direct_phone,
+        mobile_phone,
+        fax
+    FROM
+        s_sales_persons
+    WHERE
+        id = {s_sales_person_id};
+    """
+    return await db.fetch_one(sql)
