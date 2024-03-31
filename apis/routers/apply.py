@@ -99,7 +99,6 @@ async def user_orgs(data_: dict, db=Depends(get_db), token: dict = Depends(get_t
 @router.put("/application")
 async def user_orgs(apply_no: str, data: dict, db=Depends(get_db), token: dict = Depends(get_token)):
     try:
-
         p_application_header_id = await crud.query_p_application_header_id(db, apply_no)
         if data.get("p_application_headers") is not None:
             await crud.diff_update_p_application_headers_for_ap(
@@ -203,6 +202,7 @@ async def get_application(apply_no: str, db=Depends(get_db)):
         )
 
 
+# TODO:delete
 @router.get("/application/files")
 async def get_application(apply_no: str, db=Depends(get_db)):
     try:
@@ -233,8 +233,41 @@ async def get_application(apply_no: str, db=Depends(get_db)):
         )
 
 
-@router.get("/test")
-async def test():
-    with open("tttt.json", mode="r", encoding="utf8") as f:
-        mock_data = json.load(f)
-        await utils.gen_row_data(1, mock_data)
+@router.get("/application/{c_user_id}")
+async def get_application(c_user_id: str, db=Depends(get_db)):
+    try:
+        temp = {}
+        p_application_header_id = await crud.query_p_application_header_id_with_c_user_id(db, c_user_id)
+
+        p_application_headers = await crud.query_p_application_headers_for_ap(db, p_application_header_id)
+        temp["p_application_headers"] = p_application_headers
+
+        p_borrowing_details__1 = await crud.query_p_borrowing_details_for_ap(db, p_application_header_id, 1)
+        temp["p_borrowing_details__1"] = p_borrowing_details__1
+
+        if p_application_headers["land_advance_plan"] == "1":
+            temp["p_borrowing_details__2"] = await crud.query_p_borrowing_details_for_ap(db, p_application_header_id, 2)
+
+        temp["p_application_banks"] = await crud.query_p_application_banks_for_ap(db, p_application_header_id)
+
+        temp["p_applicant_persons__0"] = await crud.query_p_applicant_persons_for_ap(db, p_application_header_id, 0)
+
+        if p_application_headers["loan_type"] in ["3", "4"]:
+            temp["p_applicant_persons__1"] = await crud.query_p_applicant_persons_for_ap(db, p_application_header_id, 1)
+
+        if p_application_headers["join_guarantor_umu"] == "1":
+            temp["p_join_guarantors"] = await crud.query_p_join_guarantors_for_ap(db, p_application_header_id)
+
+        p_residents = await crud.query_p_residents_for_ap(db, p_application_header_id)
+        if p_residents:
+            temp["p_residents"] = p_residents
+
+        if p_application_headers["curr_borrowing_status"] == "1":
+            temp["p_borrowings"] = await crud.query_p_borrowings_for_ap(db, p_application_header_id)
+
+        return JSONResponse(status_code=200, content=jsonable_encoder(temp))
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )

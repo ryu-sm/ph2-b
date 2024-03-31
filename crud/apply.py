@@ -737,6 +737,7 @@ async def query_p_uploaded_files_for_ap(db: DB, p_application_header_id: int):
     return temp_files
 
 
+# TODO:delete
 async def query_p_application_header_id(db: DB, apply_no: str):
     sql = f"""
     SELECT
@@ -748,6 +749,14 @@ async def query_p_application_header_id(db: DB, apply_no: str):
     """
 
     result = await db.fetch_one(sql)
+
+    return result["id"]
+
+
+async def query_p_application_header_id_with_c_user_id(db: DB, c_user_id: str):
+    result = await db.fetch_one(
+        f"SELECT CONVERT(id,CHAR) as id FROM p_application_headers WHERE c_user_id={c_user_id};"
+    )
 
     return result["id"]
 
