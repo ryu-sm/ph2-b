@@ -37,7 +37,7 @@ def upload_buffer_to_s3(file_name, excel_buffer):
     s3_client.upload_fileobj(excel_buffer, Bucket=settings.AWS_BUCKET_NAME, Key=file_name)
 
 
-def generate_presigned_url(object_key, expiration=60):
+def generate_presigned_url(object_key, expiration=3600):
     return s3_client.generate_presigned_url(
         "get_object", Params={"Bucket": settings.AWS_BUCKET_NAME, "Key": object_key}, ExpiresIn=expiration
     )

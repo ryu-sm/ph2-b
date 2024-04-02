@@ -229,22 +229,37 @@ async def update_p_application_banks_pprovisional_result(
     await db.execute(sql)
 
     for file in R:
-        p_uploaded_file_id = await db.uuid_short()
-        fields = ["id", "p_application_header_id", "owner_type", "owner_id"]
-        values = [f"{p_uploaded_file_id}", f"{p_application_header_id}", f"{owner_type}", f"{owner_id}"]
-        s3_key = f"{p_application_header_id}/R"
-        file_name = f"{s3_key}/{file['name']}"
+        p_upload_file_id = await db.uuid_short()
+
+        sub_fields = ["id", "p_application_header_id", "owner_type", "owner_id", "record_id", "type"]
+        sub_values = [
+            f"{p_upload_file_id}",
+            f"{p_application_header_id}",
+            f"{owner_type}",
+            f"{owner_id}",
+            f"{p_application_header_id}",
+            "0",
+        ]
+
+        s3_key = f"{p_application_header_id}/{p_upload_file_id}/R"
+        file_name = file["name"]
+
+        sub_fields.append("s3_key")
+        sub_fields.append("file_name")
+        sub_values.append(f"'{s3_key}'")
+        sub_values.append(f"'{file_name}'")
+
         file_content = base64.b64decode(file["src"].split(",")[1])
 
-        upload_to_s3(file_name, file_content)
+        upload_to_s3(f"{s3_key}/{file_name}", file_content)
 
-        fields.append("s3_key")
-        fields.append("file_name")
-
-        values.append(f"'{s3_key}'")
-        values.append(f"'{file_name}'")
-
-        sql = f"INSERT INTO p_uploaded_files ({', '.join(fields)}) VALUES ({', '.join(values)});"
+        sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
+        await db.execute(sql)
+        p_activities_id = await db.uuid_short()
+        sql = f"""
+        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
+        VALUES ({p_activities_id}, {p_application_header_id}, {owner_type}, {owner_id}, 'p_application_headers', 'R', {p_application_header_id}, '{file["name"]}', 1);
+        """
         await db.execute(sql)
 
 
@@ -256,13 +271,9 @@ async def update_p_application_headers_pre_examination_status(
 
 
 async def delete_p_application_banks_pprovisional_result(
-    db: DB, p_application_header_id: int, s_bank_id: int, p_uploaded_file_id: int
+    db: DB, p_application_header_id: int, s_bank_id: int, p_upload_file_id: int
 ):
-    p_uploaded_file = await db.fetch_one(f"SELECT file_name FROM p_uploaded_files WHERE id = {p_uploaded_file_id}")
-
-    delete_from_s3(p_uploaded_file["file_name"])
-
-    await db.execute(f"DELETE FROM p_uploaded_files WHERE id = {p_uploaded_file_id}")
+    await db.execute(f"UPDATE p_uploaded_files SET deleted = 1 WHERE id = {p_upload_file_id};")
 
     sql = f"""
     UPDATE p_application_headers

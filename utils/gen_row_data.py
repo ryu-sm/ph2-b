@@ -234,7 +234,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             ),
         }
     )
-    # TODO: 确认输出
+
     if data["p_application_headers"]["land_advance_plan"] == "1":
         json_data.append(
             {
@@ -350,28 +350,24 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             ),
         }
     )
-    if data["p_uploaded_files"]["p_applicant_persons__0__H__a"]:
+    if data["p_applicant_persons__0"]["H__a"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(2)}：あなたの情報",
                 "big_class": "在留カードまたは特別永住者証明書を添付してください。",
                 "class": "",
                 "field_name": "在留カードまたは特別永住者証明書〈表面〉",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__H__a"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["H__a"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__H__b"]:
+    if data["p_applicant_persons__0"]["H__b"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(2)}：あなたの情報",
                 "big_class": "在留カードまたは特別永住者証明書を添付してください。",
                 "class": "",
                 "field_name": "在留カードまたは特別永住者証明書〈表面〉",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__H__b"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["H__b"]]),
             }
         )
 
@@ -939,32 +935,27 @@ async def gen_row_data(p_application_header_id: int, data: dict):
                 ),
             }
         )
-        if data["p_uploaded_files"]["p_applicant_persons__1__H__a"]:
+        if data["p_applicant_persons__1"]["H__a"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(4)}：収入合算者",
                     "big_class": "在留カードまたは特別永住者証明書を添付してください。",
                     "class": "",
                     "field_name": "在留カードまたは特別永住者証明書〈表面〉",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__H__a"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["H__a"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__H__b"]:
+        if data["p_applicant_persons__1"]["H__b"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(4)}：収入合算者",
                     "big_class": "在留カードまたは特別永住者証明書を添付してください。",
                     "class": "",
                     "field_name": "在留カードまたは特別永住者証明書〈表面〉",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__H__b"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["H__b"]]),
                 }
             )
 
-        # TODO: 国籍图片
         json_data.append(
             {
                 "step": f"STEP {get_step_code(4)}：収入合算者",
@@ -1718,6 +1709,15 @@ async def gen_row_data(p_application_header_id: int, data: dict):
     json_data.append(
         {
             "step": f"STEP {get_step_code(7)}：お住まいについて",
+            "big_class": "物件についての書類",
+            "class": "画像アップロード",
+            "field_name": "画像アップロード",
+            "filed_value": ", ".join([item["name"] for item in data["p_application_headers"]["G"]]),
+        }
+    )
+    json_data.append(
+        {
+            "step": f"STEP {get_step_code(7)}：お住まいについて",
             "big_class": "※チラシ等がない場合物件情報が掲載されたURL添付",
             "class": "",
             "field_name": "物件情報が掲載されたURL",
@@ -1964,8 +1964,6 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             ),
         }
     )
-    # TODO 入居者
-
     for p_resident in data["p_residents"]:
         json_data.append(
             {
@@ -2231,6 +2229,15 @@ async def gen_row_data(p_application_header_id: int, data: dict):
                 "class": "",
                 "field_name": "借入分類",
                 "filed_value": CODE_CONFIGS["p_borrowings.type"].get(p_borrowing["type"], ""),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
+                "big_class": "返済予定表・利用明細等の画像をアップロードするか",
+                "class": "",
+                "field_name": "返済予定表・利用明細等の画像をアップロードするか",
+                "filed_value": ", ".join([item["name"] for item in p_borrowing["I"]]),
             }
         )
         json_data.append(
@@ -2655,244 +2662,204 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         }
     )
 
-    if data["p_uploaded_files"]["p_applicant_persons__0__A__01__a"]:
+    if data["p_applicant_persons__0"]["A__01__a"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "運転免許証〈表面〉",
                 "class": "",
                 "field_name": "運転免許証〈表面〉",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__A__01__a"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["A__01__a"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__A__01__b"]:
+    if data["p_applicant_persons__0"]["A__01__b"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "運転免許証〈裏面〉",
                 "class": "",
                 "field_name": "運転免許証〈裏面〉",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__A__01__b"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["A__01__b"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__A__02"]:
+    if data["p_applicant_persons__0"]["A__02"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "マイナンバーカード",
                 "class": "",
                 "field_name": "マイナンバーカード",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__A__02"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["A__02"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__A__03__a"]:
+    if data["p_applicant_persons__0"]["A__03__a"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "住民基本台帳カード（顔写真付き）〈表面〉",
                 "class": "",
                 "field_name": "住民基本台帳カード（顔写真付き）〈表面〉",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__A__03__a"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["A__03__a"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__A__03__b"]:
+    if data["p_applicant_persons__0"]["A__03__b"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "住民基本台帳カード（顔写真付き）〈裏面〉",
                 "class": "",
                 "field_name": "住民基本台帳カード（顔写真付き）〈裏面〉",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__A__03__b"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["A__03__b"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__B__a"]:
+    if data["p_applicant_persons__0"]["B__a"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "健康保険証〈表面〉",
                 "class": "",
                 "field_name": "健康保険証〈表面〉",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__B__a"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["B__a"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__B__b"]:
+    if data["p_applicant_persons__0"]["B__b"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "健康保険証〈裏面〉",
                 "class": "",
                 "field_name": "健康保険証〈裏面〉",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__B__b"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["B__b"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__C__01"]:
+    if data["p_applicant_persons__0"]["C__01"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "収入に関する書類",
                 "class": "",
                 "field_name": "源泉徴収票（前年度分）",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__C__01"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["C__01"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__C__02"]:
+    if data["p_applicant_persons__0"]["C__02"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "源泉徴収票（前々年度分）",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__C__02"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["C__02"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__C__03"]:
+    if data["p_applicant_persons__0"]["C__03"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
-                "big_class": "",
+                "big_class": "収入に関する書類",
                 "class": "",
                 "field_name": "確定申告書（1期前）",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__C__03"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["C__03"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__C__04"]:
+    if data["p_applicant_persons__0"]["C__04"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "確定申告書（2期前）",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__C__04"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["C__04"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__C__05"]:
+    if data["p_applicant_persons__0"]["C__05"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "確定申告書（3期前）",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__C__05"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["C__05"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__D__01"]:
+    if data["p_applicant_persons__0"]["D__01"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "非上場企業の役員の方は下記の書類も添付してください。",
                 "class": "",
                 "field_name": "会社の決算報告書（1期前）",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__D__01"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["D__01"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__D__02"]:
+    if data["p_applicant_persons__0"]["D__02"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "会社の決算報告書（2期前）",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__D__02"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["D__02"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__D__03"]:
+    if data["p_applicant_persons__0"]["D__03"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "会社の決算報告書（3期前）",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__D__03"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["D__03"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__E"]:
+    if data["p_applicant_persons__0"]["E"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "雇用契約に関する書類",
                 "class": "",
                 "field_name": "雇用契約書",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__E"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["E"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__F__01"]:
+    if data["p_applicant_persons__0"]["F__01"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "親族経営の会社等にご勤務の方は下記の書類も添付してください。",
                 "class": "",
                 "field_name": "会社の決算報告書または経営する親族の確定申告書（1期前）",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__F__01"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["F__01"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__F__02"]:
+    if data["p_applicant_persons__0"]["F__02"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "会社の決算報告書または経営する親族の確定申告書（2期前）",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__F__02"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["F__02"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__F__03"]:
+    if data["p_applicant_persons__0"]["F__03"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "",
                 "class": "",
                 "field_name": "会社の決算報告書または経営する親族の確定申告書（3期前）",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__F__03"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["F__03"]]),
             }
         )
-    if data["p_uploaded_files"]["p_applicant_persons__0__K"]:
+    if data["p_applicant_persons__0"]["K"]:
         json_data.append(
             {
                 "step": f"STEP {get_step_code(10)}：書類添付",
                 "big_class": "その他の書類",
                 "class": "",
                 "field_name": "その他の書類",
-                "filed_value": ", ".join(
-                    [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__0__K"]]
-                ),
+                "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__0"]["K"]]),
             }
         )
 
@@ -2910,244 +2877,204 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             }
         )
 
-        if data["p_uploaded_files"]["p_applicant_persons__1__A__01__a"]:
+        if data["p_applicant_persons__1"]["A__01__a"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "運転免許証〈表面〉",
                     "class": "",
                     "field_name": "運転免許証〈表面〉",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__A__01__a"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["A__01__a"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__A__01__b"]:
+        if data["p_applicant_persons__1"]["A__01__b"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "運転免許証〈裏面〉",
                     "class": "",
                     "field_name": "運転免許証〈裏面〉",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__A__01__b"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["A__01__b"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__A__02"]:
+        if data["p_applicant_persons__1"]["A__02"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "マイナンバーカード",
                     "class": "",
                     "field_name": "マイナンバーカード",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__A__02"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["A__02"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__A__03__a"]:
+        if data["p_applicant_persons__1"]["A__03__a"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "住民基本台帳カード（顔写真付き）〈表面〉",
                     "class": "",
                     "field_name": "住民基本台帳カード（顔写真付き）〈表面〉",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__A__03__a"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["A__03__a"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__A__03__b"]:
+        if data["p_applicant_persons__1"]["A__03__b"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "住民基本台帳カード（顔写真付き）〈裏面〉",
                     "class": "",
                     "field_name": "住民基本台帳カード（顔写真付き）〈裏面〉",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__A__03__b"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["A__03__b"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__B__a"]:
+        if data["p_applicant_persons__1"]["B__a"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "健康保険証〈表面〉",
                     "class": "",
                     "field_name": "健康保険証〈表面〉",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__B__a"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["B__a"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__B__b"]:
+        if data["p_applicant_persons__1"]["B__b"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "健康保険証〈裏面〉",
                     "class": "",
                     "field_name": "健康保険証〈裏面〉",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__B__b"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["B__b"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__C__01"]:
+        if data["p_applicant_persons__1"]["C__01"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "収入に関する書類",
                     "class": "",
                     "field_name": "源泉徴収票（前年度分）",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__C__01"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["C__01"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__C__02"]:
+        if data["p_applicant_persons__1"]["C__02"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "源泉徴収票（前々年度分）",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__C__02"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["C__02"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__C__03"]:
+        if data["p_applicant_persons__1"]["C__03"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
-                    "big_class": "",
+                    "big_class": "収入に関する書類",
                     "class": "",
                     "field_name": "確定申告書（1期前）",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__C__03"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["C__03"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__C__04"]:
+        if data["p_applicant_persons__1"]["C__04"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "確定申告書（2期前）",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__C__04"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["C__04"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__C__05"]:
+        if data["p_applicant_persons__1"]["C__05"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "確定申告書（3期前）",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__C__05"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["C__05"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__D__01"]:
+        if data["p_applicant_persons__1"]["D__01"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "非上場企業の役員の方は下記の書類も添付してください。",
                     "class": "",
                     "field_name": "会社の決算報告書（1期前）",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__D__01"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["D__01"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__D__02"]:
+        if data["p_applicant_persons__1"]["D__02"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "会社の決算報告書（2期前）",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__D__02"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["D__02"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__D__03"]:
+        if data["p_applicant_persons__1"]["D__03"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "会社の決算報告書（3期前）",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__D__03"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["D__03"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__E"]:
+        if data["p_applicant_persons__1"]["E"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "雇用契約に関する書類",
                     "class": "",
                     "field_name": "雇用契約書",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__E"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["E"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__F__01"]:
+        if data["p_applicant_persons__1"]["F__01"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "親族経営の会社等にご勤務の方は下記の書類も添付してください。",
                     "class": "",
                     "field_name": "会社の決算報告書または経営する親族の確定申告書（1期前）",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__F__01"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["F__01"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__F__02"]:
+        if data["p_applicant_persons__1"]["F__02"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "会社の決算報告書または経営する親族の確定申告書（2期前）",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__F__02"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["F__02"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__F__03"]:
+        if data["p_applicant_persons__1"]["F__03"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "",
                     "class": "",
                     "field_name": "会社の決算報告書または経営する親族の確定申告書（3期前）",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__F__03"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["F__03"]]),
                 }
             )
-        if data["p_uploaded_files"]["p_applicant_persons__1__K"]:
+        if data["p_applicant_persons__1"]["K"]:
             json_data.append(
                 {
                     "step": f"STEP {get_step_code(11)}：収入合算者の書類",
                     "big_class": "その他の書類",
                     "class": "",
                     "field_name": "その他の書類",
-                    "filed_value": ", ".join(
-                        [item["name"] for item in data["p_uploaded_files"]["p_applicant_persons__1__K"]]
-                    ),
+                    "filed_value": ", ".join([item["name"] for item in data["p_applicant_persons__1"]["K"]]),
                 }
             )
 
@@ -3158,7 +3085,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             "big_class": "担当者の名刺はありますか？※名刺添付で入力を省略できます",
             "class": "",
             "field_name": "提携会社の担当者名刺",
-            "filed_value": ", ".join([item["name"] for item in data["p_uploaded_files"]["J"]]),
+            "filed_value": ", ".join([item["name"] for item in data["p_application_headers"]["J"]]),
         }
     )
     target = list(filter(lambda x: x["id"] == data["p_application_headers"]["sales_company_id"], orgs))
@@ -3209,14 +3136,6 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             "filed_value": data["p_application_headers"]["vendor_phone"],
         }
     )
-
-    # df = pd.DataFrame(
-    #     json_data,
-    # )
-
-    # excel_file_path = "data.xlsx"
-
-    # df.to_excel(excel_file_path, header=False, index=False)
 
     df = pd.DataFrame(
         json_data,

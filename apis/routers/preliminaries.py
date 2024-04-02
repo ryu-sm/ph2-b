@@ -102,7 +102,6 @@ async def common_get_preliminary(p_application_header_id: int, db=Depends(get_db
         if p_application_headers["curr_borrowing_status"] == "1":
             preliminary["p_borrowings"] = await crud.query_p_borrowings_for_ad(db, p_application_header_id)
 
-        preliminary["p_uploaded_files"] = await crud.query_p_uploaded_files_for_ad(db, p_application_header_id)
         preliminary["p_activities"] = await crud.query_p_activities_for_ad(db, p_application_header_id)
         preliminary["files_p_activities"] = await crud.query_files_p_activities_for_ad(db, p_application_header_id)
         preliminary["p_result"] = await crud.query_p_result(db, p_application_header_id)
@@ -116,7 +115,9 @@ async def common_get_preliminary(p_application_header_id: int, db=Depends(get_db
 
 
 @router.put("/preliminary/{p_application_header_id}")
-async def user_orgs(p_application_header_id: str, data: dict, db=Depends(get_db), token: dict = Depends(get_token)):
+async def put_preliminary(
+    p_application_header_id: str, data: dict, db=Depends(get_db), token: dict = Depends(get_token)
+):
     try:
         main_tab = data.get("mainTab")
         sub_tab = data.get("subTab")
@@ -132,16 +133,10 @@ async def user_orgs(p_application_header_id: str, data: dict, db=Depends(get_db)
             await crud.diff_update_p_borrowing_details_for_ad(
                 db, data["p_borrowing_details__1"], p_application_header_id, 1, token["role_type"], token["id"]
             )
-            if data["p_application_headers"]["loan_type"] in ["1", "2"]:
-                await crud.delete_p_applicant_persons__1_for_ad(db, p_application_header_id)
-                # TODO: 删除图片
-
             if data["p_application_headers"]["land_advance_plan"] == "1":
                 await crud.diff_update_p_borrowing_details_for_ad(
                     db, data["p_borrowing_details__2"], p_application_header_id, 2, token["role_type"], token["id"]
                 )
-            else:
-                await crud.delete_p_borrowing_details__2_for_ad(db, p_application_header_id)
 
         if main_tab == 1 and sub_tab in [2, 3]:
             await crud.diff_update_p_applicant_persons_for_ad(
@@ -153,24 +148,16 @@ async def user_orgs(p_application_header_id: str, data: dict, db=Depends(get_db)
                 await crud.diff_update_p_application_headers_for_ad(
                     db, data["p_application_headers"], p_application_header_id, token["role_type"], token["id"]
                 )
-
                 await crud.diff_update_p_application_banks_for_ad(
                     db, data["p_application_banks"], p_application_header_id, token["role_type"], token["id"]
                 )
                 await crud.diff_update_p_borrowing_details_for_ad(
                     db, data["p_borrowing_details__1"], p_application_header_id, 1, token["role_type"], token["id"]
                 )
-                if data["p_application_headers"]["loan_type"] in ["1", "2"]:
-                    await crud.delete_p_applicant_persons__1_for_ad(db, p_application_header_id)
-                    # TODO: 删除图片
-
                 if data["p_application_headers"]["land_advance_plan"] == "1":
                     await crud.diff_update_p_borrowing_details_for_ad(
                         db, data["p_borrowing_details__2"], p_application_header_id, 2, token["role_type"], token["id"]
                     )
-                else:
-                    await crud.delete_p_borrowing_details__2_for_ad(db, p_application_header_id)
-
             await crud.diff_update_p_join_guarantors_for_ad(
                 db, data["p_join_guarantors"], p_application_header_id, token["role_type"], token["id"]
             )
@@ -190,18 +177,16 @@ async def user_orgs(p_application_header_id: str, data: dict, db=Depends(get_db)
                 await crud.diff_update_p_borrowings_for_ad(
                     db, data["p_borrowings"], p_application_header_id, token["role_type"], token["id"]
                 )
-            else:
-                await crud.delete_p_borrowings_for_ad(db, p_application_header_id)
         if main_tab == 1 and sub_tab in [7, 8]:
             await crud.diff_update_p_application_headers_for_ad(
                 db, data["p_application_headers"], p_application_header_id, token["role_type"], token["id"]
             )
 
         if main_tab == 1 and sub_tab == 9:
-            await crud.diff_p_uploaded_files_for_ad(
-                db, data["p_uploaded_files"], p_application_header_id, token["role_type"], token["id"]
+            await crud.diff_update_p_application_headers_for_ad(
+                db, data["p_application_headers"], p_application_header_id, token["role_type"], token["id"]
             )
-            await crud.diff_update_p_borrowings_files_for_ad(
+            await crud.diff_update_p_borrowings_for_ad(
                 db, data["p_borrowings"], p_application_header_id, token["role_type"], token["id"]
             )
             await crud.diff_update_p_applicant_persons_for_ad(
@@ -217,33 +202,25 @@ async def user_orgs(p_application_header_id: str, data: dict, db=Depends(get_db)
                 await crud.diff_update_p_application_headers_for_ad(
                     db, data["p_application_headers"], p_application_header_id, token["role_type"], token["id"]
                 )
+                await crud.diff_update_p_application_banks_for_ad(
+                    db, data["p_application_banks"], p_application_header_id, token["role_type"], token["id"]
+                )
+                await crud.diff_update_p_borrowing_details_for_ad(
+                    db, data["p_borrowing_details__1"], p_application_header_id, 1, token["role_type"], token["id"]
+                )
 
                 if data["p_application_headers"]["land_advance_plan"] == "1":
                     await crud.diff_update_p_borrowing_details_for_ad(
                         db, data["p_borrowing_details__2"], p_application_header_id, 2, token["role_type"], token["id"]
                     )
-                else:
-                    await crud.delete_p_borrowing_details__2_for_ad(db, p_application_header_id)
 
-            if data.get("p_application_banks") is not None:
-                await crud.diff_update_p_application_banks_for_ad(
-                    db, data["p_application_banks"], p_application_header_id, token["role_type"], token["id"]
-                )
-            if data.get("p_borrowing_details__1") is not None:
-                await crud.diff_update_p_borrowing_details_for_ad(
-                    db, data["p_borrowing_details__1"], p_application_header_id, 1, token["role_type"], token["id"]
-                )
             if data.get("p_join_guarantors") is not None:
                 await crud.diff_update_p_join_guarantors_for_ad(
                     db, data["p_join_guarantors"], p_application_header_id, token["role_type"], token["id"]
                 )
-            if data.get("p_applicant_persons__1") is not None:
-                await crud.diff_update_p_applicant_persons_for_ad(
-                    db, data["p_applicant_persons__1"], p_application_header_id, 1, token["role_type"], token["id"]
-                )
 
-            await crud.diff_p_uploaded_files_for_ad(
-                db, data["p_uploaded_files"], p_application_header_id, token["role_type"], token["id"]
+            await crud.diff_update_p_applicant_persons_for_ad(
+                db, data["p_applicant_persons__1"], p_application_header_id, 1, token["role_type"], token["id"]
             )
 
         return JSONResponse(status_code=200, content={"message": "successful"})
@@ -255,25 +232,23 @@ async def user_orgs(p_application_header_id: str, data: dict, db=Depends(get_db)
 
 
 @router.get("/files-view/{p_application_header_id}")
-async def common_get_preliminary(
-    p_application_header_id: int, category: str, db=Depends(get_db), token=Depends(get_token)
+async def get_files_view(
+    p_application_header_id: int, type: int, category: str, db=Depends(get_db), token=Depends(get_token)
 ):
     try:
-        result = None
-        if "G" in category:
-            result = await crud.query_p_uploaded_files_for_ad_view(db, p_application_header_id, "/G")
-            return JSONResponse(status_code=200, content=result)
-        if "J" in category:
-            result = await crud.query_p_uploaded_files_for_ad_view(db, p_application_header_id, "/J")
-            return JSONResponse(status_code=200, content=result)
-        if "S" in category:
-            result = await crud.query_p_uploaded_files_for_ad_view(db, p_application_header_id, "/S")
-            return JSONResponse(status_code=200, content=result)
-        if "I" in category:
-            result = await crud.query_p_borrowings_for_ad_view(db, p_application_header_id)
-            return JSONResponse(status_code=200, content=result)
+        result = await crud.query_p_uploaded_files_for_ad_view(db, p_application_header_id, type, category)
+        return JSONResponse(status_code=200, content=result)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
 
-        result = await crud.query_p_uploaded_files_for_ad_view(db, p_application_header_id, category)
+
+@router.get("/p_borrowings/files-view/{p_application_header_id}")
+async def get_p_borrowings_files_view(p_application_header_id: int, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        result = await crud.query_p_borrowings_files_for_ad_view(db, p_application_header_id)
         return JSONResponse(status_code=200, content=result)
     except Exception as err:
         logger.exception(err)
@@ -301,22 +276,6 @@ async def get_update_hitories(
 ):
     try:
         histories = await crud.query_field_uodate_histories_for_ad(db, p_application_header_id, update_history_key)
-        return JSONResponse(status_code=200, content=histories)
-    except Exception as err:
-        logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
-
-
-@router.get("/edit_histories/files/{p_application_header_id}")
-async def get_update_hitories(
-    p_application_header_id: int, update_history_key: str, db=Depends(get_db), token=Depends(get_token)
-):
-    try:
-        histories = await crud.query_files_field_uodate_histories_for_ad(
-            db, p_application_header_id, update_history_key
-        )
         return JSONResponse(status_code=200, content=histories)
     except Exception as err:
         logger.exception(err)

@@ -218,7 +218,7 @@ async def delete_provisional_result(data: dict, db=Depends(get_db), token=Depend
             db,
             data["p_application_header_id"],
             data["s_bank_id"],
-            data["p_uploaded_file_id"],
+            data["p_upload_file_id"],
         )
         return JSONResponse(status_code=200, content={"message": "successful"})
     except Exception as err:

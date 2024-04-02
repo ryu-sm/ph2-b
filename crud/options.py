@@ -135,4 +135,6 @@ async def query_s_sales_company_id_for_category(db: DB, category):
 
 
 async def query_all_sales_person_options(db: DB):
-    return await db.fetch_all("SELECT CONVERT(id,CHAR) as value, name_kanji as label FROM s_sales_persons;")
+    return await db.fetch_all(
+        "SELECT CONVERT(id,CHAR) as value, name_kanji as label, mobile_phone, email FROM s_sales_persons;"
+    )
