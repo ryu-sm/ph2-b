@@ -352,7 +352,7 @@ CREATE TABLE `p_bank_api_send_histories` (
   `request_number` varchar(17) DEFAULT NULL COMMENT '申込認識番号',
   `pair_loan_id` bigint unsigned DEFAULT NULL COMMENT 'ペアローン相手ID',
   `request_body` json DEFAULT NULL COMMENT 'リクエストボディ',
-  `status_code` json DEFAULT NULL COMMENT 'ステータスコード',
+  `status_code` char(3) DEFAULT NULL COMMENT 'ステータスコード',
   `response_body` json DEFAULT NULL COMMENT 'レスポンスボディ',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日付',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日付',
@@ -464,12 +464,10 @@ DROP TABLE IF EXISTS `p_examine_status_histories`;
 CREATE TABLE `p_examine_status_histories` (
   `p_application_bank_id` bigint unsigned NOT NULL COMMENT '申込銀行ID',
   `status` tinyint NOT NULL COMMENT '審査状態',
-  `status_origin` json DEFAULT NULL COMMENT '審査状態源',
+  `status_origin` json NOT NULL COMMENT '審査状態源',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日付',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日付',
-  PRIMARY KEY (`p_application_bank_id`,`status`) USING BTREE,
-  KEY `p_examine_status_histories_i` (`created_at`) USING BTREE,
-  CONSTRAINT `p_examine_status_histories_fk_p_application_bank_id` FOREIGN KEY (`p_application_bank_id`) REFERENCES `p_application_banks` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  KEY `p_examine_status_histories_i` (`created_at`) USING BTREE
 ) COMMENT='審査状態履歴';
 
 -- ----------------------------

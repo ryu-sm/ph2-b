@@ -916,7 +916,7 @@ async def diff_update_p_join_guarantors_for_ad(
         filter = [item for item in old_p_join_guarantors if item["id"] == p_join_guarantor["id"]]
         if len(filter) == 0:
             data_ = blank_to_none(p_join_guarantor)
-            await crud.insert_p_join_guarantors(db, [data_], p_application_header_id)
+            await crud.insert_p_join_guarantors(db, [data_], p_application_header_id, role_type, role_id)
             continue
         [old_p_join_guarantor] = filter
         for key, value in p_join_guarantor.items():
