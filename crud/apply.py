@@ -1495,6 +1495,7 @@ async def query_p_application_headers_files_for_ap(db: DB, p_application_header_
     files = {
         "G": [],
         "J": [],
+        "R": [],
     }
     for key in file_keys:
         sql = f"""
@@ -1553,8 +1554,8 @@ async def query_p_applicant_persons_files_for_ap(db: DB, p_application_header_id
         "K",
     ]
     files = {
-        "G": [],
-        "J": [],
+        # "G": [],
+        # "J": [],
         "H__a": [],
         "H__b": [],
         "A__01__a": [],
