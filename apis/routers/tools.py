@@ -95,8 +95,8 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
                 sub_values = [
                     f"{p_upload_file_id}",
                     f"{p_application_header_id}",
-                    f"{file['role_type']}",
-                    f"{file['role_id']}",
+                    f"{file['owner_type']}",
+                    f"{file['owner_id']}",
                     f"{p_applicant_person_id}",
                     f"{new_type}",
                 ]
