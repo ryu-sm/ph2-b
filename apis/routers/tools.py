@@ -114,6 +114,45 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
                 # upload_to_s3(f"{s3_key}/{file_name}", file_content)
 
                 sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
+                # return {"sql": sql}
+
+        for s3_key__ in header_key:
+            new_type = 0
+            new_key = s3_key__.split("/")[-1]
+
+            sql = f"select * from p_uploaded_files_bk where p_application_header_id = {p_application_header_id} and s3_key like '%/{s3_key__}';"
+
+            files = await db.fetch_all(sql)
+
+            if len(files) == 0:
+                continue
+            for file in files:
+                old_file = download_from_s3(file["file_name"])
+                p_upload_file_id = await db.uuid_short()
+
+                sub_fields = ["id", "p_application_header_id", "owner_type", "owner_id", "record_id", "type"]
+                sub_values = [
+                    f"{p_upload_file_id}",
+                    f"{p_application_header_id}",
+                    f"{file['owner_type']}",
+                    f"{file['owner_id']}",
+                    f"{p_application_header_id}",
+                    f"{new_type}",
+                ]
+
+                s3_key = f"{p_application_header_id}/{p_upload_file_id}/{new_key}"
+                file_name = old_file["name"]
+
+                sub_fields.append("s3_key")
+                sub_fields.append("file_name")
+                sub_values.append(f"'{s3_key}'")
+                sub_values.append(f"'{file_name}'")
+
+                # file_content = base64.b64decode(old_file["src"].split(",")[1])
+
+                # upload_to_s3(f"{s3_key}/{file_name}", file_content)
+
+                sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
                 return {"sql": sql}
 
     except Exception as e:
