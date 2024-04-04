@@ -1000,6 +1000,7 @@ async def diff_update_p_application_headers_for_ap(db: DB, data: dict, p_applica
 
 async def diff_update_p_applicant_persons_for_ap(db: DB, data: dict, p_application_header_id, type, role_type, role_id):
     JOBS = []
+    print(data)
     p_applicant_persons_basic = await db.fetch_one(
         f"SELECT id FROM p_applicant_persons WHERE p_application_header_id = {p_application_header_id} AND type = {type}"
     )
