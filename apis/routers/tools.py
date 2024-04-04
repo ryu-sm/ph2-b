@@ -1,9 +1,10 @@
+import base64
 from fastapi import APIRouter, Depends
 import utils
 from core.config import settings
 from apis.deps import get_db
 from core.database import DB
-from utils import download_from_s3
+from utils import download_from_s3, upload_to_s3
 
 router = APIRouter()
 
@@ -70,13 +71,13 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
 
         for s3_key__ in person_key:
             new_type = 0 if "__0__" in s3_key__ else 1
+            new_key = s3_key__.split("__0__" if "__0__" in s3_key__ else "__1__")[-1]
 
             p_applicant_persons = await db.fetch_one(
                 f"select id from p_applicant_persons where p_application_header_id = {p_application_header_id} and type = {new_type}"
             )
             print(p_applicant_persons)
             if p_applicant_persons is None:
-                print(999)
                 continue
             p_applicant_person_id = p_applicant_persons["id"]
 
@@ -87,9 +88,33 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
             if len(files) == 0:
                 continue
             for file in files:
-                file_base64 = download_from_s3(file["file_name"])
-                print(file_base64)
-                return {"sec": file_base64}
+                old_file = download_from_s3(file["file_name"])
+                p_upload_file_id = await db.uuid_short()
+
+                sub_fields = ["id", "p_application_header_id", "owner_type", "owner_id", "record_id", "type"]
+                sub_values = [
+                    f"{p_upload_file_id}",
+                    f"{p_application_header_id}",
+                    f"{file['role_type']}",
+                    f"{file['role_id']}",
+                    f"{p_applicant_person_id}",
+                    f"{new_type}",
+                ]
+
+                s3_key = f"{p_application_header_id}/{p_upload_file_id}/{new_key}"
+                file_name = old_file["name"]
+
+                sub_fields.append("s3_key")
+                sub_fields.append("file_name")
+                sub_values.append(f"'{s3_key}'")
+                sub_values.append(f"'{file_name}'")
+
+                # file_content = base64.b64decode(old_file["src"].split(",")[1])
+
+                # upload_to_s3(f"{s3_key}/{file_name}", file_content)
+
+                sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
+                return {"sql": sql}
 
     except Exception as e:
         raise e
