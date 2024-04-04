@@ -81,7 +81,7 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
                 continue
             p_applicant_person_id = p_applicant_persons["id"]
 
-            sql = f"select * from p_uploaded_files_bk where p_application_header_id = {p_application_header_id} and s3_key like '%/{s3_key__}';"
+            sql = f"select * from p_uploaded_files where p_application_header_id = {p_application_header_id} and s3_key like '%/{s3_key__}';"
 
             files = await db.fetch_all(sql)
 
@@ -113,14 +113,14 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
 
                 upload_to_s3(f"{s3_key}/{file_name}", file_content)
 
-                sql = f"INSERT INTO p_uploaded_files_bk ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
+                sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
                 await db.execute(sql)
 
         for s3_key__ in header_key:
             new_type = 0
             new_key = s3_key__.split("/")[-1]
 
-            sql = f"select * from p_uploaded_files_bk where p_application_header_id = {p_application_header_id} and s3_key like '%/{s3_key__}';"
+            sql = f"select * from p_uploaded_files where p_application_header_id = {p_application_header_id} and s3_key like '%/{s3_key__}';"
 
             files = await db.fetch_all(sql)
 
@@ -152,14 +152,14 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
 
                 upload_to_s3(f"{s3_key}/{file_name}", file_content)
 
-                sql = f"INSERT INTO p_uploaded_files_bk ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
+                sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
                 await db.execute(sql)
 
         for s3_key__ in bowrring_key:
             new_type = 0
             new_key = "I"
 
-            sql = f"select * from p_uploaded_files_bk where p_application_header_id = {p_application_header_id} and s3_key like '%/{s3_key__}';"
+            sql = f"select * from p_uploaded_files where p_application_header_id = {p_application_header_id} and s3_key like '%/{s3_key__}';"
 
             files = await db.fetch_all(sql)
 
@@ -191,7 +191,7 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
 
                 upload_to_s3(f"{s3_key}/{file_name}", file_content)
 
-                sql = f"INSERT INTO p_uploaded_files_bk ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
+                sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
                 await db.execute(sql)
 
     except Exception as e:
