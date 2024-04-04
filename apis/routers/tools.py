@@ -109,12 +109,12 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
                 sub_values.append(f"'{s3_key}'")
                 sub_values.append(f"'{file_name}'")
 
-                # file_content = base64.b64decode(old_file["src"].split(",")[1])
+                file_content = base64.b64decode(old_file["src"].split(",")[1])
 
                 # upload_to_s3(f"{s3_key}/{file_name}", file_content)
 
                 sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
-                # return {"sql": sql}
+                await db.execute(sql)
 
         for s3_key__ in header_key:
             new_type = 0
@@ -148,24 +148,16 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
                 sub_values.append(f"'{s3_key}'")
                 sub_values.append(f"'{file_name}'")
 
-                # file_content = base64.b64decode(old_file["src"].split(",")[1])
+                file_content = base64.b64decode(old_file["src"].split(",")[1])
 
                 # upload_to_s3(f"{s3_key}/{file_name}", file_content)
 
                 sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
-                # return {"sql": sql}
+                await db.execute(sql)
 
         for s3_key__ in bowrring_key:
             new_type = 0
             new_key = "I"
-
-            # p_applicant_persons = await db.fetch_one(
-            #     f"select id from p_applicant_persons where p_application_header_id = {p_application_header_id} and type = {new_type}"
-            # )
-            # print(p_applicant_persons)
-            # if p_applicant_persons is None:
-            #     continue
-            # p_applicant_person_id = p_applicant_persons["id"]
 
             sql = f"select * from p_uploaded_files_bk where p_application_header_id = {p_application_header_id} and s3_key like '%/{s3_key__}';"
 
@@ -195,12 +187,12 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
                 sub_values.append(f"'{s3_key}'")
                 sub_values.append(f"'{file_name}'")
 
-                # file_content = base64.b64decode(old_file["src"].split(",")[1])
+                file_content = base64.b64decode(old_file["src"].split(",")[1])
 
                 # upload_to_s3(f"{s3_key}/{file_name}", file_content)
 
                 sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
-                return {"sql": sql}
+                await db.execute(sql)
 
     except Exception as e:
         raise e
