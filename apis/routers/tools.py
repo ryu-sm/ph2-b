@@ -111,7 +111,7 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
 
                 file_content = base64.b64decode(old_file["src"].split(",")[1])
 
-                # upload_to_s3(f"{s3_key}/{file_name}", file_content)
+                upload_to_s3(f"{s3_key}/{file_name}", file_content)
 
                 sql = f"INSERT INTO p_uploaded_files_bk ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
                 await db.execute(sql)
@@ -150,7 +150,7 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
 
                 file_content = base64.b64decode(old_file["src"].split(",")[1])
 
-                # upload_to_s3(f"{s3_key}/{file_name}", file_content)
+                upload_to_s3(f"{s3_key}/{file_name}", file_content)
 
                 sql = f"INSERT INTO p_uploaded_files_bk ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
                 await db.execute(sql)
@@ -189,7 +189,7 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
 
                 file_content = base64.b64decode(old_file["src"].split(",")[1])
 
-                # upload_to_s3(f"{s3_key}/{file_name}", file_content)
+                upload_to_s3(f"{s3_key}/{file_name}", file_content)
 
                 sql = f"INSERT INTO p_uploaded_files_bk ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
                 await db.execute(sql)
