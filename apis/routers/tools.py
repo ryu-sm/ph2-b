@@ -113,7 +113,7 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
 
                 # upload_to_s3(f"{s3_key}/{file_name}", file_content)
 
-                sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
+                sql = f"INSERT INTO p_uploaded_files_bk ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
                 await db.execute(sql)
 
         for s3_key__ in header_key:
@@ -152,7 +152,7 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
 
                 # upload_to_s3(f"{s3_key}/{file_name}", file_content)
 
-                sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
+                sql = f"INSERT INTO p_uploaded_files_bk ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
                 await db.execute(sql)
 
         for s3_key__ in bowrring_key:
@@ -191,7 +191,7 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
 
                 # upload_to_s3(f"{s3_key}/{file_name}", file_content)
 
-                sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
+                sql = f"INSERT INTO p_uploaded_files_bk ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
                 await db.execute(sql)
 
     except Exception as e:
