@@ -46,14 +46,14 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         index = step_list.index(id)
         return str(index + 1).zfill(2)
 
-    json_string = json.dumps(data, indent=4)  # indent for pretty printing
+    # json_string = json.dumps(data, indent=4)  # indent for pretty printing
 
-    # Specify the file path
-    file_path = "tttt.json"
+    # # Specify the file path
+    # file_path = "tttt.json"
 
-    # Write JSON data to a file
-    with open(file_path, "w") as json_file:
-        json_file.write(json_string)
+    # # Write JSON data to a file
+    # with open(file_path, "w") as json_file:
+    #     json_file.write(json_string)
     db = DB()
     banks = await db.fetch_all("SELECT CONVERT(id,CHAR) as id, name FROM s_banks;")
     orgs = await db.fetch_all("SELECT CONVERT(id,CHAR) as id, name FROM s_sales_company_orgs;")

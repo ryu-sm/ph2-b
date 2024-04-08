@@ -1,5 +1,5 @@
 from loguru import logger
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi import Depends
 from fastapi.responses import JSONResponse
 
@@ -7,6 +7,7 @@ from core.custom import LoggingContextRoute
 from apis.deps import get_db
 from apis.deps import get_token
 import crud
+import utils
 from utils.s3 import download_from_s3
 from utils import blank_to_none
 
@@ -279,10 +280,19 @@ async def get_p_borrowings_files_view(p_application_header_id: int, db=Depends(g
 
 
 @router.get("/row_data/{p_application_header_id}")
-async def get_raw_data(p_application_header_id: int, token: dict = Depends(get_token)):
+async def get_raw_data(
+    p_application_header_id: int, request: Request, db=Depends(get_db), token: dict = Depends(get_token)
+):
     try:
 
         file = download_from_s3(f"{p_application_header_id}/row_data.xlsx")
+        # await utils.common_insert_c_access_log(
+        #     db,
+        #     request,
+        #     params={"path": {"p_application_header_id": p_application_header_id}},
+        #     status_code=200,
+        #     response_body=DEFAULT_200_MSG,
+        # )
         return JSONResponse(status_code=200, content=file)
     except Exception as err:
         logger.exception(err)

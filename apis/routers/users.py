@@ -134,9 +134,11 @@ async def user_login(data: dict, request: Request, db=Depends(get_db)):
 
 
 @router.delete("/user/token")
-async def user_logout(request: Request, db=Depends(get_db), token=Depends(get_token)):
+async def user_logout(email: str, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
-        await utils.common_insert_c_access_log(db, request, status_code=200, response_body=DEFAULT_200_MSG)
+        await utils.common_insert_c_access_log(
+            db, request, params={"query": {"email": email}}, status_code=200, response_body=DEFAULT_200_MSG
+        )
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
@@ -150,9 +152,6 @@ async def user_up_password(data: dict, request: Request, db=Depends(get_db), tok
         if not utils.verify_password(data["password"], await crud.query_c_user_hashed_pwd(db, user_id)):
             return JSONResponse(status_code=412, content={"massage": "curr password is wrong."})
         await crud.update_c_user_password_with_id(db, id=user_id, hashed_pwd=utils.hash_password(data["new_password"]))
-        await utils.common_insert_c_access_log(
-            db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
-        )
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
@@ -195,9 +194,7 @@ async def user_change_email(data: dict, request: Request, db=Depends(get_db)):
             payload=await crud.query_c_user_token_payload(db, c_user_id=payload["id"]),
             expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
         )
-        await utils.common_insert_c_access_log(
-            db, request, params={"body": data}, status_code=200, response_body={"access_token": access_token}
-        )
+
         return JSONResponse(status_code=200, content={"access_token": access_token})
     except Exception as err:
         logger.exception(err)
@@ -208,7 +205,7 @@ async def user_change_email(data: dict, request: Request, db=Depends(get_db)):
 async def user_withdrawal(request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
         await crud.delete_c_user(db, id=token.get("id"))
-        await utils.common_insert_c_access_log(db, request, status_code=200, response_body=DEFAULT_200_MSG)
+
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)

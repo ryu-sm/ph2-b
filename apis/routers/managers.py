@@ -13,7 +13,8 @@ import crud
 import utils
 import schemas
 from utils.data_check import manager_data_check
-
+from utils.s3 import download_from_s3
+from typing import Optional
 
 router = APIRouter(route_class=LoggingContextRoute)
 
@@ -63,9 +64,7 @@ async def manager_up_password(data: dict, request: Request, db=Depends(get_db), 
         await crud.update_s_manager_password_with_id(
             db, id=token["id"], hashed_pwd=utils.hash_password(data["new_password"])
         )
-        await utils.common_insert_c_access_log(
-            db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
-        )
+
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
@@ -106,9 +105,11 @@ async def manager_login(data: dict, request: Request, db=Depends(get_db)):
 
 
 @router.delete("/manager/token")
-async def manager_logout(request: Request, db=Depends(get_db), token=Depends(get_token)):
+async def manager_logout(email: str, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
-        await utils.common_insert_c_access_log(db, request, status_code=200, response_body=DEFAULT_200_MSG)
+        await utils.common_insert_c_access_log(
+            db, request, params={"query": {"email": email}}, status_code=200, response_body=DEFAULT_200_MSG
+        )
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
@@ -131,9 +132,12 @@ async def manager_get_access_applications(status: int, db=Depends(get_db), token
 
 
 @router.put("/manager/un-pair-loan")
-async def un_pair_laon(data: dict, db=Depends(get_db), token=Depends(get_token)):
+async def un_pair_laon(data: dict, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
         await crud.delete_pair_laon(db, data.values(), token["role_type"], token["id"])
+        await utils.common_insert_c_access_log(
+            db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
+        )
         return JSONResponse(status_code=200, content={"message": "successful"})
     except Exception as err:
         logger.exception(err)
@@ -143,9 +147,12 @@ async def un_pair_laon(data: dict, db=Depends(get_db), token=Depends(get_token))
 
 
 @router.put("/manager/set-pair-loan")
-async def set_pair_laon(data: dict, db=Depends(get_db), token=Depends(get_token)):
+async def set_pair_laon(data: dict, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
         await crud.set_pair_loan(db, data, token["role_type"], token["id"])
+        await utils.common_insert_c_access_log(
+            db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
+        )
         return JSONResponse(status_code=200, content={"message": "successful"})
     except Exception as err:
         logger.exception(err)
@@ -210,7 +217,7 @@ async def update_provisional_after_result(data: dict, db=Depends(get_db), token=
 
 
 @router.put("/manager/provisional_result")
-async def update_provisional_result(data: dict, db=Depends(get_db), token=Depends(get_token)):
+async def update_provisional_result(data: dict, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
         await crud.update_p_application_banks_pprovisional_result(
             db,
@@ -221,16 +228,17 @@ async def update_provisional_result(data: dict, db=Depends(get_db), token=Depend
             token["role_type"],
             token["id"],
         )
-        return JSONResponse(status_code=200, content={"message": "successful"})
+        # await utils.common_insert_c_access_log(
+        #     db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
+        # )
+        return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
-@router.patch("/manager/provisional_result")
-async def delete_provisional_result(data: dict, db=Depends(get_db), token=Depends(get_token)):
+@router.post("/manager/provisional_result")
+async def delete_provisional_result(data: dict, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
         await crud.delete_p_application_banks_pprovisional_result(
             db,
@@ -238,21 +246,25 @@ async def delete_provisional_result(data: dict, db=Depends(get_db), token=Depend
             data["s_bank_id"],
             data["p_upload_file_id"],
         )
-        return JSONResponse(status_code=200, content={"message": "successful"})
+        # await utils.common_insert_c_access_log(
+        #     db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
+        # )
+        return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
 @router.put("/manager/approver_confirmation")
-async def update_approver_confirmation(data: dict, db=Depends(get_db), token=Depends(get_token)):
+async def update_approver_confirmation(data: dict, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
         await crud.update_p_application_headers_approver_confirmation(
             db, data["p_application_header_id"], data["approver_confirmation"]
         )
-        return JSONResponse(status_code=200, content={"message": "successful"})
+        await utils.common_insert_c_access_log(
+            db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
+        )
+        return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
         return JSONResponse(
@@ -261,8 +273,9 @@ async def update_approver_confirmation(data: dict, db=Depends(get_db), token=Dep
 
 
 @router.put("/manager/pre_examination_status")
-async def update_pre_examination_status(data: dict, db=Depends(get_db), token=Depends(get_token)):
+async def update_pre_examination_status(data: dict, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
+        print("preliminary", bool(data.get("preliminary")))
         if data["pre_examination_status"] == 3:
             errors = manager_data_check(data["preliminary"])
 
@@ -271,7 +284,26 @@ async def update_pre_examination_status(data: dict, db=Depends(get_db), token=De
         await crud.update_p_application_headers_pre_examination_status(
             db, data["p_application_header_id"], data["pre_examination_status"]
         )
+
+        await utils.common_insert_c_access_log(
+            db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
+        )
+
         return JSONResponse(status_code=200, content={"message": "successful"})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.get("/c_access_logs")
+async def update_pre_examination_status(start: Optional[str] = None, end: Optional[str] = None, db=Depends(get_db)):
+    try:
+        print(start, end)
+        file = await utils.access_logs_output(start, end)
+        # file = download_from_s3(file_key)
+        return JSONResponse(status_code=200, content=file)
     except Exception as err:
         logger.exception(err)
         return JSONResponse(

@@ -96,21 +96,6 @@ FILE_FIELF_KEYS = [
 ]
 
 
-ENDPIONT_MAP = {
-    "/user/token&POST": "ログイン",
-    "/user/token&DELETE": "ログアウト",
-    "/user/password&PUT": "パスワード変更",
-    "/user/email&PUT": "メールアドレス変更",
-    "/user&DELETE": "退会",
-    "/manager/password&PUT": "パスワード変更",
-    "/manager/token&POST": "ログイン",
-    "/manager/token&DELETE": "ログアウト",
-    "/sales-person/password&PUT": "パスワード変更",
-    "/sales-person/token&POST": "ログイン",
-    "/sales-person/token&DELETE": "ログアウト",
-}
-
-
 # ENUM
 class USER_STATUS(Enum):
     NORMAL = "1"

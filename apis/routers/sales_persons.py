@@ -64,9 +64,7 @@ async def sales_person_up_password(data: dict, request: Request, db=Depends(get_
         await crud.update_s_sales_person_password_with_id(
             db, id=token["id"], hashed_pwd=utils.hash_password(data["new_password"])
         )
-        await utils.common_insert_c_access_log(
-            db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
-        )
+
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
@@ -107,9 +105,11 @@ async def sales_person_login(data: dict, request: Request, db=Depends(get_db)):
 
 
 @router.delete("/sales-person/token")
-async def sales_person_logout(request: Request, db=Depends(get_db), token=Depends(get_token)):
+async def sales_person_logout(email: str, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
-        await utils.common_insert_c_access_log(db, request, status_code=200, response_body=DEFAULT_200_MSG)
+        await utils.common_insert_c_access_log(
+            db, request, params={"query": {"email": email}}, status_code=200, response_body=DEFAULT_200_MSG
+        )
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
