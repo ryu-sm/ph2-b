@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from core.config import settings
 from core.custom import LoggingContextRoute
 from apis.deps import get_db
-from apis.deps import get_user_id
+
 import crud
 import utils
 import schemas

@@ -45,3 +45,9 @@ async def insert_c_message(
     )
     """
     await db.execute(sql)
+
+
+async def query_update_history_count(db: DB, p_application_header_id, table_name, field_name, table_id):
+    sql = f"SELECT COUNT(*) AS total FROM p_activities WHERE p_application_header_id = {p_application_header_id} AND table_name = '{table_name}' AND field_name = '{field_name}' AND table_id={table_id}"
+    result = await db.fetch_one(sql)
+    return result["total"]

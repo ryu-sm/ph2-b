@@ -2,20 +2,39 @@ import json
 import typing
 import base64
 import asyncio
+import pytz
 from datetime import datetime
 from core.database import DB
-from constant import JSON_FIELD_KEYS, FILE_FIELF_KEYS
+from constant import (
+    JSON_FIELD_KEYS,
+    FILE_FIELF_KEYS,
+    P_APPLICATION_HEADERS_FILE_FIELF_KEYS,
+    P_APPLICANT_PERSONS_FILE_FIELF_KEYS,
+    P_BORROWINGS_FILE_FIELF_KEYS,
+    JSON_DICT_FIELD_KEYS,
+    JSON_LIST_FIELD_KEYS,
+    INIT_NEW_HOUSE_PLANNED_RESIDENT_OVERVIEW,
+)
+from constant import (
+    P_UPLOAD_FILE_TYPE,
+    TOKEN_ROLE_TYPE,
+    P_APPLICANT_PERSONS_TYPE,
+    P_BORROWING_DETAILS_TIME_TYPE,
+    LOAN_TYPE,
+    LAND_ADVANCE_PLAN,
+    JOIN_GUARANTOR_UMU,
+    CURR_BORROWING_STATUS,
+    OPERATE_TYPE,
+)
 from utils import upload_to_s3, none_to_blank
 import utils
+import crud
 
 
-async def insert_p_application_headers(
-    db: DB, data: dict, role_type, role_id, c_user_id="null", s_sales_person_id="null"
-):
-    JOBS = []
-    sql = f"SELECT MAX(apply_no) no FROM p_application_headers WHERE created_at  >= '{datetime.strftime(datetime.now(),'%Y-%m-%d')} 00:00:00'"
+async def insert_p_application_headers(db: DB, data: dict, role_type, role_id, c_user_id=None, s_sales_person_id=None):
+    jp_tz = pytz.timezone("Asia/Tokyo")
+    sql = f"SELECT MAX(apply_no) no FROM p_application_headers WHERE created_at  >= '{datetime.strftime(datetime.now(jp_tz),'%Y-%m-%d')} 00:00:00'"
     last_apply = await db.fetch_one(sql)
-
     new_apply_no = None
     if last_apply["no"] is None:
         new_apply_no = f"SET{datetime.strftime(datetime.now(),'%Y%m%d')}001"
@@ -24,341 +43,132 @@ async def insert_p_application_headers(
         new_apply_no = f"SET{datetime.strftime(datetime.now(),'%Y%m%d')}{new_no}"
 
     p_application_header_id = await db.uuid_short()
-    fields = ["id", "c_user_id", "s_sales_person_id", "apply_no"]
-    values = [
-        f"{p_application_header_id}",
-        f"{c_user_id}",
-        f"{s_sales_person_id}",
-        f"'{new_apply_no}'",
-    ]
-
-    for key, value in data.items():
-        # files upload
-        if key in FILE_FIELF_KEYS:
-
-            if len(value) == 0:
-                continue
-            else:
-                for file in value:
-                    p_upload_file_id = await db.uuid_short()
-
-                    sub_fields = ["id", "p_application_header_id", "owner_type", "owner_id", "record_id", "type"]
-                    sub_values = [
-                        f"{p_upload_file_id}",
-                        f"{p_application_header_id}",
-                        f"{role_type}",
-                        f"{role_id}",
-                        f"{p_application_header_id}",
-                        "0",
-                    ]
-
-                    s3_key = f"{p_application_header_id}/{p_upload_file_id}/{key}"
-                    file_name = file["name"]
-
-                    sub_fields.append("s3_key")
-                    sub_fields.append("file_name")
-                    sub_values.append(f"'{s3_key}'")
-                    sub_values.append(f"'{file_name}'")
-
-                    file_content = base64.b64decode(file["src"].split(",")[1])
-
-                    upload_to_s3(f"{s3_key}/{file_name}", file_content)
-
-                    sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
-                    await db.execute(sql)
-                    p_activities_id = await db.uuid_short()
-                    sql = f"""
-                    INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-                    VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', '{key}', {p_application_header_id}, '{file["name"]}', 0);
-                    """
-                    JOBS.append(db.execute(sql))
-                continue
-
-        if value is None:
-            continue
-        fields.append(key)
-        if key in JSON_FIELD_KEYS:
-            values.append(f"'{json.dumps(value, ensure_ascii=False)}'")
-        else:
-            values.append(f"'{value}'")
-
-    sql = f"INSERT INTO p_application_headers ({', '.join(fields)}) VALUES ({', '.join(values)});"
-
-    await db.execute(sql)
-
-    ignoreFields = ["id", "c_user_id", "s_sales_person_id", "apply_no", "origin_data"]
-    for field, value in zip(fields, values):
-        if field in ignoreFields:
-            continue
-        id = await db.uuid_short()
-        sql = f"""
-        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', '{field}', {p_application_header_id}, {value}, 0);
-        """
-        JOBS.append(db.execute(sql))
-    if JOBS:
-        await asyncio.wait(JOBS)
+    basuc_p_application_header_sql_params = {
+        "id": p_application_header_id,
+        "c_user_id": c_user_id,
+        "s_sales_person_id": s_sales_person_id,
+        "apply_no": new_apply_no,
+    }
+    await db.execute(utils.gen_insert_sql("p_application_headers", {**data, **basuc_p_application_header_sql_params}))
+    for file_field_key in P_APPLICATION_HEADERS_FILE_FIELF_KEYS:
+        files = data.get(file_field_key, [])
+        for file in files:
+            p_upload_file_id = await db.uuid_short()
+            p_upload_file_sql_params = {
+                "id": p_upload_file_id,
+                "p_application_header_id": p_application_header_id,
+                "owner_type": role_type,
+                "owner_id": role_id,
+                "record_id": p_application_header_id,
+                "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
+                "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{file_field_key}",
+                "file_name": file["name"],
+            }
+            utils.upload_base64_file_s3(
+                f"{p_upload_file_sql_params.get('s3_key')}/{p_upload_file_sql_params.get('file_name')}",
+                file["src"],
+            )
+            await db.execute(utils.gen_insert_sql("p_uploaded_files", p_upload_file_sql_params))
     return p_application_header_id
 
 
-async def insert_p_applicant_persons(db: DB, data: dict, p_application_header_id: int, type: int, role_type, role_id):
-    JOBS = []
-    p_applicant_person_id = await db.uuid_short()
-    fields = ["id", "p_application_header_id", "type"]
-    values = [f"{p_applicant_person_id}", f"{p_application_header_id}", f"{type}"]
-    for key, value in data.items():
-        # files upload
-        if key in FILE_FIELF_KEYS:
-
-            if len(value) == 0:
-                continue
-            else:
-                for file in value:
-                    p_upload_file_id = await db.uuid_short()
-
-                    sub_fields = ["id", "p_application_header_id", "owner_type", "owner_id", "record_id", "type"]
-                    sub_values = [
-                        f"{p_upload_file_id}",
-                        f"{p_application_header_id}",
-                        f"{role_type}",
-                        f"{role_id}",
-                        f"{p_applicant_person_id}",
-                        f"{type}",
-                    ]
-
-                    s3_key = f"{p_application_header_id}/{p_upload_file_id}/{key}"
-                    file_name = file["name"]
-
-                    sub_fields.append("s3_key")
-                    sub_fields.append("file_name")
-                    sub_values.append(f"'{s3_key}'")
-                    sub_values.append(f"'{file_name}'")
-
-                    file_content = base64.b64decode(file["src"].split(",")[1])
-
-                    upload_to_s3(f"{s3_key}/{file_name}", file_content)
-
-                    sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
-                    await db.execute(sql)
-                    p_activities_id = await db.uuid_short()
-                    sql = f"""
-                    INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-                    VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_applicant_persons', '{key}', {p_applicant_person_id}, '{file["name"]}', 0);
-                    """
-                    JOBS.append(db.execute(sql))
-                continue
-
-        if value is None:
-            continue
-        fields.append(key)
-        if key in JSON_FIELD_KEYS:
-            values.append(f"'{json.dumps(value, ensure_ascii=False)}'")
-        else:
-            values.append(f"'{value}'")
-
-    sql = f"INSERT INTO p_applicant_persons ({', '.join(fields)}) VALUES ({', '.join(values)});"
-    await db.execute(sql)
-
-    ignoreFields = ["id", "p_application_header_id", "type"]
-    for field, value in zip(fields, values):
-        if field in ignoreFields:
-            continue
-        id = await db.uuid_short()
-        sql = f"""
-        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_applicant_persons', '{field}', {p_applicant_person_id}, {value}, 0);
-        """
-        JOBS.append(db.execute(sql))
-    if JOBS:
-        await asyncio.wait(JOBS)
-
-
-async def insert_p_borrowing_details(
-    db: DB, data: dict, p_application_header_id: int, time_type: int, role_type, role_id
+async def insert_p_applicant_persons(
+    db: DB, data: dict, p_application_header_id: int, type: int, role_type: int, role_id: int
 ):
-    JOBS = []
+    p_applicant_person_id = await db.uuid_short()
+    basic_p_applicant_person_sql_params = {
+        "id": p_applicant_person_id,
+        "p_application_header_id": p_application_header_id,
+        "type": type,
+    }
+    await db.execute(utils.gen_insert_sql("p_applicant_persons", {**data, **basic_p_applicant_person_sql_params}))
+
+    for file_field_key in P_APPLICANT_PERSONS_FILE_FIELF_KEYS:
+        files = data.get(file_field_key, [])
+        for file in files:
+            p_upload_file_id = await db.uuid_short()
+            p_upload_file_sql_params = {
+                "id": p_upload_file_id,
+                "p_application_header_id": p_application_header_id,
+                "owner_type": role_type,
+                "owner_id": role_id,
+                "record_id": p_applicant_person_id,
+                "type": type,
+                "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{file_field_key}",
+                "file_name": file["name"],
+            }
+            utils.upload_base64_file_s3(
+                f"{p_upload_file_sql_params.get('s3_key')}/{p_upload_file_sql_params.get('file_name')}",
+                file["src"],
+            )
+            await db.execute(utils.gen_insert_sql("p_uploaded_files", p_upload_file_sql_params))
+
+
+async def insert_p_borrowing_details(db: DB, data: dict, p_application_header_id: int, time_type: int):
     p_borrowing_detail_id = await db.uuid_short()
-    fields = ["id", "p_application_header_id", "time_type"]
-    values = [f"{p_borrowing_detail_id}", f"{p_application_header_id}", f"{time_type}"]
-    for key, value in data.items():
-        if value is None:
-            continue
-        fields.append(key)
-        if key in JSON_FIELD_KEYS:
-            values.append(f"'{json.dumps(value, ensure_ascii=False)}'")
-        else:
-            values.append(f"'{value}'")
-
-    sql = f"INSERT INTO p_borrowing_details ({', '.join(fields)}) VALUES ({', '.join(values)});"
-    await db.execute(sql)
-
-    ignoreFields = ["id", "p_application_header_id", "type"]
-    for field, value in zip(fields, values):
-        if field in ignoreFields:
-            continue
-        id = await db.uuid_short()
-        sql = f"""
-        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowing_details', '{field}', {p_borrowing_detail_id}, {value}, 0);
-        """
-        JOBS.append(db.execute(sql))
-    if JOBS:
-        await asyncio.wait(JOBS)
+    basic_p_borrowing_detail_sql_params = {
+        "id": p_borrowing_detail_id,
+        "p_application_header_id": p_application_header_id,
+        "time_type": time_type,
+    }
+    await db.execute(utils.gen_insert_sql("p_borrowing_details", {**data, **basic_p_borrowing_detail_sql_params}))
 
 
 async def instert_p_application_banks(db: DB, data: list, p_application_header_id: int):
     for s_bank_id in data:
-        id = await db.uuid_short()
-        fields = ["id", "p_application_header_id", "s_bank_id"]
-        values = [f"{id}", f"{p_application_header_id}", f"{s_bank_id}"]
-        sql = f"INSERT INTO p_application_banks ({', '.join(fields)}) VALUES ({', '.join(values)});"
-        await db.execute(sql)
+        p_application_banks_id = await db.uuid_short()
+        p_application_banks_sql_params = {
+            "id": p_application_banks_id,
+            "p_application_header_id": p_application_header_id,
+            "s_bank_id": s_bank_id,
+        }
+        await db.execute(utils.gen_insert_sql("p_application_banks", p_application_banks_sql_params))
 
 
-async def insert_p_join_guarantors(db: DB, data: typing.List[dict], p_application_header_id: int, role_type, role_id):
-    JOBS = []
+async def insert_p_join_guarantors(db: DB, data: typing.List[dict], p_application_header_id: int):
     for join_guarantor in data:
         p_join_guarantor_id = await db.uuid_short()
-        fields = ["id", "p_application_header_id"]
-        values = [f"{p_join_guarantor_id}", f"{p_application_header_id}"]
-
-        for key, value in join_guarantor.items():
-            if key == "id":
-                continue
-            if value is None:
-                continue
-            fields.append(key)
-            if key in JSON_FIELD_KEYS:
-                values.append(f"'{json.dumps(value, ensure_ascii=False)}'")
-            else:
-                values.append(f"'{value}'")
-
-        sql = f"INSERT INTO p_join_guarantors ({', '.join(fields)}) VALUES ({', '.join(values)});"
-        await db.execute(sql)
-        ignoreFields = ["id", "p_application_header_id"]
-        for field, value in zip(fields, values):
-            if field in ignoreFields:
-                continue
-            id = await db.uuid_short()
-            sql = f"""
-            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-            VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_join_guarantors', '{field}', {p_join_guarantor_id}, {value}, 0);
-            """
-            JOBS.append(db.execute(sql))
-    if JOBS:
-        await asyncio.wait(JOBS)
+        basic_p_join_guarantor_sql_params = {
+            "id": p_join_guarantor_id,
+            "p_application_header_id": p_application_header_id,
+        }
+        await db.execute(
+            utils.gen_insert_sql("p_join_guarantors", {**join_guarantor, **basic_p_join_guarantor_sql_params})
+        )
 
 
 async def insert_p_borrowings(db: DB, data: typing.List[dict], p_application_header_id: int, role_type, role_id):
-    JOBS = []
     for borrowing in data:
         p_borrowing_id = await db.uuid_short()
-        fields = ["id", "p_application_header_id"]
-        values = [f"{p_borrowing_id}", f"{p_application_header_id}"]
+        basic_p_borrowing_sql_params = {"id": p_borrowing_id, "p_application_header_id": p_application_header_id}
+        await db.execute(utils.gen_insert_sql("p_borrowings", {**borrowing, **basic_p_borrowing_sql_params}))
 
-        for key, value in borrowing.items():
-            if key == "id":
-                continue
-            # files upload
-            if key in FILE_FIELF_KEYS:
-
-                if len(value) == 0:
-                    continue
-                else:
-                    for file in value:
-                        p_upload_file_id = await db.uuid_short()
-
-                        sub_fields = ["id", "p_application_header_id", "owner_type", "owner_id", "record_id", "type"]
-                        sub_values = [
-                            f"{p_upload_file_id}",
-                            f"{p_application_header_id}",
-                            f"{role_type}",
-                            f"{role_id}",
-                            f"{p_borrowing_id}",
-                            "0",
-                        ]
-
-                        s3_key = f"{p_application_header_id}/{p_upload_file_id}/{key}"
-                        file_name = file["name"]
-
-                        sub_fields.append("s3_key")
-                        sub_fields.append("file_name")
-                        sub_values.append(f"'{s3_key}'")
-                        sub_values.append(f"'{file_name}'")
-
-                        file_content = base64.b64decode(file["src"].split(",")[1])
-
-                        upload_to_s3(f"{s3_key}/{file_name}", file_content)
-
-                        sql = (
-                            f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
-                        )
-                        await db.execute(sql)
-                        p_activities_id = await db.uuid_short()
-                        sql = f"""
-                        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-                        VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', '{key}', {p_borrowing_id}, '{file["name"]}', 0);
-                        """
-                        JOBS.append(db.execute(sql))
-                    continue
-            if value is None:
-                continue
-            fields.append(key)
-            if key in JSON_FIELD_KEYS:
-                values.append(f"'{json.dumps(value, ensure_ascii=False)}'")
-            else:
-                values.append(f"'{value}'")
-
-        sql = f"INSERT INTO p_borrowings ({', '.join(fields)}) VALUES ({', '.join(values)});"
-        await db.execute(sql)
-        ignoreFields = ["id", "p_application_header_id", "p_borrowings__I"]
-        for field, value in zip(fields, values):
-            if field in ignoreFields:
-                continue
-            id = await db.uuid_short()
-            sql = f"""
-            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-            VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', '{field}', {p_borrowing_id}, {value}, 0);
-            """
-            JOBS.append(db.execute(sql))
-
-    if JOBS:
-        await asyncio.wait(JOBS)
+        for file_field_key in P_BORROWINGS_FILE_FIELF_KEYS:
+            files = borrowing.get(file_field_key, [])
+            for file in files:
+                p_upload_file_id = await db.uuid_short()
+                p_upload_file_sql_params = {
+                    "id": p_upload_file_id,
+                    "p_application_header_id": p_application_header_id,
+                    "owner_type": role_type,
+                    "owner_id": role_id,
+                    "record_id": p_borrowing_id,
+                    "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
+                    "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{file_field_key}",
+                    "file_name": file["name"],
+                }
+                utils.upload_base64_file_s3(
+                    f"{p_upload_file_sql_params.get('s3_key')}/{p_upload_file_sql_params.get('file_name')}",
+                    file["src"],
+                )
+                await db.execute(utils.gen_insert_sql("p_uploaded_files", p_upload_file_sql_params))
 
 
-async def insert_p_residents(db: DB, data: typing.List[dict], p_application_header_id: int, role_type, role_id):
-    JOBS = []
+async def insert_p_residents(db: DB, data: typing.List[dict], p_application_header_id: int):
     for resident in data:
         p_resident_id = await db.uuid_short()
-        fields = ["id", "p_application_header_id"]
-        values = [f"{p_resident_id}", f"{p_application_header_id}"]
-
-        for key, value in resident.items():
-            if key == "id":
-                continue
-            if value is None:
-                continue
-            fields.append(key)
-            if key in JSON_FIELD_KEYS:
-                values.append(f"'{json.dumps(value, ensure_ascii=False)}'")
-            else:
-                values.append(f"'{value}'")
-
-        sql = f"INSERT INTO p_residents ({', '.join(fields)}) VALUES ({', '.join(values)});"
-        await db.execute(sql)
-        ignoreFields = ["id", "p_application_header_id"]
-        for field, value in zip(fields, values):
-            if field in ignoreFields:
-                continue
-            id = await db.uuid_short()
-            sql = f"""
-            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-            VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_residents', '{field}', {p_resident_id}, {value}, 0);
-            """
-            JOBS.append(db.execute(sql))
-
-    if JOBS:
-        await asyncio.wait(JOBS)
+        basic_p_resident_sql_params = {"id": p_resident_id, "p_application_header_id": p_application_header_id}
+        await db.execute(utils.gen_insert_sql("p_residents", {**resident, **basic_p_resident_sql_params}))
 
 
 async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
@@ -451,21 +261,10 @@ async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
         id = {p_application_header_id};
     """
 
-    result = await db.fetch_one(sql)
-    if result is None:
-        return None
-    temp = {}
-    for key, value in result.items():
-        if key in JSON_FIELD_KEYS:
-            temp[key] = json.loads(value) if value else []
-        else:
-            temp[key] = value
+    p_application_headers = await db.fetch_one(sql)
 
     file_keys = ["G", "J", "R"]
-    files = {
-        "G": [],
-        "J": [],
-    }
+    files = {"G": [], "J": [], "R": []}
     for key in file_keys:
         sql = f"""
         SELECT
@@ -486,15 +285,14 @@ async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
             s3_key LIKE '%/{key}';
         """
         files_info = await db.fetch_all(sql)
-        if len(files) == 0:
-            continue
-        else:
-            temp_files = []
-            for file_info in files_info:
-                src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
-                temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
-            files[key] = temp_files
-    return none_to_blank({**temp, **files})
+
+        temp_files = []
+        for file_info in files_info:
+            src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
+            temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
+        files[key] = temp_files
+
+    return none_to_blank({**p_application_headers, **files})
 
 
 async def query_p_borrowing_details_for_ap(db: DB, p_application_header_id: int, time_type: int):
@@ -513,7 +311,7 @@ async def query_p_borrowing_details_for_ap(db: DB, p_application_header_id: int,
         AND
         time_type = {time_type};
     """
-    if time_type == 1:
+    if time_type == P_BORROWING_DETAILS_TIME_TYPE.ONE_TIME.value:
         return none_to_blank(await db.fetch_one(sql))
 
     sql = f"""
@@ -533,8 +331,8 @@ async def query_p_borrowing_details_for_ap(db: DB, p_application_header_id: int,
 
 async def query_p_application_banks_for_ap(db: DB, p_application_header_id: int):
     sql = f"SELECT CONVERT(s_bank_id,CHAR) AS s_bank_id FROM p_application_banks WHERE p_application_header_id={p_application_header_id};"
-    result = await db.fetch_all(sql)
-    return [item["s_bank_id"] for item in result]
+    p_application_banks = await db.fetch_all(sql)
+    return [p_application_bank["s_bank_id"] for p_application_bank in p_application_banks]
 
 
 async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int, type: int):
@@ -608,20 +406,7 @@ async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int,
         AND
         type = {type};
     """
-    result = await db.fetch_one(sql)
-    if result is None:
-        return None
-    temp = {}
-    for key, value in result.items():
-        if type == 1 and key == "email":
-            continue
-        if type == 0 and key == "rel_to_applicant_a_name":
-            continue
-        if key in JSON_FIELD_KEYS:
-            temp[key] = json.loads(value) if value else []
-        else:
-            temp[key] = value
-
+    p_applicant_persons = await db.fetch_one(sql)
     file_keys = [
         "H__a",
         "H__b",
@@ -695,15 +480,12 @@ async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int,
             s3_key LIKE '%/{key}';
         """
         files_info = await db.fetch_all(sql)
-        if len(files) == 0:
-            continue
-        else:
-            temp_files = []
-            for file_info in files_info:
-                src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
-                temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
-            files[key] = temp_files
-    return none_to_blank({**temp, **files})
+        temp_files = []
+        for file_info in files_info:
+            src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
+            temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
+        files[key] = temp_files
+    return none_to_blank({**p_applicant_persons, **files})
 
 
 async def query_p_join_guarantors_for_ap(db: DB, p_application_header_id: int):
@@ -732,9 +514,9 @@ async def query_p_join_guarantors_for_ap(db: DB, p_application_header_id: int):
     WHERE
         p_application_header_id = {p_application_header_id};
     """
-    result = await db.fetch_all(sql)
+    p_join_guarantors = await db.fetch_all(sql)
 
-    return [none_to_blank(item) for item in result]
+    return [none_to_blank(p_join_guarantor) for p_join_guarantor in p_join_guarantors]
 
 
 async def query_p_residents_for_ap(db: DB, p_application_header_id: int):
@@ -763,9 +545,9 @@ async def query_p_residents_for_ap(db: DB, p_application_header_id: int):
     WHERE
         p_application_header_id = {p_application_header_id};
     """
-    result = await db.fetch_all(sql)
+    p_residents = await db.fetch_all(sql)
 
-    return [none_to_blank(item) for item in result]
+    return [none_to_blank(p_resident) for p_resident in p_residents]
 
 
 async def query_p_borrowings_for_ap(db: DB, p_application_header_id: int):
@@ -825,40 +607,26 @@ async def query_p_borrowings_for_ap(db: DB, p_application_header_id: int):
                 s3_key LIKE '%/{key}';
             """
             files_info = await db.fetch_all(sql)
-            if len(files) == 0:
-                continue
-            else:
-                temp_files = []
-                for file_info in files_info:
-                    src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
-                    temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
-                files[key] = temp_files
+            temp_files = []
+            for file_info in files_info:
+                src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
+                temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
+            files[key] = temp_files
         borrowings.append(none_to_blank({**borrowing, **files}))
-
     return borrowings
 
 
 async def query_p_application_header_id_with_c_user_id(db: DB, c_user_id: str):
-    result = await db.fetch_one(
+    p_application_headers = await db.fetch_one(
         f"SELECT CONVERT(id,CHAR) as id FROM p_application_headers WHERE c_user_id={c_user_id};"
     )
-
-    return result["id"]
+    return p_application_headers["id"]
 
 
 async def query_p_application_header_apply_no(db: DB, p_application_header_id: int):
-    sql = f"""
-    SELECT
-        apply_no
-    FROM
-        p_application_headers
-    WHERE
-        id = {p_application_header_id};
-    """
-
-    result = await db.fetch_one(sql)
-
-    return result["apply_no"]
+    sql = f"SELECT apply_no FROM p_application_headers WHERE id = {p_application_header_id};"
+    p_application_headers = await db.fetch_one(sql)
+    return p_application_headers["apply_no"]
 
 
 async def diff_update_p_application_headers_for_ap(db: DB, data: dict, p_application_header_id, role_type, role_id):
@@ -868,25 +636,34 @@ async def diff_update_p_application_headers_for_ap(db: DB, data: dict, p_applica
 
     # delete join_guarantor
     join_guarantor_umu = data.get("join_guarantor_umu")
-    if join_guarantor_umu != "1":
+    if join_guarantor_umu != JOIN_GUARANTOR_UMU.HAVE.value:
         await db.execute(f"DELETE FROM p_join_guarantors WHERE p_application_header_id = {p_application_header_id};")
     # delete p_applicant_persons__1
     loan_type = data.get("loan_type")
-    if loan_type not in ["3", "4"]:
+    if loan_type not in [LOAN_TYPE.TOTAL_INCOME_EQUITY.value, LOAN_TYPE.TOTAL_INCOME_NO_EQUITY.value]:
         await db.execute(
-            f"DELETE FROM p_applicant_persons WHERE p_application_header_id = {p_application_header_id}  AND type = 1;"
+            f"DELETE FROM p_applicant_persons WHERE p_application_header_id = {p_application_header_id}  AND type = {P_UPLOAD_FILE_TYPE.TOTAL_INCOME.value};"
         )
         await db.execute(
-            f"UPDATE p_uploaded_files SET deleted = 1 WHERE p_application_header_id = {p_application_header_id} AND type = 1;"
+            f"UPDATE p_uploaded_files SET deleted = 1 WHERE p_application_header_id = {p_application_header_id} AND type = {P_UPLOAD_FILE_TYPE.TOTAL_INCOME.value};"
         )
     # delete p_borrowing_details__2
     land_advance_plan = data.get("land_advance_plan")
-    if land_advance_plan != "1":
+    if land_advance_plan != LAND_ADVANCE_PLAN.HOPE.value:
         await db.execute(
-            f"DELETE FROM p_borrowing_details WHERE p_application_header_id = {p_application_header_id} AND time_type = 2;"
+            f"DELETE FROM p_borrowing_details WHERE p_application_header_id = {p_application_header_id} AND time_type = {P_BORROWING_DETAILS_TIME_TYPE.TWO_TIME.value};"
         )
     for key, value in data.items():
         old_value = old_p_application_headers.get(key, "")
+        if key in JSON_LIST_FIELD_KEYS:
+            if sorted(value) == sorted(old_value):
+                continue
+        if key in JSON_DICT_FIELD_KEYS:
+            if INIT_NEW_HOUSE_PLANNED_RESIDENT_OVERVIEW == value and not old_value:
+                continue
+        if value == old_value:
+            continue
+
         if key in FILE_FIELF_KEYS:
             sql = f"""
             SELECT
@@ -916,37 +693,82 @@ async def diff_update_p_application_headers_for_ap(db: DB, data: dict, p_applica
                     continue
                 # add file
                 p_upload_file_id = await db.uuid_short()
+                p_upload_file_sql_params = {
+                    "id": p_upload_file_id,
+                    "p_application_header_id": p_application_header_id,
+                    "owner_type": role_type,
+                    "owner_id": role_id,
+                    "record_id": p_application_header_id,
+                    "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
+                    "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{key}",
+                    "file_name": update_file["name"],
+                }
+                utils.upload_base64_file_s3(
+                    f"{p_upload_file_sql_params.get('s3_key')}/{p_upload_file_sql_params.get('file_name')}",
+                    update_file["src"],
+                )
+                await db.execute(utils.gen_insert_sql("p_uploaded_files", p_upload_file_sql_params))
 
-                sub_fields = ["id", "p_application_header_id", "owner_type", "owner_id", "record_id", "type"]
-                sub_values = [
-                    f"{p_upload_file_id}",
-                    f"{p_application_header_id}",
-                    f"{role_type}",
-                    f"{role_id}",
-                    f"{p_application_header_id}",
-                    "0",
-                ]
-
-                s3_key = f"{p_application_header_id}/{p_upload_file_id}/{key}"
-                file_name = update_file["name"]
-
-                sub_fields.append("s3_key")
-                sub_fields.append("file_name")
-                sub_values.append(f"'{s3_key}'")
-                sub_values.append(f"'{file_name}'")
-
-                file_content = base64.b64decode(update_file["src"].split(",")[1])
-
-                upload_to_s3(f"{s3_key}/{file_name}", file_content)
-
-                sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
-                await db.execute(sql)
-                p_activities_id = await db.uuid_short()
-                sql = f"""
-                INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', '{key}', {p_application_header_id}, '{update_file["name"]}', 1);
-                """
-                JOBS.append(db.execute(sql))
+                total = await crud.query_update_history_count(
+                    db, p_application_header_id, "p_application_headers", key, p_application_header_id
+                )
+                if total == 0 and len(old_files_info) == 0:
+                    JOBS.append(
+                        db.execute(
+                            utils.gen_insert_sql(
+                                "p_activities",
+                                {
+                                    "id": await db.uuid_short(),
+                                    "p_application_header_id": p_application_header_id,
+                                    "operator_type": role_type,
+                                    "operator_id": role_id,
+                                    "table_name": "p_application_headers",
+                                    "field_name": key,
+                                    "table_id": p_application_header_id,
+                                    "content": None,
+                                    "operate_type": OPERATE_TYPE.APPLY.value,
+                                },
+                            )
+                        )
+                    )
+                if total == 0 and len(old_files_info) > 0:
+                    for old_file in old_files_info:
+                        JOBS.append(
+                            db.execute(
+                                utils.gen_insert_sql(
+                                    "p_activities",
+                                    {
+                                        "id": await db.uuid_short(),
+                                        "p_application_header_id": p_application_header_id,
+                                        "operator_type": role_type,
+                                        "operator_id": role_id,
+                                        "table_name": "p_application_headers",
+                                        "field_name": key,
+                                        "table_id": p_application_header_id,
+                                        "content": old_file["file_name"],
+                                        "operate_type": OPERATE_TYPE.APPLY.value,
+                                    },
+                                )
+                            )
+                        )
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_application_headers",
+                                "field_name": key,
+                                "table_id": p_application_header_id,
+                                "content": update_file["name"],
+                                "operate_type": OPERATE_TYPE.UPDATE.value,
+                            },
+                        )
+                    )
+                )
             # delete file
             delete_files_id = list(set(old_files_id) - set(un_update_files_id))
             if len(delete_files_id) == 0:
@@ -958,49 +780,99 @@ async def diff_update_p_application_headers_for_ap(db: DB, data: dict, p_applica
             for delete_file_info in delete_files_info:
                 sql = f"UPDATE p_uploaded_files SET deleted = 1 WHERE id = {delete_file_info['id']};"
                 JOBS.append(db.execute(sql))
-                p_activities_id = await db.uuid_short()
-                sql = f"""
-                INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', '{key}', {p_application_header_id}, '{delete_file_info["file_name"]}', 9);
-                """
-                JOBS.append(db.execute(sql))
-
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_application_headers",
+                                "field_name": key,
+                                "table_id": p_application_header_id,
+                                "content": delete_file_info["file_name"],
+                                "operate_type": OPERATE_TYPE.DELETE.value,
+                            },
+                        )
+                    )
+                )
             continue
 
-        if value == old_value:
-            continue
-        if key in JSON_FIELD_KEYS:
-            if json.dumps(value, ensure_ascii=False) == json.dumps(old_value, ensure_ascii=False):
-                continue
-        operate_type = 1
+        # field deleted
         if not value and old_value:
-            operate_type = 0
-        if value and not old_value:
-            operate_type = 2
-        content = value
-        if key in JSON_FIELD_KEYS:
-            content = json.dumps(value, ensure_ascii=False)
-        content = f"'{content}'" if content else "NULL"
-        id = await db.uuid_short()
-        sql = f"""
-        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', '{key}', {p_application_header_id}, {content}, {operate_type});
-        """
-        JOBS.append(db.execute(sql))
-        content = value
-        if key in JSON_FIELD_KEYS:
-            content = json.dumps(value, ensure_ascii=False)
-        content = f"'{content}'" if content else "NULL"
-        print(key, value)
-        sql = f"UPDATE p_application_headers SET {key} = {content} WHERE id = {p_application_header_id}"
-        JOBS.append(db.execute(sql))
+            JOBS.append(
+                db.execute(
+                    utils.gen_insert_sql(
+                        "p_activities",
+                        {
+                            "id": await db.uuid_short(),
+                            "p_application_header_id": p_application_header_id,
+                            "operator_type": role_type,
+                            "operator_id": role_id,
+                            "table_name": "p_application_headers",
+                            "field_name": key,
+                            "table_id": p_application_header_id,
+                            "content": None,
+                            "operate_type": OPERATE_TYPE.DELETE.value,
+                        },
+                    )
+                )
+            )
+        # field update
+        else:
+            total = await crud.query_update_history_count(
+                db, p_application_header_id, "p_application_headers", key, p_application_header_id
+            )
+            if total == 0:
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_application_headers",
+                                "field_name": key,
+                                "table_id": p_application_header_id,
+                                "content": old_value if old_value != "" else None,
+                                "operate_type": OPERATE_TYPE.APPLY.value,
+                            },
+                        )
+                    )
+                )
+            JOBS.append(
+                db.execute(
+                    utils.gen_insert_sql(
+                        "p_activities",
+                        {
+                            "id": await db.uuid_short(),
+                            "p_application_header_id": p_application_header_id,
+                            "operator_type": role_type,
+                            "operator_id": role_id,
+                            "table_name": "p_application_headers",
+                            "field_name": key,
+                            "table_id": p_application_header_id,
+                            "content": value,
+                            "operate_type": OPERATE_TYPE.UPDATE.value,
+                        },
+                    )
+                )
+            )
+
+        JOBS.append(
+            db.execute(utils.gen_update_sql("p_application_headers", {key: value}, {"id": p_application_header_id}))
+        )
+
     if JOBS:
         await asyncio.wait(JOBS)
 
 
 async def diff_update_p_applicant_persons_for_ap(db: DB, data: dict, p_application_header_id, type, role_type, role_id):
     JOBS = []
-    print(data)
     p_applicant_persons_basic = await db.fetch_one(
         f"SELECT id FROM p_applicant_persons WHERE p_application_header_id = {p_application_header_id} AND type = {type}"
     )
@@ -1014,7 +886,14 @@ async def diff_update_p_applicant_persons_for_ap(db: DB, data: dict, p_applicati
 
     for key, value in data.items():
         old_value = old_p_applicant_persons.get(key, "")
-
+        if key in JSON_LIST_FIELD_KEYS:
+            if sorted(value) == sorted(old_value):
+                continue
+        # if key in JSON_DICT_FIELD_KEYS:
+        #     if INIT_NEW_HOUSE_PLANNED_RESIDENT_OVERVIEW == value and not old_value:
+        #         continue
+        if value == old_value:
+            continue
         if key in FILE_FIELF_KEYS:
             sql = f"""
             SELECT
@@ -1044,37 +923,83 @@ async def diff_update_p_applicant_persons_for_ap(db: DB, data: dict, p_applicati
                     continue
                 # add file
                 p_upload_file_id = await db.uuid_short()
+                p_upload_file_sql_params = {
+                    "id": p_upload_file_id,
+                    "p_application_header_id": p_application_header_id,
+                    "owner_type": role_type,
+                    "owner_id": role_id,
+                    "record_id": p_applicant_persons_id,
+                    "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
+                    "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{key}",
+                    "file_name": update_file["name"],
+                }
+                utils.upload_base64_file_s3(
+                    f"{p_upload_file_sql_params.get('s3_key')}/{p_upload_file_sql_params.get('file_name')}",
+                    update_file["src"],
+                )
+                await db.execute(utils.gen_insert_sql("p_uploaded_files", p_upload_file_sql_params))
 
-                sub_fields = ["id", "p_application_header_id", "owner_type", "owner_id", "record_id", "type"]
-                sub_values = [
-                    f"{p_upload_file_id}",
-                    f"{p_application_header_id}",
-                    f"{role_type}",
-                    f"{role_id}",
-                    f"{p_applicant_persons_id}",
-                    f"{type}",
-                ]
+                total = await crud.query_update_history_count(
+                    db, p_application_header_id, "p_applicant_persons", key, p_applicant_persons_id
+                )
+                if total == 0 and len(old_files_info) == 0:
+                    JOBS.append(
+                        db.execute(
+                            utils.gen_insert_sql(
+                                "p_activities",
+                                {
+                                    "id": await db.uuid_short(),
+                                    "p_application_header_id": p_application_header_id,
+                                    "operator_type": role_type,
+                                    "operator_id": role_id,
+                                    "table_name": "p_applicant_persons",
+                                    "field_name": key,
+                                    "table_id": p_applicant_persons_id,
+                                    "content": None,
+                                    "operate_type": OPERATE_TYPE.APPLY.value,
+                                },
+                            )
+                        )
+                    )
+                if total == 0 and len(old_files_info) > 0:
+                    for old_file in old_files_info:
+                        JOBS.append(
+                            db.execute(
+                                utils.gen_insert_sql(
+                                    "p_activities",
+                                    {
+                                        "id": await db.uuid_short(),
+                                        "p_application_header_id": p_application_header_id,
+                                        "operator_type": role_type,
+                                        "operator_id": role_id,
+                                        "table_name": "p_applicant_persons",
+                                        "field_name": key,
+                                        "table_id": p_applicant_persons_id,
+                                        "content": old_file["file_name"],
+                                        "operate_type": OPERATE_TYPE.APPLY.value,
+                                    },
+                                )
+                            )
+                        )
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_applicant_persons",
+                                "field_name": key,
+                                "table_id": p_applicant_persons_id,
+                                "content": update_file["name"],
+                                "operate_type": OPERATE_TYPE.UPDATE.value,
+                            },
+                        )
+                    )
+                )
 
-                s3_key = f"{p_application_header_id}/{p_upload_file_id}/{key}"
-                file_name = update_file["name"]
-
-                sub_fields.append("s3_key")
-                sub_fields.append("file_name")
-                sub_values.append(f"'{s3_key}'")
-                sub_values.append(f"'{file_name}'")
-
-                file_content = base64.b64decode(update_file["src"].split(",")[1])
-
-                upload_to_s3(f"{s3_key}/{file_name}", file_content)
-
-                sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
-                await db.execute(sql)
-                p_activities_id = await db.uuid_short()
-                sql = f"""
-                INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_applicant_persons', '{key}', {p_applicant_persons_id}, '{update_file["name"]}', 1);
-                """
-                JOBS.append(db.execute(sql))
             # delete file
             delete_files_id = list(set(old_files_id) - set(un_update_files_id))
             if len(delete_files_id) == 0:
@@ -1086,45 +1011,93 @@ async def diff_update_p_applicant_persons_for_ap(db: DB, data: dict, p_applicati
             for delete_file_info in delete_files_info:
                 sql = f"UPDATE p_uploaded_files SET deleted = 1 WHERE id = {delete_file_info['id']};"
                 JOBS.append(db.execute(sql))
-                p_activities_id = await db.uuid_short()
-                sql = f"""
-                INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-                VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_applicant_persons', '{key}', {p_applicant_persons_id}, '{delete_file_info["file_name"]}', 9);
-                """
-                JOBS.append(db.execute(sql))
-
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_applicant_persons",
+                                "field_name": key,
+                                "table_id": p_applicant_persons_id,
+                                "content": delete_file_info["file_name"],
+                                "operate_type": OPERATE_TYPE.DELETE.value,
+                            },
+                        )
+                    )
+                )
             continue
 
-        if value == old_value:
-            continue
-        if key in JSON_FIELD_KEYS:
-            if json.dumps(value, ensure_ascii=False) == json.dumps(old_value, ensure_ascii=False):
-                continue
-
-        operate_type = 1
+        # field deleted
         if not value and old_value:
-            operate_type = 0
-        if value and not old_value:
-            operate_type = 2
+            JOBS.append(
+                db.execute(
+                    utils.gen_insert_sql(
+                        "p_activities",
+                        {
+                            "id": await db.uuid_short(),
+                            "p_application_header_id": p_application_header_id,
+                            "operator_type": role_type,
+                            "operator_id": role_id,
+                            "table_name": "p_applicant_persons",
+                            "field_name": key,
+                            "table_id": p_applicant_persons_id,
+                            "content": None,
+                            "operate_type": OPERATE_TYPE.DELETE.value,
+                        },
+                    )
+                )
+            )
 
-        content = value
-        if key in JSON_FIELD_KEYS:
-            content = json.dumps(value, ensure_ascii=False)
+        # field update
+        else:
+            total = await crud.query_update_history_count(
+                db, p_application_header_id, "p_applicant_persons", key, p_applicant_persons_id
+            )
+            if total == 0:
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_applicant_persons",
+                                "field_name": key,
+                                "table_id": p_applicant_persons_id,
+                                "content": old_value if old_value != "" else None,
+                                "operate_type": OPERATE_TYPE.APPLY.value,
+                            },
+                        )
+                    )
+                )
+            JOBS.append(
+                db.execute(
+                    utils.gen_insert_sql(
+                        "p_activities",
+                        {
+                            "id": await db.uuid_short(),
+                            "p_application_header_id": p_application_header_id,
+                            "operator_type": role_type,
+                            "operator_id": role_id,
+                            "table_name": "p_applicant_persons",
+                            "field_name": key,
+                            "table_id": p_applicant_persons_id,
+                            "content": value,
+                            "operate_type": OPERATE_TYPE.UPDATE.value,
+                        },
+                    )
+                )
+            )
 
-        content = f"'{content}'" if content else "NULL"
-
-        id = await db.uuid_short()
-        sql = f"""
-        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_applicant_persons', '{key}', {p_applicant_persons_id}, {content}, {operate_type});
-        """
-        JOBS.append(db.execute(sql))
-        content = value
-        if key in JSON_FIELD_KEYS:
-            content = json.dumps(value, ensure_ascii=False)
-        content = f"'{content}'" if content else "NULL"
-        sql = f"UPDATE p_applicant_persons SET {key} = {content} WHERE id = {p_applicant_persons_id}"
-        JOBS.append(db.execute(sql))
+        JOBS.append(
+            db.execute(utils.gen_update_sql("p_applicant_persons", {key: value}, {"id": p_applicant_persons_id}))
+        )
     if JOBS:
         await asyncio.wait(JOBS)
 
@@ -1138,36 +1111,82 @@ async def diff_update_p_borrowing_details_for_ap(
     )
     if p_borrowing_details_basic is None:
         data_ = utils.blank_to_none(data)
-        await insert_p_borrowing_details(db, data_, p_application_header_id, time_type, role_type, role_id)
+        await insert_p_borrowing_details(db, data_, p_application_header_id, time_type)
         return None
     p_borrowing_details_id = p_borrowing_details_basic["id"]
     old_p_borrowing_details = await query_p_borrowing_details_for_ap(db, p_application_header_id, time_type)
 
     for key, value in data.items():
-
         old_value = old_p_borrowing_details.get(key, "")
-
         if value == old_value:
             continue
-        operate_type = 1
+        # field deleted
         if not value and old_value:
-            operate_type = 0
-        if value and not old_value:
-            operate_type = 2
+            JOBS.append(
+                db.execute(
+                    utils.gen_insert_sql(
+                        "p_activities",
+                        {
+                            "id": await db.uuid_short(),
+                            "p_application_header_id": p_application_header_id,
+                            "operator_type": role_type,
+                            "operator_id": role_id,
+                            "table_name": "p_borrowing_details",
+                            "field_name": key,
+                            "table_id": p_borrowing_details_id,
+                            "content": None,
+                            "operate_type": OPERATE_TYPE.DELETE.value,
+                        },
+                    )
+                )
+            )
 
-        content = value
-        content = f"'{content}'" if content else "NULL"
+        # field update
+        else:
+            total = await crud.query_update_history_count(
+                db, p_application_header_id, "p_borrowing_details", key, p_borrowing_details_id
+            )
+            if total == 0:
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_borrowing_details",
+                                "field_name": key,
+                                "table_id": p_borrowing_details_id,
+                                "content": old_value if old_value != "" else None,
+                                "operate_type": OPERATE_TYPE.APPLY.value,
+                            },
+                        )
+                    )
+                )
+            JOBS.append(
+                db.execute(
+                    utils.gen_insert_sql(
+                        "p_activities",
+                        {
+                            "id": await db.uuid_short(),
+                            "p_application_header_id": p_application_header_id,
+                            "operator_type": role_type,
+                            "operator_id": role_id,
+                            "table_name": "p_borrowing_details",
+                            "field_name": key,
+                            "table_id": p_borrowing_details_id,
+                            "content": value,
+                            "operate_type": OPERATE_TYPE.UPDATE.value,
+                        },
+                    )
+                )
+            )
 
-        id = await db.uuid_short()
-        sql = f"""
-        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowing_details', '{key}', {p_borrowing_details_id}, {content}, {operate_type});
-        """
-        JOBS.append(db.execute(sql))
-        content = value
-        content = f"'{content}'" if content else "NULL"
-        sql = f"UPDATE p_borrowing_details SET {key} = {content} WHERE id = {p_borrowing_details_id}"
-        JOBS.append(db.execute(sql))
+        JOBS.append(
+            db.execute(utils.gen_update_sql("p_borrowing_details", {key: value}, {"id": p_borrowing_details_id}))
+        )
     if JOBS:
         await asyncio.wait(JOBS)
 
@@ -1180,15 +1199,31 @@ async def diff_update_p_application_banks_for_ap(db: DB, data: list, p_applicati
             continue
 
         p_application_banks_id = await db.uuid_short()
+        p_application_banks_sql_params = {
+            "id": p_application_banks_id,
+            "p_application_header_id": p_application_header_id,
+            "s_bank_id": s_bank_id,
+        }
+        await db.execute(utils.gen_insert_sql("p_application_banks", p_application_banks_sql_params))
 
-        id = await db.uuid_short()
-        sql = f"""
-        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_banks', 's_bank_id', {p_application_banks_id}, '{s_bank_id}', 2);
-        """
-        JOBS.append(db.execute(sql))
-        sql = f"INSERT INTO p_application_banks (id, p_application_header_id, s_bank_id) VALUES ({p_application_banks_id}, {p_application_header_id}, {s_bank_id});"
-        JOBS.append(db.execute(sql))
+        JOBS.append(
+            db.execute(
+                utils.gen_insert_sql(
+                    "p_activities",
+                    {
+                        "id": await db.uuid_short(),
+                        "p_application_header_id": p_application_header_id,
+                        "operator_type": role_type,
+                        "operator_id": role_id,
+                        "table_name": "p_application_banks",
+                        "field_name": "s_bank_id",
+                        "table_id": p_application_banks_id,
+                        "content": s_bank_id,
+                        "operate_type": OPERATE_TYPE.UPDATE.value,
+                    },
+                )
+            )
+        )
 
     for s_bank_id in old_p_application_banks:
         if s_bank_id in data:
@@ -1200,14 +1235,27 @@ async def diff_update_p_application_banks_for_ap(db: DB, data: list, p_applicati
 
         p_application_banks_id = p_application_banks_basic["id"]
 
-        id = await db.uuid_short()
-        sql = f"""
-        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_banks', null, {p_application_banks_id}, null, 0);
-        """
-        JOBS.append(db.execute(sql))
+        JOBS.append(
+            db.execute(
+                utils.gen_insert_sql(
+                    "p_activities",
+                    {
+                        "id": await db.uuid_short(),
+                        "p_application_header_id": p_application_header_id,
+                        "operator_type": role_type,
+                        "operator_id": role_id,
+                        "table_name": "p_application_banks",
+                        "field_name": "s_bank_id",
+                        "table_id": p_application_banks_id,
+                        "content": s_bank_id,
+                        "operate_type": OPERATE_TYPE.DELETE.value,
+                    },
+                )
+            )
+        )
         sql = f"DELETE FROM p_application_banks WHERE id = {p_application_banks_id};"
         JOBS.append(db.execute(sql))
+
     if JOBS:
         await asyncio.wait(JOBS)
 
@@ -1222,7 +1270,7 @@ async def diff_update_p_join_guarantors_for_ap(
         filter = [item for item in old_p_join_guarantors if item["id"] == p_join_guarantor["id"]]
         if len(filter) == 0:
             data_ = utils.blank_to_none(p_join_guarantor)
-            await insert_p_join_guarantors(db, [data_], p_application_header_id, role_type, role_id)
+            await insert_p_join_guarantors(db, [data_], p_application_header_id)
             continue
         [old_p_join_guarantor] = filter
         for key, value in p_join_guarantor.items():
@@ -1230,45 +1278,96 @@ async def diff_update_p_join_guarantors_for_ap(
 
             if value == old_value:
                 continue
-            if key in JSON_FIELD_KEYS:
-                if json.dumps(value, ensure_ascii=False) == json.dumps(old_value, ensure_ascii=False):
-                    continue
-
-            operate_type = 1
+            # field deleted
             if not value and old_value:
-                operate_type = 0
-            if value and not old_value:
-                operate_type = 2
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_join_guarantors",
+                                "field_name": key,
+                                "table_id": old_p_join_guarantor["id"],
+                                "content": None,
+                                "operate_type": OPERATE_TYPE.DELETE.value,
+                            },
+                        )
+                    )
+                )
 
-            content = value
-            if key in JSON_FIELD_KEYS:
-                content = json.dumps(value, ensure_ascii=False)
+            # field update
+            else:
+                total = await crud.query_update_history_count(
+                    db, p_application_header_id, "p_join_guarantors", key, old_p_join_guarantor["id"]
+                )
+                if total == 0:
+                    JOBS.append(
+                        db.execute(
+                            utils.gen_insert_sql(
+                                "p_activities",
+                                {
+                                    "id": await db.uuid_short(),
+                                    "p_application_header_id": p_application_header_id,
+                                    "operator_type": role_type,
+                                    "operator_id": role_id,
+                                    "table_name": "p_join_guarantors",
+                                    "field_name": key,
+                                    "table_id": old_p_join_guarantor["id"],
+                                    "content": old_value if old_value != "" else None,
+                                    "operate_type": OPERATE_TYPE.APPLY.value,
+                                },
+                            )
+                        )
+                    )
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_join_guarantors",
+                                "field_name": key,
+                                "table_id": old_p_join_guarantor["id"],
+                                "content": value,
+                                "operate_type": OPERATE_TYPE.UPDATE.value,
+                            },
+                        )
+                    )
+                )
 
-            content = f"'{content}'" if content else "null"
-
-            id = await db.uuid_short()
-            sql = f"""
-            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-            VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_join_guarantors', '{key}', {old_p_join_guarantor["id"]}, {content}, {operate_type});
-            """
-            JOBS.append(db.execute(sql))
-            content = value
-            if key in JSON_FIELD_KEYS:
-                content = json.dumps(value, ensure_ascii=False)
-            content = f"'{content}'" if content else "null"
-            sql = f"UPDATE p_join_guarantors SET {key} = {content} WHERE id = {old_p_join_guarantor['id']}"
-            JOBS.append(db.execute(sql))
+            JOBS.append(
+                db.execute(utils.gen_update_sql("p_join_guarantors", {key: value}, {"id": old_p_join_guarantor["id"]}))
+            )
 
     for old_p_join_guarantor in old_p_join_guarantors:
         filter = [item for item in data if item["id"] == old_p_join_guarantor["id"]]
         if len(filter) > 0:
             continue
-        id = await db.uuid_short()
-        sql = f"""
-        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_join_guarantors', null, {old_p_join_guarantor['id']}, null, 0);
-        """
-        JOBS.append(db.execute(sql))
+        JOBS.append(
+            db.execute(
+                utils.gen_insert_sql(
+                    "p_activities",
+                    {
+                        "id": await db.uuid_short(),
+                        "p_application_header_id": p_application_header_id,
+                        "operator_type": role_type,
+                        "operator_id": role_id,
+                        "table_name": "p_join_guarantors",
+                        "field_name": None,
+                        "table_id": old_p_join_guarantor["id"],
+                        "content": None,
+                        "operate_type": OPERATE_TYPE.DELETE.value,
+                    },
+                )
+            )
+        )
         sql = f"DELETE FROM p_join_guarantors WHERE id = {old_p_join_guarantor['id']};"
         JOBS.append(db.execute(sql))
     if JOBS:
@@ -1283,7 +1382,7 @@ async def diff_update_p_residents_for_ap(db: DB, data: typing.List[dict], p_appl
         filter = [item for item in old_p_residents if item["id"] == p_resident["id"]]
         if len(filter) == 0:
             data_ = utils.blank_to_none(p_resident)
-            await insert_p_residents(db, [data_], p_application_header_id, role_type, role_id)
+            await insert_p_residents(db, [data_], p_application_header_id)
             continue
         [old_p_resident] = filter
         for key, value in p_resident.items():
@@ -1291,45 +1390,94 @@ async def diff_update_p_residents_for_ap(db: DB, data: typing.List[dict], p_appl
 
             if value == old_value:
                 continue
-            if key in JSON_FIELD_KEYS:
-                if json.dumps(value, ensure_ascii=False) == json.dumps(old_value, ensure_ascii=False):
-                    continue
-
-            operate_type = 1
+            # field deleted
             if not value and old_value:
-                operate_type = 0
-            if value and not old_value:
-                operate_type = 2
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_residents",
+                                "field_name": key,
+                                "table_id": old_p_resident["id"],
+                                "content": None,
+                                "operate_type": OPERATE_TYPE.DELETE.value,
+                            },
+                        )
+                    )
+                )
 
-            content = value
-            if key in JSON_FIELD_KEYS:
-                content = json.dumps(value, ensure_ascii=False)
+            # field update
+            else:
+                total = await crud.query_update_history_count(
+                    db, p_application_header_id, "p_residents", key, old_p_resident["id"]
+                )
+                if total == 0:
+                    JOBS.append(
+                        db.execute(
+                            utils.gen_insert_sql(
+                                "p_activities",
+                                {
+                                    "id": await db.uuid_short(),
+                                    "p_application_header_id": p_application_header_id,
+                                    "operator_type": role_type,
+                                    "operator_id": role_id,
+                                    "table_name": "p_residents",
+                                    "field_name": key,
+                                    "table_id": old_p_resident["id"],
+                                    "content": old_value if old_value != "" else None,
+                                    "operate_type": OPERATE_TYPE.APPLY.value,
+                                },
+                            )
+                        )
+                    )
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_residents",
+                                "field_name": key,
+                                "table_id": old_p_resident["id"],
+                                "content": value,
+                                "operate_type": OPERATE_TYPE.UPDATE.value,
+                            },
+                        )
+                    )
+                )
 
-            content = f"'{content}'" if content else "null"
-
-            id = await db.uuid_short()
-            sql = f"""
-            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-            VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_residents', '{key}', {old_p_resident["id"]}, {content}, {operate_type});
-            """
-            JOBS.append(db.execute(sql))
-            content = value
-            if key in JSON_FIELD_KEYS:
-                content = json.dumps(value, ensure_ascii=False)
-            content = f"'{content}'" if content else "null"
-            sql = f"UPDATE p_residents SET {key} = {content} WHERE id = {old_p_resident['id']}"
-            JOBS.append(db.execute(sql))
+            JOBS.append(db.execute(utils.gen_update_sql("p_residents", {key: value}, {"id": old_p_resident["id"]})))
 
     for old_p_resident in old_p_residents:
         filter = [item for item in data if item["id"] == old_p_resident["id"]]
         if len(filter) > 0:
             continue
-        id = await db.uuid_short()
-        sql = f"""
-        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_residents', null, {old_p_resident['id']}, null, 0);
-        """
-        JOBS.append(db.execute(sql))
+        JOBS.append(
+            db.execute(
+                utils.gen_insert_sql(
+                    "p_activities",
+                    {
+                        "id": await db.uuid_short(),
+                        "p_application_header_id": p_application_header_id,
+                        "operator_type": role_type,
+                        "operator_id": role_id,
+                        "table_name": "p_residents",
+                        "field_name": None,
+                        "table_id": old_p_resident["id"],
+                        "content": None,
+                        "operate_type": OPERATE_TYPE.DELETE.value,
+                    },
+                )
+            )
+        )
         sql = f"DELETE FROM p_residents WHERE id = {old_p_resident['id']};"
         JOBS.append(db.execute(sql))
     if JOBS:
@@ -1349,7 +1497,7 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
             continue
         [old_p_borrowing] = filter
         for key, value in p_borrowing.items():
-            if key in FILE_FIELF_KEYS:
+            if key in ["I"]:
                 sql = f"""
                 SELECT
                     CONVERT(id,CHAR) AS id,
@@ -1380,37 +1528,83 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
                         continue
                     # add file
                     p_upload_file_id = await db.uuid_short()
+                    p_upload_file_sql_params = {
+                        "id": p_upload_file_id,
+                        "p_application_header_id": p_application_header_id,
+                        "owner_type": role_type,
+                        "owner_id": role_id,
+                        "record_id": old_p_borrowing["id"],
+                        "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
+                        "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{key}",
+                        "file_name": update_file["name"],
+                    }
+                    utils.upload_base64_file_s3(
+                        f"{p_upload_file_sql_params.get('s3_key')}/{p_upload_file_sql_params.get('file_name')}",
+                        update_file["src"],
+                    )
+                    await db.execute(utils.gen_insert_sql("p_uploaded_files", p_upload_file_sql_params))
 
-                    sub_fields = ["id", "p_application_header_id", "owner_type", "owner_id", "record_id", "type"]
-                    sub_values = [
-                        f"{p_upload_file_id}",
-                        f"{p_application_header_id}",
-                        f"{role_type}",
-                        f"{role_id}",
-                        f"{old_p_borrowing['id']}",
-                        f"0",
-                    ]
+                    total = await crud.query_update_history_count(
+                        db, p_application_header_id, "p_borrowings", key, old_p_borrowing["id"]
+                    )
+                    if total == 0 and len(old_files_info) == 0:
+                        JOBS.append(
+                            db.execute(
+                                utils.gen_insert_sql(
+                                    "p_activities",
+                                    {
+                                        "id": await db.uuid_short(),
+                                        "p_application_header_id": p_application_header_id,
+                                        "operator_type": role_type,
+                                        "operator_id": role_id,
+                                        "table_name": "p_borrowings",
+                                        "field_name": key,
+                                        "table_id": old_p_borrowing["id"],
+                                        "content": None,
+                                        "operate_type": OPERATE_TYPE.APPLY.value,
+                                    },
+                                )
+                            )
+                        )
+                    if total == 0 and len(old_files_info) > 0:
+                        for old_file in old_files_info:
+                            JOBS.append(
+                                db.execute(
+                                    utils.gen_insert_sql(
+                                        "p_activities",
+                                        {
+                                            "id": await db.uuid_short(),
+                                            "p_application_header_id": p_application_header_id,
+                                            "operator_type": role_type,
+                                            "operator_id": role_id,
+                                            "table_name": "p_borrowings",
+                                            "field_name": key,
+                                            "table_id": old_p_borrowing["id"],
+                                            "content": old_file["file_name"],
+                                            "operate_type": OPERATE_TYPE.APPLY.value,
+                                        },
+                                    )
+                                )
+                            )
+                    JOBS.append(
+                        db.execute(
+                            utils.gen_insert_sql(
+                                "p_activities",
+                                {
+                                    "id": await db.uuid_short(),
+                                    "p_application_header_id": p_application_header_id,
+                                    "operator_type": role_type,
+                                    "operator_id": role_id,
+                                    "table_name": "p_borrowings",
+                                    "field_name": key,
+                                    "table_id": old_p_borrowing["id"],
+                                    "content": update_file["name"],
+                                    "operate_type": OPERATE_TYPE.UPDATE.value,
+                                },
+                            )
+                        )
+                    )
 
-                    s3_key = f"{p_application_header_id}/{p_upload_file_id}/{key}"
-                    file_name = update_file["name"]
-
-                    sub_fields.append("s3_key")
-                    sub_fields.append("file_name")
-                    sub_values.append(f"'{s3_key}'")
-                    sub_values.append(f"'{file_name}'")
-
-                    file_content = base64.b64decode(update_file["src"].split(",")[1])
-
-                    upload_to_s3(f"{s3_key}/{file_name}", file_content)
-
-                    sql = f"INSERT INTO p_uploaded_files ({', '.join(sub_fields)}) VALUES ({', '.join(sub_values)});"
-                    await db.execute(sql)
-                    p_activities_id = await db.uuid_short()
-                    sql = f"""
-                    INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-                    VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', '{key}', {p_borrowing["id"]}, '{update_file["name"]}', 1);
-                    """
-                    JOBS.append(db.execute(sql))
                 # delete file
                 delete_files_id = list(set(old_files_id) - set(un_update_files_id))
                 if len(delete_files_id) == 0:
@@ -1422,70 +1616,122 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
                 for delete_file_info in delete_files_info:
                     sql = f"UPDATE p_uploaded_files SET deleted = 1 WHERE id = {delete_file_info['id']};"
                     JOBS.append(db.execute(sql))
-                    p_activities_id = await db.uuid_short()
-                    sql = f"""
-                    INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-                    VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', '{key}', {delete_file_info["id"]}, '{delete_file_info["file_name"]}', 9);
-                    """
-                    JOBS.append(db.execute(sql))
-
+                    JOBS.append(
+                        db.execute(
+                            utils.gen_insert_sql(
+                                "p_activities",
+                                {
+                                    "id": await db.uuid_short(),
+                                    "p_application_header_id": p_application_header_id,
+                                    "operator_type": role_type,
+                                    "operator_id": role_id,
+                                    "table_name": "p_borrowings",
+                                    "field_name": key,
+                                    "table_id": old_p_borrowing["id"],
+                                    "content": delete_file_info["file_name"],
+                                    "operate_type": OPERATE_TYPE.DELETE.value,
+                                },
+                            )
+                        )
+                    )
                 continue
 
-            old_value = old_p_borrowing.get(key, [])
+            old_value = old_p_borrowing.get(key, "")
 
             if value == old_value:
                 continue
-            if key in JSON_FIELD_KEYS:
-                temp = json.dumps(value, ensure_ascii=False)
-                if temp == old_value:
-                    continue
-
-            operate_type = 1
+            # field deleted
             if not value and old_value:
-                operate_type = 0
-            if value and not old_value:
-                operate_type = 2
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_borrowings",
+                                "field_name": key,
+                                "table_id": old_p_borrowing["id"],
+                                "content": None,
+                                "operate_type": OPERATE_TYPE.DELETE.value,
+                            },
+                        )
+                    )
+                )
 
-            content = value
-            if key in JSON_FIELD_KEYS:
-                content = json.dumps(value, ensure_ascii=False)
+            # field update
+            else:
+                total = await crud.query_update_history_count(
+                    db, p_application_header_id, "p_borrowings", key, old_p_borrowing["id"]
+                )
+                if total == 0:
+                    JOBS.append(
+                        db.execute(
+                            utils.gen_insert_sql(
+                                "p_activities",
+                                {
+                                    "id": await db.uuid_short(),
+                                    "p_application_header_id": p_application_header_id,
+                                    "operator_type": role_type,
+                                    "operator_id": role_id,
+                                    "table_name": "p_borrowings",
+                                    "field_name": key,
+                                    "table_id": old_p_borrowing["id"],
+                                    "content": old_value if old_value != "" else None,
+                                    "operate_type": OPERATE_TYPE.APPLY.value,
+                                },
+                            )
+                        )
+                    )
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_borrowings",
+                                "field_name": key,
+                                "table_id": old_p_borrowing["id"],
+                                "content": value,
+                                "operate_type": OPERATE_TYPE.UPDATE.value,
+                            },
+                        )
+                    )
+                )
 
-            content = f"'{content}'" if content else "null"
-
-            id = await db.uuid_short()
-            sql = f"""
-            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-            VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', '{key}', {old_p_borrowing["id"]}, {content}, {operate_type});
-            """
-            JOBS.append(db.execute(sql))
-            content = value
-            if key in JSON_FIELD_KEYS:
-                content = json.dumps(value, ensure_ascii=False)
-            content = f"'{content}'" if content else "null"
-
-            sql = f"UPDATE p_borrowings SET {key} = {content} WHERE id = {old_p_borrowing['id']}"
-            JOBS.append(db.execute(sql))
+            JOBS.append(db.execute(utils.gen_update_sql("p_borrowings", {key: value}, {"id": old_p_borrowing["id"]})))
 
     for old_p_borrowing in old_p_borrowings:
         filter = [item for item in data if item["id"] == old_p_borrowing["id"]]
         if len(filter) > 0:
             continue
-        id = await db.uuid_short()
-        sql = f"""
-        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', null, {old_p_borrowing['id']}, null, 0);
-        """
-        JOBS.append(db.execute(sql))
+        JOBS.append(
+            db.execute(
+                utils.gen_insert_sql(
+                    "p_activities",
+                    {
+                        "id": await db.uuid_short(),
+                        "p_application_header_id": p_application_header_id,
+                        "operator_type": role_type,
+                        "operator_id": role_id,
+                        "table_name": "p_borrowings",
+                        "field_name": None,
+                        "table_id": old_p_borrowing["id"],
+                        "content": None,
+                        "operate_type": OPERATE_TYPE.DELETE.value,
+                    },
+                )
+            )
+        )
         sql = f"DELETE FROM p_borrowings WHERE id = {old_p_borrowing['id']};"
         JOBS.append(db.execute(sql))
         for delete_file_info in old_p_borrowing["I"]:
             sql = f"UPDATE p_uploaded_files SET deleted = 1 WHERE id = {delete_file_info['id']};"
-            JOBS.append(db.execute(sql))
-            p_activities_id = await db.uuid_short()
-            sql = f"""
-            INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-            VALUES ({p_activities_id}, {p_application_header_id}, {role_type}, {role_id}, 'p_borrowings', 'I', {old_p_borrowing["id"]}, '{delete_file_info["name"]}', 9);
-            """
             JOBS.append(db.execute(sql))
     if JOBS:
         await asyncio.wait(JOBS)
@@ -1511,21 +1757,18 @@ async def query_p_application_headers_files_for_ap(db: DB, p_application_header_
             AND
             owner_type = 1
             AND
-            type = 0
+            type = {P_UPLOAD_FILE_TYPE.APPLICANT.value}
             AND
             deleted IS NULL
             AND
             s3_key LIKE '%/{key}';
         """
         files_info = await db.fetch_all(sql)
-        if len(files) == 0:
-            continue
-        else:
-            temp_files = []
-            for file_info in files_info:
-                src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
-                temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
-            files[key] = temp_files
+        temp_files = []
+        for file_info in files_info:
+            src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
+            temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
+        files[key] = temp_files
     return files
 
 
@@ -1555,8 +1798,6 @@ async def query_p_applicant_persons_files_for_ap(db: DB, p_application_header_id
         "K",
     ]
     files = {
-        # "G": [],
-        # "J": [],
         "H__a": [],
         "H__b": [],
         "A__01__a": [],
@@ -1603,14 +1844,11 @@ async def query_p_applicant_persons_files_for_ap(db: DB, p_application_header_id
             s3_key LIKE '%/{key}';
         """
         files_info = await db.fetch_all(sql)
-        if len(files) == 0:
-            continue
-        else:
-            temp_files = []
-            for file_info in files_info:
-                src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
-                temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
-            files[key] = temp_files
+        temp_files = []
+        for file_info in files_info:
+            src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
+            temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
+        files[key] = temp_files
     return files
 
 
@@ -1643,21 +1881,18 @@ async def query_p_borrowings_files_for_ap(db: DB, p_application_header_id: int):
                 AND
                 owner_type = 1
                 AND
-                type = 0
+                type = {P_UPLOAD_FILE_TYPE.APPLICANT.value}
                 AND
                 deleted IS NULL
                 AND
                 s3_key LIKE '%/{key}';
             """
             files_info = await db.fetch_all(sql)
-            if len(files) == 0:
-                continue
-            else:
-                temp_files = []
-                for file_info in files_info:
-                    src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
-                    temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
-                files[key] = temp_files
+            temp_files = []
+            for file_info in files_info:
+                src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
+                temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
+            files[key] = temp_files
         borrowings.append(none_to_blank({**borrowing, **files}))
 
     return borrowings

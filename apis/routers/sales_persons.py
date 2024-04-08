@@ -1,9 +1,10 @@
 from loguru import logger
 from datetime import datetime
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi import Depends
 from fastapi.responses import JSONResponse
 
+from constant import DEFAULT_200_MSG, DEFAULT_500_MSG
 from core.config import settings
 from core.custom import LoggingContextRoute
 from apis.deps import get_db
@@ -56,30 +57,31 @@ async def sales_person_reset_password(data: schemas.ResetPasswordManager, db=Dep
 
 
 @router.put("/sales-person/password")
-async def sales_person_up_password(data: schemas.UpPasswordUser, db=Depends(get_db), token=Depends(get_token)):
+async def sales_person_up_password(data: dict, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
-        if not utils.verify_password(data.password, await crud.query_s_sales_person_hashed_pwd(db, token["id"])):
+        if not utils.verify_password(data["password"], await crud.query_s_sales_person_hashed_pwd(db, token["id"])):
             return JSONResponse(status_code=412, content={"massage": "curr password is wrong."})
         await crud.update_s_sales_person_password_with_id(
-            db, id=token["id"], hashed_pwd=utils.hash_password(data.new_password)
+            db, id=token["id"], hashed_pwd=utils.hash_password(data["new_password"])
         )
-        return JSONResponse(status_code=200, content={"message": "update password successful."})
+        await utils.common_insert_c_access_log(
+            db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
+        )
+        return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
 @router.post("/sales-person/token")
-async def sales_person_login(data: schemas.LoginManager, db=Depends(get_db)):
+async def sales_person_login(data: dict, request: Request, db=Depends(get_db)):
     try:
-        is_exist = await crud.check_s_sales_person_with_email(db, email=data.email)
+        is_exist = await crud.check_s_sales_person_with_email(db, email=data["email"])
         if not is_exist:
             return JSONResponse(status_code=400, content={"message": "user email is not exist."})
         if is_exist["status"] == 2:
             return JSONResponse(status_code=423, content={"message": "account is locked."})
-        if not utils.verify_password(data.password, is_exist["hashed_pwd"]):
+        if not utils.verify_password(data["password"], is_exist["hashed_pwd"]):
             if is_exist["failed_first_at"]:
                 if (datetime.now() - is_exist["failed_first_at"]).seconds < 300 and is_exist["failed_time"] == 4:
                     await crud.update_s_sales_person_status_locked(db, id=is_exist["id"])
@@ -95,12 +97,23 @@ async def sales_person_login(data: schemas.LoginManager, db=Depends(get_db)):
             payload=await crud.query_s_sales_person_token_payload(db, id=is_exist["id"]),
             expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
         )
+        await utils.common_insert_c_access_log(
+            db, request, params={"body": data}, status_code=200, response_body={"access_token": "*******"}
+        )
         return JSONResponse(status_code=200, content={"access_token": access_token})
     except Exception as err:
         logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
+
+
+@router.delete("/sales-person/token")
+async def sales_person_logout(request: Request, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        await utils.common_insert_c_access_log(db, request, status_code=200, response_body=DEFAULT_200_MSG)
+        return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
 @router.get("/sales-person/preliminaries")

@@ -1,11 +1,40 @@
 import crud
 from core.database import DB
+import utils
+from constant import (
+    TOKEN_ROLE_TYPE,
+    P_APPLICANT_PERSONS_TYPE,
+    P_BORROWING_DETAILS_TIME_TYPE,
+    LOAN_TYPE,
+    LAND_ADVANCE_PLAN,
+    JOIN_GUARANTOR_UMU,
+    CURR_BORROWING_STATUS,
+    OPERATE_TYPE,
+)
 
 
-async def update_p_application_headers_s_manager_id(db: DB, p_application_header_id: int, s_manager_id: int):
+async def update_p_application_headers_s_manager_id(
+    db: DB, p_application_header_id: int, s_manager_id: int, role_type: int, role_id: int
+):
     calc_s_manager_id = s_manager_id if s_manager_id else "NULL"
     await db.execute(
         f"UPDATE p_application_headers SET s_manager_id = {calc_s_manager_id} WHERE id = {p_application_header_id}"
+    )
+    await db.execute(
+        utils.gen_insert_sql(
+            "p_activities",
+            {
+                "id": await db.uuid_short(),
+                "p_application_header_id": p_application_header_id,
+                "operator_type": role_type,
+                "operator_id": role_id,
+                "table_name": "p_application_headers",
+                "field_name": "s_manager_id",
+                "table_id": p_application_header_id,
+                "content": s_manager_id,
+                "operate_type": OPERATE_TYPE.UPDATE.value,
+            },
+        )
     )
 
 
@@ -16,22 +45,26 @@ async def update_p_application_headers_s_sales_person_id(db: DB, data: dict, rol
         await db.execute(
             f"UPDATE p_application_headers SET s_sales_person_id = {s_sales_person_id} WHERE id = {p_application_header_id}"
         )
-        id = await db.uuid_short()
-        sql = f"""
-        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', 's_sales_person_id', {p_application_header_id}, '{s_sales_person_id}', 2);
-        """
-        await db.execute(sql)
     else:
         await db.execute(
             f"UPDATE p_application_headers SET s_sales_person_id = NULL WHERE id = {p_application_header_id}"
         )
-        id = await db.uuid_short()
-        sql = f"""
-        INSERT INTO p_activities (id, p_application_header_id, operator_type, operator_id, table_name, field_name, table_id, content, operate_type)
-        VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', 's_sales_person_id', {p_application_header_id}, NULL, 9);
-        """
-        await db.execute(sql)
+    await db.execute(
+        utils.gen_insert_sql(
+            "p_activities",
+            {
+                "id": await db.uuid_short(),
+                "p_application_header_id": p_application_header_id,
+                "operator_type": role_type,
+                "operator_id": role_id,
+                "table_name": "p_application_headers",
+                "field_name": "s_sales_person_id",
+                "table_id": p_application_header_id,
+                "content": s_sales_person_id,
+                "operate_type": OPERATE_TYPE.UPDATE.value,
+            },
+        )
+    )
 
 
 async def update_p_application_headers_sales_area_id(db: DB, data: dict, role_type, role_id):
@@ -154,13 +187,63 @@ async def update_p_application_headers_sales_exhibition_hall_id(db: DB, data: di
     return initResult
 
 
-async def delete_pair_laon(db: DB, ids: list):
+async def delete_pair_laon(db: DB, ids: list, role_type, role_id):
     await db.execute(f"UPDATE p_application_headers SET pair_loan_id = null WHERE id IN ({','.join(ids)});")
 
+    for id in ids:
+        await db.execute(
+            utils.gen_insert_sql(
+                "p_activities",
+                {
+                    "id": await db.uuid_short(),
+                    "p_application_header_id": id,
+                    "operator_type": role_type,
+                    "operator_id": role_id,
+                    "table_name": "p_application_headers",
+                    "field_name": "pair_loan_id",
+                    "table_id": id,
+                    "content": None,
+                    "operate_type": OPERATE_TYPE.UPDATE.value,
+                },
+            )
+        )
 
-async def set_pair_loan(db: DB, data: dict):
+
+async def set_pair_loan(db: DB, data: dict, role_type, role_id):
     await db.execute(f"UPDATE p_application_headers SET pair_loan_id = {data['pair_loan_id']} WHERE id = {data['id']};")
     await db.execute(f"UPDATE p_application_headers SET pair_loan_id = {data['id']} WHERE id = {data['pair_loan_id']};")
+    await db.execute(
+        utils.gen_insert_sql(
+            "p_activities",
+            {
+                "id": await db.uuid_short(),
+                "p_application_header_id": data["pair_loan_id"],
+                "operator_type": role_type,
+                "operator_id": role_id,
+                "table_name": "p_application_headers",
+                "field_name": "pair_loan_id",
+                "table_id": data["pair_loan_id"],
+                "content": data["id"],
+                "operate_type": OPERATE_TYPE.UPDATE.value,
+            },
+        )
+    )
+    await db.execute(
+        utils.gen_insert_sql(
+            "p_activities",
+            {
+                "id": await db.uuid_short(),
+                "p_application_header_id": data["id"],
+                "operator_type": role_type,
+                "operator_id": role_id,
+                "table_name": "p_application_headers",
+                "field_name": "pair_loan_id",
+                "table_id": data["id"],
+                "content": data["pair_loan_id"],
+                "operate_type": OPERATE_TYPE.UPDATE.value,
+            },
+        )
+    )
 
 
 async def query_memos(db: DB, p_application_header_id):
@@ -194,7 +277,27 @@ async def update_memo(db: DB, memo_id: int, content: str):
 
 
 async def update_p_application_banks_provisional_after_result(
-    db: DB, p_application_header_id: int, s_bank_id: int, provisional_after_result: int
+    db: DB, p_application_header_id: int, s_bank_id: int, provisional_after_result: int, role_type, role_id
 ):
-    sql = f"UPDATE p_application_banks SET provisional_after_result = {provisional_after_result} WHERE p_application_header_id = {p_application_header_id} AND s_bank_id = {s_bank_id};"
+    p_application_banks = await db.fetch_one(
+        f"SELECT id FROM WHERE p_application_header_id = {p_application_header_id} AND s_bank_id = {s_bank_id};"
+    )
+
+    sql = f"UPDATE p_application_banks SET provisional_after_result = {provisional_after_result} WHERE id = {p_application_banks['id']};"
     await db.execute(sql)
+    await db.execute(
+        utils.gen_insert_sql(
+            "p_activities",
+            {
+                "id": await db.uuid_short(),
+                "p_application_header_id": p_application_header_id,
+                "operator_type": role_type,
+                "operator_id": role_id,
+                "table_name": "p_application_banks",
+                "field_name": "provisional_after_result",
+                "table_id": p_application_banks["id"],
+                "content": provisional_after_result,
+                "operate_type": OPERATE_TYPE.UPDATE.value,
+            },
+        )
+    )

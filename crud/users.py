@@ -1,10 +1,11 @@
 import json
 from core.database import DB
+import utils
+from constant import USER_STATUS, AGENT_SENDED, UNSUBCRIBED, BANK_CODE
 
 
 async def check_c_user_with_email(db: DB, email: str):
-    sql = f"SELECT CONVERT(id,CHAR) AS id FROM c_users WHERE email = '{email}';"
-    return await db.fetch_one(sql)
+    return await db.fetch_one(f"SELECT CONVERT(id,CHAR) AS id FROM c_users WHERE email = '{email}';")
 
 
 async def query_c_user_with_email(db: DB, email: str):
@@ -27,47 +28,56 @@ async def query_c_user_with_email(db: DB, email: str):
 
 async def insert_new_c_user(db: DB, email: str, hashed_pwd: str, s_sales_company_org_id: int):
     id = await db.uuid_short()
-    sql = f"""
-    INSERT INTO c_users (id, email, hashed_pwd, s_sales_company_org_id, status)
-    VALUES ({id}, '{email}', '{hashed_pwd}', {s_sales_company_org_id if s_sales_company_org_id else 'null'}, 1);
-    """
-    await db.execute(sql)
+    sql_params = {"id": id, "email": email, "hashed_pwd": hashed_pwd, "s_sales_company_org_id": s_sales_company_org_id}
+    await db.execute(utils.gen_insert_sql("c_users", sql_params))
     return id
 
 
 async def update_c_user_password_with_email(db: DB, email: str, hashed_pwd: str):
-    sql = f"UPDATE c_users SET hashed_pwd = '{hashed_pwd}', status = 1, failed_first_at = null, failed_time = 0 WHERE email = '{email}';"
-    await db.execute(sql)
+    sql_params = {
+        "hashed_pwd": hashed_pwd,
+        "status": USER_STATUS.NORMAL.value,
+        "failed_first_at": None,
+        "failed_time": 0,
+    }
+    sql_where = {"email": email}
+    await db.execute(utils.gen_update_sql("c_users", sql_params, sql_where))
 
 
 async def update_c_user_password_with_id(db: DB, id: int, hashed_pwd: str):
-    sql = f"UPDATE c_users SET hashed_pwd = '{hashed_pwd}' WHERE id = {id};"
-    await db.execute(sql)
+    sql_params = {"hashed_pwd": hashed_pwd, "failed_first_at": None, "failed_time": 0}
+    sql_where = {"id": id}
+    await db.execute(utils.gen_update_sql("c_users", sql_params, sql_where))
 
 
 async def update_c_user_failed_first_at(db: DB, id: int, failed_time: int = 1):
-    sql = f"UPDATE c_users SET failed_first_at = CURRENT_TIMESTAMP, failed_time = {failed_time} WHERE id = {id};"
-    await db.execute(sql)
+    await db.execute(
+        f"UPDATE c_users SET failed_first_at = CURRENT_TIMESTAMP, failed_time = {failed_time} WHERE id = {id};"
+    )
 
 
 async def update_c_user_status_locked(db: DB, id: int):
-    sql = f"UPDATE c_users SET status = 2, failed_time = 5 WHERE id = {id};"
-    await db.execute(sql)
+    sql_params = {"status": USER_STATUS.LOCK.value, "failed_time": None}
+    sql_where = {"id": id}
+    await db.execute(utils.gen_update_sql("c_users", sql_params, sql_where))
 
 
 async def update_c_user_failed_time(db: DB, id: int, failed_time: int = 1):
-    sql = f"UPDATE c_users SET failed_time = {failed_time} WHERE id = {id};"
-    await db.execute(sql)
+    sql_params = {"failed_time": failed_time}
+    sql_where = {"id": id}
+    await db.execute(utils.gen_update_sql("c_users", sql_params, sql_where))
 
 
 async def update_c_user_email(db: DB, id: int, new_email: str):
-    sql = f"UPDATE c_users SET email = '{new_email}' WHERE id = {id};"
-    await db.execute(sql)
+    sql_params = {"email": new_email}
+    sql_where = {"id": id}
+    await db.execute(utils.gen_update_sql("c_users", sql_params, sql_where))
 
 
 async def update_c_user_agent_sended(db: DB, id: int):
-    sql = f"UPDATE c_users SET agent_sended = 1 WHERE id = {id};"
-    await db.execute(sql)
+    sql_params = {"agent_sended": AGENT_SENDED.SENDED.value}
+    sql_where = {"id": id}
+    await db.execute(utils.gen_update_sql("c_users", sql_params, sql_where))
 
 
 async def query_c_user_basic_info(db: DB, id: int):
@@ -88,8 +98,9 @@ async def query_c_user_basic_info(db: DB, id: int):
 
 
 async def reset_c_user_failed_infos(db: DB, id: int):
-    sql = f"UPDATE c_users SET failed_first_at = null, failed_time = 0 WHERE id = {id};"
-    await db.execute(sql)
+    sql_params = {"failed_first_at": None, "failed_time": 0}
+    sql_where = {"id": id}
+    await db.execute(utils.gen_update_sql("c_users", sql_params, sql_where))
 
 
 async def query_c_user_hashed_pwd(db: DB, id: int):
@@ -102,15 +113,15 @@ async def query_c_user_hashed_pwd(db: DB, id: int):
 async def delete_c_user(db: DB, id: int):
     sql = f"DELETE FROM p_drafts WHERE c_user_id = {id};"
     await db.execute(sql)
-    sql = f"UPDATE p_application_headers SET c_user_id = NUll, unsubcribed = 1 WHERE c_user_id = {id};"
-    print(sql)
-    await db.execute(sql)
+    sql_params = {"c_user_id": None, "unsubcribed": UNSUBCRIBED.UNSUBCRIBED.value}
+    sql_where = {"c_user_id": id}
+    await db.execute(utils.gen_update_sql("p_application_headers", sql_params, sql_where))
     sql = f"DELETE FROM c_users WHERE id = {id};"
     await db.execute(sql)
 
 
 async def query_c_user_token_payload(db: DB, c_user_id: int):
-    sbi = await db.fetch_one("SELECT id, name FROM s_banks WHERE code = '0038';")
+    sbi = await db.fetch_one(f"SELECT id, name FROM s_banks WHERE code = {BANK_CODE.SBI.value};")
     sbi_id = sbi["id"]
     sql = f"""
     SELECT
@@ -149,8 +160,6 @@ async def query_c_user_token_payload(db: DB, c_user_id: int):
     """
     result = await db.fetch_one(sql)
     result["has_draft"] = bool(result["has_draft"])
-    # if result["s_sales_company_org_id"] is None:
-    #     result["s_sales_company_org_id"] = "100713166408778466"
     return result
 
 
@@ -161,8 +170,7 @@ async def query_p_draft_data(db: DB, c_user_id: int):
 
 
 async def upsert_p_draft_data(db: DB, c_user_id: int, data: dict):
-    sql = f"SELECT COUNT(id) as isExist FROM p_drafts WHERE c_user_id = {c_user_id};"
-    p_draft = await db.fetch_one(sql)
+    p_draft = await db.fetch_one(f"SELECT COUNT(id) as isExist FROM p_drafts WHERE c_user_id = {c_user_id};")
     if p_draft["isExist"]:
         sql = f"UPDATE p_drafts SET data = '{json.dumps(data, ensure_ascii=False)}' WHERE c_user_id = {c_user_id};"
         await db.execute(sql)
@@ -173,5 +181,4 @@ async def upsert_p_draft_data(db: DB, c_user_id: int, data: dict):
 
 
 async def delete_p_draft_data(db: DB, c_user_id: int):
-    sql = f"DELETE FROM p_drafts WHERE c_user_id = {c_user_id};"
-    await db.execute(sql)
+    await db.execute(f"DELETE FROM p_drafts WHERE c_user_id = {c_user_id};")

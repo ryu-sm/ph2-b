@@ -26,12 +26,12 @@ def parse_token(token):
 
 
 def only_parse_payload(token):
-    try:
+    if token is None:
+        return {}
+    else:
         return jwt.decode(
             token=token,
             key=settings.JWT_SECRETS_KEY,
             algorithms=[settings.JWT_ALGORITHM],
             options={"verify_exp": False},
         )
-    except Exception:
-        return None

@@ -10,13 +10,27 @@ import crud
 from utils.s3 import download_from_s3
 from utils import blank_to_none
 
-router = APIRouter(route_class=LoggingContextRoute)
+from constant import (
+    TOKEN_ROLE_TYPE,
+    P_APPLICANT_PERSONS_TYPE,
+    P_BORROWING_DETAILS_TIME_TYPE,
+    LOAN_TYPE,
+    LAND_ADVANCE_PLAN,
+    JOIN_GUARANTOR_UMU,
+    CURR_BORROWING_STATUS,
+)
+
+from constant import DEFAULT_200_MSG, DEFAULT_500_MSG
+
+router = APIRouter()
 
 
 @router.put("/preliminary/s_manager_id")
 async def common_update_preliminary_s_manager_id(data: dict, db=Depends(get_db), token=Depends(get_token)):
     try:
-        await crud.update_p_application_headers_s_manager_id(db, data["p_application_header_id"], data["s_manager_id"])
+        await crud.update_p_application_headers_s_manager_id(
+            db, data["p_application_header_id"], data["s_manager_id"], token["role_type"], token["id"]
+        )
         return JSONResponse(status_code=200, content={"message": "successful"})
     except Exception as err:
         logger.exception(err)
@@ -74,32 +88,39 @@ async def common_get_preliminary(p_application_header_id: int, db=Depends(get_db
         p_application_headers = await crud.query_p_application_headers_for_ad(db, p_application_header_id)
         preliminary["p_application_headers"] = p_application_headers
 
-        p_borrowing_details__1 = await crud.query_p_borrowing_details_for_ad(db, p_application_header_id, 1)
+        p_borrowing_details__1 = await crud.query_p_borrowing_details_for_ad(
+            db, p_application_header_id, P_BORROWING_DETAILS_TIME_TYPE.ONE_TIME.value
+        )
         preliminary["p_borrowing_details__1"] = p_borrowing_details__1
 
-        if p_application_headers["land_advance_plan"] == "1":
+        if p_application_headers["land_advance_plan"] == LAND_ADVANCE_PLAN.HOPE.value:
             preliminary["p_borrowing_details__2"] = await crud.query_p_borrowing_details_for_ad(
-                db, p_application_header_id, 2
+                db, p_application_header_id, P_BORROWING_DETAILS_TIME_TYPE.TWO_TIME.value
             )
 
         preliminary["p_application_banks"] = await crud.query_p_application_banks_for_ad(db, p_application_header_id)
 
-        p_applicant_persons__0 = await crud.query_p_applicant_persons_for_ad(db, p_application_header_id, 0)
+        p_applicant_persons__0 = await crud.query_p_applicant_persons_for_ad(
+            db, p_application_header_id, P_APPLICANT_PERSONS_TYPE.APPLICANT.value
+        )
         preliminary["p_applicant_persons__0"] = p_applicant_persons__0
 
-        if p_application_headers["loan_type"] in ["3", "4"]:
+        if p_application_headers["loan_type"] in [
+            LOAN_TYPE.TOTAL_INCOME_EQUITY.value,
+            LOAN_TYPE.TOTAL_INCOME_NO_EQUITY.value,
+        ]:
             preliminary["p_applicant_persons__1"] = await crud.query_p_applicant_persons_for_ad(
-                db, p_application_header_id, 1
+                db, p_application_header_id, P_APPLICANT_PERSONS_TYPE.TOTAL_INCOME.value
             )
 
-        if p_application_headers["join_guarantor_umu"] == "1":
+        if p_application_headers["join_guarantor_umu"] == JOIN_GUARANTOR_UMU.HAVE.value:
             preliminary["p_join_guarantors"] = await crud.query_p_join_guarantors_for_ad(db, p_application_header_id)
 
         p_residents = await crud.query_p_residents_for_ad(db, p_application_header_id)
         if p_residents:
             preliminary["p_residents"] = p_residents
 
-        if p_application_headers["curr_borrowing_status"] == "1":
+        if p_application_headers["curr_borrowing_status"] == CURR_BORROWING_STATUS.HAVE.value:
             preliminary["p_borrowings"] = await crud.query_p_borrowings_for_ad(db, p_application_header_id)
 
         preliminary["p_activities"] = await crud.query_p_activities_for_ad(db, p_application_header_id)

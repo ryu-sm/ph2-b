@@ -41,3 +41,9 @@ def generate_presigned_url(object_key, expiration=3600):
     return s3_client.generate_presigned_url(
         "get_object", Params={"Bucket": settings.AWS_BUCKET_NAME, "Key": object_key}, ExpiresIn=expiration
     )
+
+
+def upload_base64_file_s3(full_key: str, base64_file: str):
+    [file_type, file_content_str] = base64_file.split(",")
+    file_content = base64.b64decode(file_content_str)
+    s3_client.put_object(Bucket=settings.AWS_BUCKET_NAME, Key=full_key, Body=file_content)

@@ -1,50 +1,45 @@
 from loguru import logger
 from datetime import datetime
 from fastapi import APIRouter
+from fastapi import Request
 from fastapi import Depends
 from fastapi.responses import JSONResponse
 
 from core.config import settings
-from core.custom import LoggingContextRoute
 from apis.deps import get_db
-from apis.deps import get_user_id
+from apis.deps import get_token
 import crud
 import utils
 import schemas
 
-
+from constant import DEFAULT_200_MSG, DEFAULT_500_MSG
 from templates.user_register_init_message import INIT_MESSAGE
 
-router = APIRouter(route_class=LoggingContextRoute)
+router = APIRouter()
 
 
 @router.post("/user/verify-email")
-async def user_send_verify_email(data: schemas.VerifyEmail, db=Depends(get_db)):
+async def user_send_verify_email(data: dict, request: Request, db=Depends(get_db)):
     try:
-        is_exist = await crud.check_c_user_with_email(db, email=data.email)
+        is_exist = await crud.check_c_user_with_email(db, email=data["email"])
         if is_exist:
             return JSONResponse(status_code=400, content={"message": "user email is exist."})
-        token = utils.gen_token(
-            {"email": data.email, "s_sales_company_org_id": data.s_sales_company_org_id},
-            expires_delta=settings.JWT_VERIFY_EMAIL_TOKEN_EXP,
-        )
+        token = utils.gen_token(data, expires_delta=settings.JWT_VERIFY_EMAIL_TOKEN_EXP)
         utils.send_email(
-            to=data.email,
+            to=data["email"],
             template="user_send_verify_email",
             link=f"{settings.FRONTEND_BASE_URL}/register?token={token}",
         )
-        return JSONResponse(status_code=200, content={"message": "verify email send successful."})
+        return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
 @router.post("/user")
-async def user_register(data: schemas.NewUser, db=Depends(get_db)):
+async def user_register(data: dict, db=Depends(get_db)):
     try:
-        payload = utils.parse_token(data.token)
+        payload = utils.parse_token(data["token"])
         if payload is None:
             return JSONResponse(status_code=407, content={"message": "token is invalid."})
         is_exist = await crud.check_c_user_with_email(db, email=payload["email"])
@@ -53,8 +48,8 @@ async def user_register(data: schemas.NewUser, db=Depends(get_db)):
         new_user_id = await crud.insert_new_c_user(
             db,
             email=payload["email"],
-            hashed_pwd=utils.hash_password(data.password),
-            s_sales_company_org_id=payload["s_sales_company_org_id"],
+            hashed_pwd=utils.hash_password(data["password"]),
+            s_sales_company_org_id=payload.get("s_sales_company_org_id"),
         )
         await crud.insert_c_message(db, c_user_id=new_user_id, sender_type=3, content=INIT_MESSAGE)
         access_token = utils.gen_token(
@@ -64,9 +59,7 @@ async def user_register(data: schemas.NewUser, db=Depends(get_db)):
         return JSONResponse(status_code=200, content={"access_token": access_token})
     except Exception as err:
         logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
 @router.post("/user/password/verify-email")
@@ -107,14 +100,14 @@ async def user_reset_password(data: schemas.ResetPasswordUser, db=Depends(get_db
 
 
 @router.post("/user/token")
-async def user_login(data: schemas.LoginUser, db=Depends(get_db)):
+async def user_login(data: dict, request: Request, db=Depends(get_db)):
     try:
-        is_exist = await crud.query_c_user_with_email(db, email=data.email)
+        is_exist = await crud.query_c_user_with_email(db, email=data["email"])
         if not is_exist:
             return JSONResponse(status_code=400, content={"message": "user email is not exist."})
         if is_exist["status"] == 2:
             return JSONResponse(status_code=423, content={"message": "account is locked."})
-        if not utils.verify_password(data.password, is_exist["hashed_pwd"]):
+        if not utils.verify_password(data["password"], is_exist["hashed_pwd"]):
             if is_exist["failed_first_at"]:
                 if (datetime.now() - is_exist["failed_first_at"]).seconds < 300 and is_exist["failed_time"] == 4:
                     await crud.update_c_user_status_locked(db, id=is_exist["id"])
@@ -130,113 +123,113 @@ async def user_login(data: schemas.LoginUser, db=Depends(get_db)):
         )
         if is_exist["failed_first_at"] or is_exist["failed_first_at"]:
             await crud.reset_c_user_failed_infos(db, is_exist["id"])
+        await utils.common_insert_c_access_log(
+            db, request, params={"body": data}, status_code=200, response_body={"access_token": "*******"}
+        )
         return JSONResponse(status_code=200, content={"access_token": access_token})
+
     except Exception as err:
         logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
 @router.delete("/user/token")
-async def user_logout(user_id=Depends(get_user_id)):
+async def user_logout(request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
-        return JSONResponse(status_code=200, content={"message": "logout successful."})
+        await utils.common_insert_c_access_log(db, request, status_code=200, response_body=DEFAULT_200_MSG)
+        return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
 @router.put("/user/password")
-async def user_up_password(data: schemas.UpPasswordUser, db=Depends(get_db), user_id=Depends(get_user_id)):
+async def user_up_password(data: dict, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
-        if not utils.verify_password(data.password, await crud.query_c_user_hashed_pwd(db, user_id)):
+        user_id = token.get("id")
+        if not utils.verify_password(data["password"], await crud.query_c_user_hashed_pwd(db, user_id)):
             return JSONResponse(status_code=412, content={"massage": "curr password is wrong."})
-        await crud.update_c_user_password_with_id(db, id=user_id, hashed_pwd=utils.hash_password(data.new_password))
-        return JSONResponse(status_code=200, content={"message": "update password successful."})
+        await crud.update_c_user_password_with_id(db, id=user_id, hashed_pwd=utils.hash_password(data["new_password"]))
+        await utils.common_insert_c_access_log(
+            db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
+        )
+        return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
 @router.post("/user/email/verify-email")
-async def user_send_change_email_verify_email(
-    data: schemas.UpEmailUser, db=Depends(get_db), user_id=Depends(get_user_id)
-):
+async def user_send_change_email_verify_email(data: dict, db=Depends(get_db), token=Depends(get_token)):
     try:
+        user_id = token.get("id")
         curr_db_user = await crud.query_c_user_basic_info(db, id=user_id)
-        if data.email != curr_db_user["email"]:
+        if data.get("email") != curr_db_user["email"]:
             return JSONResponse(status_code=412, content={"massage": "curr email is wrong."})
-        is_exist = await crud.query_c_user_with_email(db, email=data.new_email)
+        is_exist = await crud.query_c_user_with_email(db, email=data.get("new_email"))
         if is_exist:
             return JSONResponse(status_code=400, content={"massage": "new email is exist."})
-        token = utils.gen_token({"id": user_id, "new_email": data.new_email})
+        token = utils.gen_token({"id": user_id, "new_email": data.get("new_email")})
         utils.send_email(
-            to=data.new_email,
+            to=data.get("new_email"),
             template="user_send_change_email_verify_email",
             link=f"{settings.FRONTEND_BASE_URL}/change-email?token={token}",
         )
-        return JSONResponse(status_code=200, content={"message": "update password successful."})
+        return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
 @router.put("/user/email")
-async def user_change_email(data: schemas.UpEmailUserConfirm, db=Depends(get_db)):
+async def user_change_email(data: dict, request: Request, db=Depends(get_db)):
     try:
-        payload = utils.parse_token(data.token)
+        payload = utils.parse_token(data["token"])
         if payload is None:
             return JSONResponse(status_code=401, content={"message": "token is invalid."})
         curr_db_user = await crud.query_c_user_basic_info(db, id=payload["id"])
         if payload["new_email"] == curr_db_user["email"]:
             return JSONResponse(status_code=401, content={"message": "token is invalid."})
         await crud.update_c_user_email(db, id=payload["id"], new_email=payload["new_email"])
-        return JSONResponse(status_code=200, content={"message": "update password successful."})
+        access_token = utils.gen_token(
+            payload=await crud.query_c_user_token_payload(db, c_user_id=payload["id"]),
+            expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
+        )
+        await utils.common_insert_c_access_log(
+            db, request, params={"body": data}, status_code=200, response_body={"access_token": access_token}
+        )
+        return JSONResponse(status_code=200, content={"access_token": access_token})
     except Exception as err:
         logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
 @router.delete("/user")
-async def user_withdrawal(db=Depends(get_db), user_id=Depends(get_user_id)):
+async def user_withdrawal(request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
-        await crud.delete_c_user(db, id=user_id)
-        return JSONResponse(status_code=200, content={"message": "withdrawal successful."})
+        await crud.delete_c_user(db, id=token.get("id"))
+        await utils.common_insert_c_access_log(db, request, status_code=200, response_body=DEFAULT_200_MSG)
+        return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
 @router.post("/user/draft")
-async def user_save_draft(data: dict, db=Depends(get_db), user_id=Depends(get_user_id)):
+async def user_save_draft(data: dict, db=Depends(get_db), token=Depends(get_token)):
     try:
-        await crud.upsert_p_draft_data(db, user_id, data)
-        return JSONResponse(status_code=200, content={"message": "save successful."})
+        await crud.upsert_p_draft_data(db, token.get("id"), data)
+        return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
 @router.get("/user/draft")
-async def user_get_draft(db=Depends(get_db), user_id=Depends(get_user_id)):
+async def user_get_draft(db=Depends(get_db), token=Depends(get_token)):
     try:
-        data = await crud.query_p_draft_data(db, user_id)
+        data = await crud.query_p_draft_data(db, token.get("id"))
         return JSONResponse(status_code=200, content=data)
     except Exception as err:
         logger.exception(err)
-        return JSONResponse(
-            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
-        )
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
