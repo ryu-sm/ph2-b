@@ -38,7 +38,7 @@ def gen_update_sql(table: str, params: dict, where: dict):
     where_items = []
 
     for field, value in params.items():
-        t_value = f"'{value}'" if value is not None else "NULL"
+        t_value = f"'{value}'" if value else "NULL"
         up_items.append(f"{field} = {t_value}")
 
     for field, value in where.items():
