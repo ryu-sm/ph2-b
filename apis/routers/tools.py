@@ -5,6 +5,7 @@ from core.config import settings
 from apis.deps import get_db
 from core.database import DB
 from utils import download_from_s3, upload_to_s3
+from utils.translate_files import translate_p_uploaded_files, translate_p_archive_files, translate_c_access_logs
 
 router = APIRouter()
 
@@ -196,3 +197,11 @@ async def file_reload(p_application_header_id: int, db: DB = Depends(get_db)):
 
     except Exception as e:
         raise e
+
+
+@router.get("/translate-files")
+async def files(db: DB = Depends(get_db)):
+    # await translate_p_uploaded_files(db)
+    # await translate_p_archive_files(db)
+
+    return await translate_c_access_logs(db)

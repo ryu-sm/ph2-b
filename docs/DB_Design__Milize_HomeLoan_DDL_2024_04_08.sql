@@ -9,14 +9,12 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `c_access_logs`;
 CREATE TABLE `c_access_logs` (
   `id` bigint unsigned NOT NULL COMMENT 'ID',
+  `apply_no` varchar(14) DEFAULT NULL COMMENT '受付番号',
   `account_id` bigint unsigned DEFAULT NULL COMMENT 'アカウントID',
-  `ip` varchar(128) DEFAULT NULL COMMENT 'IP',
-  `url` varchar(512) DEFAULT NULL COMMENT 'URL',
-  `endpoint` varchar(255) DEFAULT NULL COMMENT 'エンドポイント',
-  `method` varchar(6) DEFAULT NULL COMMENT 'メソッド',
-  `params` json DEFAULT NULL COMMENT 'パラメータ',
-  `status_code` int DEFAULT NULL COMMENT 'ステータスコード',
-  `response_body` json DEFAULT NULL COMMENT 'レスポンスボディ',
+  `account_type` tinyint DEFAULT NULL COMMENT 'アカウント区分',
+  `ip` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'IP',
+  `operation` varchar(128) DEFAULT NULL COMMENT '操作',
+  `operation_content` varchar(512) DEFAULT NULL COMMENT '操作内容',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日付',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日付',
   PRIMARY KEY (`id`) USING BTREE,
@@ -31,9 +29,7 @@ CREATE TABLE `c_archive_files` (
   `id` bigint unsigned NOT NULL COMMENT 'ID',
   `s_sales_company_org_id` bigint unsigned NOT NULL COMMENT '連携先ID',
   `s_sales_person_id` bigint unsigned NOT NULL COMMENT '業者ID',
-  `file_names` json DEFAULT NULL COMMENT 'ファイル名　複数',
   `note` varchar(1024) DEFAULT NULL COMMENT '備考内容',
-  `s3_key` varchar(512) DEFAULT NULL COMMENT 'S3キー',
   `deleted` tinyint DEFAULT NULL COMMENT '論理削除',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日付',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日付',
@@ -44,6 +40,22 @@ CREATE TABLE `c_archive_files` (
   CONSTRAINT `c_archive_files_fk_s_sales_company_orgs_id` FOREIGN KEY (`s_sales_company_org_id`) REFERENCES `s_sales_company_orgs` (`id`),
   CONSTRAINT `c_archive_files_fk_s_sales_person_id` FOREIGN KEY (`s_sales_person_id`) REFERENCES `s_sales_persons` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) COMMENT='業者共有書類';
+
+-- ----------------------------
+-- Table structure for c_archive_uploaded_files
+-- ----------------------------
+DROP TABLE IF EXISTS `c_archive_uploaded_files`;
+CREATE TABLE `c_archive_uploaded_files` (
+  `id` bigint unsigned NOT NULL COMMENT 'ID',
+  `owner_id` bigint unsigned DEFAULT NULL COMMENT '所有者ID',
+  `record_id` bigint unsigned DEFAULT NULL COMMENT '関連レコードID',
+  `s3_key` varchar(255) DEFAULT NULL COMMENT 'S3キー',
+  `file_name` varchar(255) DEFAULT NULL COMMENT 'ファイル名',
+  `deleted` tinyint DEFAULT NULL COMMENT '論理削除',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日付',
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日付',
+  PRIMARY KEY (`id`)
+) COMMENT='業者共有書類アップロードファイル';
 
 -- ----------------------------
 -- Table structure for c_messages
@@ -236,9 +248,9 @@ CREATE TABLE `p_application_headers` (
   `c_user_id` bigint unsigned DEFAULT NULL COMMENT 'ユーザーID',
   `s_sales_person_id` bigint unsigned DEFAULT NULL COMMENT '業者ID',
   `s_manager_id` bigint unsigned DEFAULT NULL COMMENT '銀代担当者ID',
-  `sales_company_id` bigint unsigned DEFAULT NULL COMMENT '紹介会社（組織階層）ID',
-  `sales_area_id` bigint unsigned DEFAULT NULL,
-  `sales_exhibition_hall_id` bigint unsigned DEFAULT NULL,
+  `sales_company_id` bigint unsigned DEFAULT NULL COMMENT '紹介会社ID',
+  `sales_area_id` bigint unsigned DEFAULT NULL COMMENT 'エリアID',
+  `sales_exhibition_hall_id` bigint unsigned DEFAULT NULL COMMENT '展示場ID',
   `apply_no` varchar(14) DEFAULT NULL COMMENT '受付番号',
   `apply_date` date DEFAULT NULL COMMENT '申込日兼同意日',
   `move_scheduled_date` varchar(7) DEFAULT NULL COMMENT '入居予定年月',
@@ -591,6 +603,7 @@ CREATE TABLE `p_uploaded_files` (
   `owner_type` tinyint DEFAULT NULL COMMENT '所有者区分',
   `owner_id` bigint unsigned DEFAULT NULL COMMENT '所有者ID',
   `p_application_header_id` bigint unsigned DEFAULT NULL COMMENT '案件メイン情報ID',
+  `record_id` bigint unsigned DEFAULT NULL COMMENT '関連レコードID',
   `type` varchar(1) DEFAULT NULL COMMENT '区分',
   `s3_key` varchar(255) DEFAULT NULL COMMENT 'S3キー',
   `file_name` varchar(255) DEFAULT NULL COMMENT 'ファイル名',

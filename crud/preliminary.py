@@ -173,7 +173,7 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
             AND
             deleted IS NULL
             AND
-            s3_key LIKE '%/{key}';
+            s3_key LIKE '%/{key}%';
         """
         files_info = await db.fetch_all(sql)
 
@@ -386,7 +386,7 @@ async def query_p_applicant_persons_for_ad(db: DB, p_application_header_id: int,
             AND
             deleted IS NULL
             AND
-            s3_key LIKE '%/{key}';
+            s3_key LIKE '%/{key}%';
         """
         files_info = await db.fetch_all(sql)
         temp_files = []
@@ -529,7 +529,7 @@ async def query_p_borrowings_for_ad(db: DB, p_application_header_id: int):
                 AND
                 deleted IS NULL
                 AND
-                s3_key LIKE '%/{key}';
+                s3_key LIKE '%/{key}%';
             """
             files_info = await db.fetch_all(sql)
             temp_files = []
@@ -598,7 +598,7 @@ async def diff_update_p_application_headers_for_ad(db: DB, data: dict, p_applica
                 AND
                 type = 0
                 AND
-                s3_key LIKE '%/{key}';
+                s3_key LIKE '%/{key}%';
             """
             old_files_info = await db.fetch_all(sql)
             old_files_id = [item["id"] for item in old_files_info]
@@ -826,7 +826,7 @@ async def diff_update_p_applicant_persons_for_ad(db: DB, data: dict, p_applicati
                 AND
                 type = {type}
                 AND
-                s3_key LIKE '%/{key}';
+                s3_key LIKE '%/{key}%';
             """
             old_files_info = await db.fetch_all(sql)
             old_files_id = [item["id"] for item in old_files_info]
@@ -1429,7 +1429,7 @@ async def diff_update_p_borrowings_for_ad(db: DB, data: typing.List[dict], p_app
                     AND
                     type = 0
                     AND
-                    s3_key LIKE '%/{key}';
+                    s3_key LIKE '%/{key}%';
                 """
                 old_files_info = await db.fetch_all(sql)
                 old_files_id = [item["id"] for item in old_files_info]
@@ -1878,3 +1878,7 @@ async def query_p_borrowings_files_for_ad_view(db: DB, p_application_header_id: 
                 src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
                 borrowings.append({"times": index + 1, "src": src, "name": file_info["file_name"], **file_info})
     return borrowings
+
+
+async def query_p_application_header_basic(db: DB, id: int):
+    return await db.fetch_one(f"SELECT apply_no, pre_examination_status FROM p_application_headers WHERE id = {id};")

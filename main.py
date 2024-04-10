@@ -48,9 +48,9 @@ app.include_router(optipns_router)
 app.include_router(orgs_router)
 app.include_router(apply_router)
 app.include_router(managers_router)
+app.include_router(c_archive_files_router)
 app.include_router(sales_persons_router)
 app.include_router(preliminaries_router)
-app.include_router(c_archive_files_router)
 app.include_router(messages_router)
 
 
@@ -73,4 +73,4 @@ app.add_middleware(
 if __name__ == "__main__":
     from uvicorn import run
 
-    run(app="main:app", host="0.0.0.0", port=8000, reload=True)
+    run(app="main:app", host="0.0.0.0", port=8080, reload=True)

@@ -42,24 +42,6 @@ def none_to_blank(data: dict):
 
 
 # accesee log
-
-
-async def common_insert_c_access_log(
-    db: DB, request: Request, params: dict = None, status_code: int = 200, response_body: dict = None
-):
-    print(request.path_params)
-    payload = utils.only_parse_payload(request.headers.get("authorization"))
-    sql_params = {
-        "id": await db.uuid_short(),
-        "account_id": payload.get("id"),
-        "url": request.url._url,
-        "ip": request.client.host,
-        "endpoint": utils.parse_endpoint(request.url.path, request.path_params),
-        "method": request.method,
-        "params": json.dumps(params, ensure_ascii=False) if params else None,
-        "status_code": status_code,
-        "response_body": json.dumps(response_body, ensure_ascii=False) if response_body else None,
-    }
-
-    sql = utils.gen_insert_sql("c_access_logs", sql_params)
-    await db.execute(sql)
+async def common_insert_c_access_log(db: DB, request: Request, params: dict):
+    sql_params = {"id": await db.uuid_short(), "ip": request.client.host, **params}
+    await db.execute(utils.gen_insert_sql("c_access_logs", sql_params))

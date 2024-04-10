@@ -1,4 +1,3 @@
-import json
 from loguru import logger
 from fastapi import APIRouter
 from fastapi import Depends
@@ -29,6 +28,10 @@ router = APIRouter()
 @router.post("/application")
 async def post_application(data_: dict, db=Depends(get_db), token: dict = Depends(get_token)):
     try:
+        # errors = manager_data_check(data_)
+
+        # if errors:
+        #     return JSONResponse(status_code=400, content=errors)
         data = utils.blank_to_none(data_)
         p_application_header_id = None
         if token["role_type"] == TOKEN_ROLE_TYPE.USER.value:

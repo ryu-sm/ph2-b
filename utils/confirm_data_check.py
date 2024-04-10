@@ -5,7 +5,7 @@ from schemas.regex import REGEX
 
 def manager_data_check(data: dict):
     errors = {}
-
+    # TODO:
     mcj_id = "100730412732514738"
 
     # お借入のご希望

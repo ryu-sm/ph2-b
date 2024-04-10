@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request
 from fastapi import Depends
 from fastapi.responses import JSONResponse
 
-from constant import DEFAULT_200_MSG, DEFAULT_500_MSG
+from constant import ACCESS_LOG_OPERATION, DEFAULT_200_MSG, DEFAULT_500_MSG
 from core.config import settings
 from core.custom import LoggingContextRoute
 from apis.deps import get_db
@@ -91,12 +91,19 @@ async def sales_person_login(data: dict, request: Request, db=Depends(get_db)):
             else:
                 await crud.update_s_sales_person_failed_time(db, id=is_exist["id"])
             return JSONResponse(status_code=400, content={"message": "email or password is invalid."})
+        payload = await crud.query_s_sales_person_token_payload(db, id=is_exist["id"])
         access_token = utils.gen_token(
-            payload=await crud.query_s_sales_person_token_payload(db, id=is_exist["id"]),
+            payload=payload,
             expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
         )
         await utils.common_insert_c_access_log(
-            db, request, params={"body": data}, status_code=200, response_body={"access_token": "*******"}
+            db,
+            request,
+            params={
+                "account_id": payload.get("id"),
+                "account_type": payload.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.LOGIN.value,
+            },
         )
         return JSONResponse(status_code=200, content={"access_token": access_token})
     except Exception as err:
@@ -105,10 +112,16 @@ async def sales_person_login(data: dict, request: Request, db=Depends(get_db)):
 
 
 @router.delete("/sales-person/token")
-async def sales_person_logout(email: str, request: Request, db=Depends(get_db), token=Depends(get_token)):
+async def sales_person_logout(request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
         await utils.common_insert_c_access_log(
-            db, request, params={"query": {"email": email}}, status_code=200, response_body=DEFAULT_200_MSG
+            db,
+            request,
+            params={
+                "account_id": token.get("id"),
+                "account_type": token.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.LOGOUT.value,
+            },
         )
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:

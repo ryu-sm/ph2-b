@@ -12,14 +12,14 @@ import crud
 import utils
 import schemas
 
-from constant import DEFAULT_200_MSG, DEFAULT_500_MSG
+from constant import DEFAULT_200_MSG, DEFAULT_500_MSG, ACCESS_LOG_OPERATION
 from templates.user_register_init_message import INIT_MESSAGE
 
 router = APIRouter()
 
 
 @router.post("/user/verify-email")
-async def user_send_verify_email(data: dict, request: Request, db=Depends(get_db)):
+async def user_send_verify_email(data: dict, db=Depends(get_db)):
     try:
         is_exist = await crud.check_c_user_with_email(db, email=data["email"])
         if is_exist:
@@ -117,14 +117,19 @@ async def user_login(data: dict, request: Request, db=Depends(get_db)):
             else:
                 await crud.update_c_user_failed_first_at(db, id=is_exist["id"])
             return JSONResponse(status_code=400, content={"message": "email or password is invalid."})
-        access_token = utils.gen_token(
-            payload=await crud.query_c_user_token_payload(db, c_user_id=is_exist["id"]),
-            expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
-        )
+        payload = await crud.query_c_user_token_payload(db, c_user_id=is_exist["id"])
+        access_token = utils.gen_token(payload=payload, expires_delta=settings.JWT_ACCESS_TOKEN_EXP)
+
         if is_exist["failed_first_at"] or is_exist["failed_first_at"]:
             await crud.reset_c_user_failed_infos(db, is_exist["id"])
         await utils.common_insert_c_access_log(
-            db, request, params={"body": data}, status_code=200, response_body={"access_token": "*******"}
+            db,
+            request,
+            params={
+                "account_id": payload.get("id"),
+                "account_type": payload.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.LOGIN.value,
+            },
         )
         return JSONResponse(status_code=200, content={"access_token": access_token})
 
@@ -134,10 +139,16 @@ async def user_login(data: dict, request: Request, db=Depends(get_db)):
 
 
 @router.delete("/user/token")
-async def user_logout(email: str, request: Request, db=Depends(get_db), token=Depends(get_token)):
+async def user_logout(request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
         await utils.common_insert_c_access_log(
-            db, request, params={"query": {"email": email}}, status_code=200, response_body=DEFAULT_200_MSG
+            db,
+            request,
+            params={
+                "account_id": token.get("id"),
+                "account_type": token.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.LOGOUT.value,
+            },
         )
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:

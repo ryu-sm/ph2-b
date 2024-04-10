@@ -1,70 +1,49 @@
 import base64
 import json
 import uuid
+from constant import P_UPLOAD_FILE_TYPE
 from core.database import DB
 import crud
+import utils
 from utils.common import none_to_blank
 from utils.s3 import delete_from_s3, upload_to_s3, download_from_s3
 
 
-async def insert_c_archive_files(db: DB, files: list, s_sales_person_id: int, s_sales_company_org_id: int):
-    id = await db.uuid_short()
-    file_names = []
+async def insert_c_archive_files(
+    db: DB, files: list, s_sales_person_id: int, s_sales_company_org_id: int, role_type, role_id
+):
+    s_sales_company_org_root_id = await crud.query_s_sales_company_orgs_root_id(db, s_sales_company_org_id)
+    c_archive_file_id = await db.uuid_short()
+    c_archive_file_sql_params = {
+        "id": c_archive_file_id,
+        "s_sales_company_org_id": s_sales_company_org_root_id,
+        "s_sales_person_id": s_sales_person_id,
+    }
+    await db.execute(utils.gen_insert_sql("c_archive_files", c_archive_file_sql_params))
+
     for file in files:
-        s3_key = f"{s_sales_company_org_id}/{id}"
-        file_name = f"{s3_key}/{file['name']}"
-        file_content = base64.b64decode(file["src"].split(",")[1])
-        upload_to_s3(file_name, file_content)
-        file_names.append({"id": str(uuid.uuid4()), "name": file["name"]})
-
-    sql = f"""
-    INSERT INTO c_archive_files (id, s_sales_company_org_id, s_sales_person_id, file_names)
-    VALUES ({id}, {s_sales_company_org_id}, {s_sales_person_id}, '{json.dumps(file_names, ensure_ascii=False)}');
-    """
-
-    await db.execute(sql)
-
-
-async def query_c_archive_files_for_s_sales_person(db: DB, s_sales_company_org_id: int):
-    sql = f"""
-    SELECT
-        CONVERT(c_archive_files.id,CHAR) AS id,
-        DATE_FORMAT(c_archive_files.created_at, '%Y/%m/%d %H:%i') as created_at,
-        s_sales_persons.name_kanji as s_sales_person_name,
-        c_archive_files.file_names as file_names,
-        c_archive_files.note as note,
-        s_sales_company_orgs.name as org_name
-    FROM
-        c_archive_files
-    LEFT JOIN
-        s_sales_persons
-        ON
-        s_sales_persons.id = c_archive_files.s_sales_person_id
-    LEFT JOIN
-        s_sales_company_orgs
-        ON
-        s_sales_company_orgs.id = c_archive_files.s_sales_company_org_id
-    WHERE
-        c_archive_files.s_sales_company_org_id = {s_sales_company_org_id};
-    """
-    result = await db.fetch_all(sql)
-
-    temp = []
-
-    for item in result:
-        files = json.loads(item["file_names"])
-        temp.append(none_to_blank({**item, "file_names": files, "files_num": len(files)}))
-
-    return temp
+        c_archive_uploaded_file_id = await db.uuid_short()
+        c_archive_uploaded_file_sql_params = {
+            "id": c_archive_uploaded_file_id,
+            # "owner_type": role_type,
+            "owner_id": s_sales_person_id,
+            "record_id": c_archive_file_id,
+            "s3_key": f"{s_sales_company_org_root_id}/{s_sales_person_id}/{c_archive_uploaded_file_id}",
+            "file_name": file["name"],
+        }
+        utils.upload_base64_file_s3(
+            f"{c_archive_uploaded_file_sql_params.get('s3_key')}/{c_archive_uploaded_file_sql_params.get('file_name')}",
+            file["src"],
+        )
+        await db.execute(utils.gen_insert_sql("c_archive_uploaded_files", c_archive_uploaded_file_sql_params))
 
 
-async def query_c_archive_files_for_manager(db: DB):
+async def query_c_archive_files_for_s_sales_person(db: DB, s_sales_company_org_ids: str):
     sql = f"""
     SELECT
         CONVERT(c_archive_files.id,CHAR) AS id,
         DATE_FORMAT(c_archive_files.created_at, '%Y/%m/%d %H:%i') as created_at,
         s_sales_persons.name_kanji as s_sales_person_name,
-        c_archive_files.file_names as file_names,
         c_archive_files.note as note,
         s_sales_company_orgs.name as org_name,
         CONVERT(s_sales_company_orgs.id,CHAR) as org_id,
@@ -78,76 +57,97 @@ async def query_c_archive_files_for_manager(db: DB):
     LEFT JOIN
         s_sales_company_orgs
         ON
-        s_sales_company_orgs.id = c_archive_files.s_sales_company_org_id;
+        s_sales_company_orgs.id = c_archive_files.s_sales_company_org_id
+    WHERE
+        c_archive_files.deleted is NULL
+        AND
+        c_archive_files.s_sales_company_org_id in ({s_sales_company_org_ids});
     """
-    result = await db.fetch_all(sql)
+    basic = await db.fetch_all(sql)
 
-    temp = []
+    c_archive_files = []
 
-    for item in result:
-        files = json.loads(item["file_names"])
-        temp.append(none_to_blank({**item, "file_names": files, "files_num": len(files)}))
+    for item in basic:
+        sql = f"SELECT file_name FROM c_archive_uploaded_files WHERE record_id = {item['id']} AND deleted is NULL;"
+        files = await db.fetch_all(sql)
+        c_archive_files.append(
+            none_to_blank({**item, "file_names": [item["file_name"] for item in files], "files_num": len(files)})
+        )
 
-    return temp
+    return c_archive_files
+
+
+async def query_c_archive_files_for_manager(db: DB):
+    sql = f"""
+    SELECT
+        CONVERT(c_archive_files.id,CHAR) AS id,
+        DATE_FORMAT(c_archive_files.created_at, '%Y/%m/%d %H:%i') as created_at,
+        s_sales_persons.name_kanji as s_sales_person_name,
+        c_archive_files.note as note,
+        s_sales_company_orgs.name as org_name,
+        CONVERT(s_sales_company_orgs.id,CHAR) as org_id,
+        CONVERT(s_sales_persons.id,CHAR) as s_sales_person_id
+    FROM
+        c_archive_files
+    LEFT JOIN
+        s_sales_persons
+        ON
+        s_sales_persons.id = c_archive_files.s_sales_person_id
+    LEFT JOIN
+        s_sales_company_orgs
+        ON
+        s_sales_company_orgs.id = c_archive_files.s_sales_company_org_id
+    WHERE
+        c_archive_files.deleted is NULL;
+    """
+    basic = await db.fetch_all(sql)
+
+    c_archive_files = []
+
+    for item in basic:
+        sql = f"SELECT file_name FROM c_archive_uploaded_files WHERE record_id = {item['id']} AND deleted is NULL;"
+        files = await db.fetch_all(sql)
+        c_archive_files.append(
+            none_to_blank({**item, "file_names": [item["file_name"] for item in files], "files_num": len(files)})
+        )
+
+    return c_archive_files
 
 
 async def query_c_archive_file(db: DB, id: int):
-    sql = f"SELECT id, s_sales_company_org_id, file_names FROM c_archive_files WHERE id = {id};"
-    c_archive_file = await db.fetch_one(sql)
-    c_archive_file_id = c_archive_file["id"]
-    s_sales_company_org_id = c_archive_file["s_sales_company_org_id"]
+    sql = f"""
+    SELECT
+        CONVERT(id,CHAR) AS id,
+        s3_key,
+        file_name
+    FROM
+        c_archive_uploaded_files
+    WHERE
+        record_id = {id}
+        AND
+        deleted is NULL;
+    """
+    files_info = await db.fetch_all(sql)
     files = []
-    for file in json.loads(c_archive_file["file_names"]):
-
-        s3_key = f"{s_sales_company_org_id}/{c_archive_file_id}"
-        file_name = f"{s3_key}/{file['name']}"
-
-        files.append({**download_from_s3(file_name), "id": file["id"]})
+    for file_info in files_info:
+        src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
+        files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
     return files
 
 
 async def delete_c_archive_file(db: DB, id: int):
-    sql = f"SELECT id, s_sales_company_org_id, file_names FROM c_archive_files WHERE id = {id};"
-    c_archive_file = await db.fetch_one(sql)
-
-    c_archive_file_id = c_archive_file["id"]
-    s_sales_company_org_id = c_archive_file["s_sales_company_org_id"]
-
-    for file in json.loads(c_archive_file["file_names"]):
-
-        s3_key = f"{s_sales_company_org_id}/{c_archive_file_id}"
-        file_name = f"{s3_key}/{file['name']}"
-
-        delete_from_s3(file_name)
-    await db.execute(f"DELETE FROM  c_archive_files WHERE id = {id};")
+    await db.execute(f"UPDATE c_archive_uploaded_files SET deleted = 1 WHERE record_id = {id};")
+    await db.execute(f"UPDATE c_archive_files SET deleted = 1 WHERE id = {id};")
 
 
-async def delete_c_archive_file_for_sub(db: DB, id: int, data: dict):
-    sql = f"SELECT id, s_sales_company_org_id, file_names FROM c_archive_files WHERE id = {id};"
-    c_archive_file = await db.fetch_one(sql)
-    c_archive_file_id = c_archive_file["id"]
-    s_sales_company_org_id = c_archive_file["s_sales_company_org_id"]
-    files = json.loads(c_archive_file["file_names"])
-    un_delete_files = []
-    for file in files:
-        if file["id"] == data["id"]:
-            continue
-        else:
-            un_delete_files.append(file)
-
-    s3_key = f"{s_sales_company_org_id}/{c_archive_file_id}"
-    file_name = f"{s3_key}/{data['name']}"
-
-    delete_from_s3(file_name)
-
-    if len(un_delete_files) == 0:
-        await db.execute(f"DELETE FROM  c_archive_files WHERE id = {id};")
-    else:
-        await db.execute(
-            f"UPDATE  c_archive_files SET file_names = '{json.dumps(un_delete_files, ensure_ascii=False)}' WHERE id = {id};"
-        )
-
-    return bool(un_delete_files)
+async def delete_c_archive_file_for_sub(db: DB, id: int):
+    await db.execute(f"UPDATE c_archive_uploaded_files SET deleted = 1 WHERE id = {id};")
+    file = await db.fetch_one(f"SELECT record_id FROM c_archive_uploaded_files WHERE id = {id};")
+    files = await db.fetch_all(
+        f"SELECT id FROM c_archive_uploaded_files WHERE deleted is NULL AND record_id = {file['record_id']};"
+    )
+    if len(files) == 0:
+        await db.execute(f"UPDATE c_archive_files SET deleted = 1 WHERE id = {file['record_id']};")
 
 
 async def update_c_archive_file_note(db: DB, id: int, note: str):

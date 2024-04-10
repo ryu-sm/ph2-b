@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request
 from fastapi import Depends
 from fastapi.responses import JSONResponse
 
-from constant import DEFAULT_200_MSG, DEFAULT_500_MSG
+from constant import ACCESS_LOG_OPERATION, DEFAULT_200_MSG, DEFAULT_500_MSG
 from core.config import settings
 from core.custom import LoggingContextRoute
 from apis.deps import get_db
@@ -12,8 +12,7 @@ from apis.deps import get_token
 import crud
 import utils
 import schemas
-from utils.data_check import manager_data_check
-from utils.s3 import download_from_s3
+from utils.confirm_data_check import manager_data_check
 from typing import Optional
 
 router = APIRouter(route_class=LoggingContextRoute)
@@ -57,7 +56,7 @@ async def manager_reset_password(data: schemas.ResetPasswordManager, db=Depends(
 
 
 @router.put("/manager/password")
-async def manager_up_password(data: dict, request: Request, db=Depends(get_db), token=Depends(get_token)):
+async def manager_up_password(data: dict, db=Depends(get_db), token=Depends(get_token)):
     try:
         if not utils.verify_password(data["password"], await crud.query_s_manager_hashed_pwd(db, token["id"])):
             return JSONResponse(status_code=412, content={"massage": "curr password is wrong."})
@@ -91,12 +90,19 @@ async def manager_login(data: dict, request: Request, db=Depends(get_db)):
             else:
                 await crud.update_s_manager_failed_time(db, id=is_exist["id"])
             return JSONResponse(status_code=400, content={"message": "email or password is invalid."})
+        payload = await crud.query_s_manager_token_payload(db, id=is_exist["id"])
         access_token = utils.gen_token(
-            payload=await crud.query_s_manager_token_payload(db, id=is_exist["id"]),
+            payload=payload,
             expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
         )
         await utils.common_insert_c_access_log(
-            db, request, params={"body": data}, status_code=200, response_body={"access_token": "*******"}
+            db,
+            request,
+            params={
+                "account_id": payload.get("id"),
+                "account_type": payload.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.LOGIN.value,
+            },
         )
         return JSONResponse(status_code=200, content={"access_token": access_token})
     except Exception as err:
@@ -105,10 +111,16 @@ async def manager_login(data: dict, request: Request, db=Depends(get_db)):
 
 
 @router.delete("/manager/token")
-async def manager_logout(email: str, request: Request, db=Depends(get_db), token=Depends(get_token)):
+async def manager_logout(request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
         await utils.common_insert_c_access_log(
-            db, request, params={"query": {"email": email}}, status_code=200, response_body=DEFAULT_200_MSG
+            db,
+            request,
+            params={
+                "account_id": token.get("id"),
+                "account_type": token.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.LOGIN.value,
+            },
         )
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
@@ -135,8 +147,18 @@ async def manager_get_access_applications(status: int, db=Depends(get_db), token
 async def un_pair_laon(data: dict, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
         await crud.delete_pair_laon(db, data.values(), token["role_type"], token["id"])
+        p_application_header_basic_a = await crud.query_p_application_header_basic(db, data["id"])
+        p_application_header_basic_b = await crud.query_p_application_header_basic(db, data["pair_loan_id"])
         await utils.common_insert_c_access_log(
-            db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
+            db,
+            request,
+            params={
+                "apply_no": p_application_header_basic_a["apply_no"],
+                "account_id": token.get("id"),
+                "account_type": token.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.UPDATE.value,
+                "operation_content": f"ペアローン紐付・解除: {p_application_header_basic_a['apply_no']}と{p_application_header_basic_b['apply_no']}解除",
+            },
         )
         return JSONResponse(status_code=200, content={"message": "successful"})
     except Exception as err:
@@ -150,8 +172,18 @@ async def un_pair_laon(data: dict, request: Request, db=Depends(get_db), token=D
 async def set_pair_laon(data: dict, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
         await crud.set_pair_loan(db, data, token["role_type"], token["id"])
+        p_application_header_basic_a = await crud.query_p_application_header_basic(db, data["id"])
+        p_application_header_basic_b = await crud.query_p_application_header_basic(db, data["pair_loan_id"])
         await utils.common_insert_c_access_log(
-            db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
+            db,
+            request,
+            params={
+                "apply_no": p_application_header_basic_a["apply_no"],
+                "account_id": token.get("id"),
+                "account_type": token.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.UPDATE.value,
+                "operation_content": f"ペアローン紐付・解除: {p_application_header_basic_a['apply_no']}と{p_application_header_basic_b['apply_no']}紐付",
+            },
         )
         return JSONResponse(status_code=200, content={"message": "successful"})
     except Exception as err:
@@ -228,9 +260,25 @@ async def update_provisional_result(data: dict, request: Request, db=Depends(get
             token["role_type"],
             token["id"],
         )
-        # await utils.common_insert_c_access_log(
-        #     db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
-        # )
+        p_application_header_basic = await crud.query_p_application_header_basic(db, data["p_application_header_id"])
+
+        operation_content_maps = {
+            0: "仮審査結果の操作状態: 承認",
+            1: "仮審査結果の操作状態: 条件付承認",
+            2: "仮審査結果の操作状態: 否決",
+        }
+
+        await utils.common_insert_c_access_log(
+            db,
+            request,
+            params={
+                "apply_no": p_application_header_basic["apply_no"],
+                "account_id": token.get("id"),
+                "account_type": token.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.UPDATE.value,
+                "operation_content": operation_content_maps[data["provisional_result"]],
+            },
+        )
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
@@ -246,9 +294,19 @@ async def delete_provisional_result(data: dict, request: Request, db=Depends(get
             data["s_bank_id"],
             data["p_upload_file_id"],
         )
-        # await utils.common_insert_c_access_log(
-        #     db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
-        # )
+        p_application_header_basic = await crud.query_p_application_header_basic(db, data["p_application_header_id"])
+
+        await utils.common_insert_c_access_log(
+            db,
+            request,
+            params={
+                "apply_no": p_application_header_basic["apply_no"],
+                "account_id": token.get("id"),
+                "account_type": token.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.DELETE.value,
+                "operation_content": "審査結果PDF: アップロードファイルを削除した",
+            },
+        )
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
         logger.exception(err)
@@ -261,8 +319,18 @@ async def update_approver_confirmation(data: dict, request: Request, db=Depends(
         await crud.update_p_application_headers_approver_confirmation(
             db, data["p_application_header_id"], data["approver_confirmation"]
         )
+        p_application_header_basic = await crud.query_p_application_header_basic(db, data["p_application_header_id"])
+
         await utils.common_insert_c_access_log(
-            db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
+            db,
+            request,
+            params={
+                "apply_no": p_application_header_basic["apply_no"],
+                "account_id": token.get("id"),
+                "account_type": token.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.UPDATE.value,
+                "operation_content": "仮審査結果の操作状態: 承認者確認",
+            },
         )
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
@@ -275,6 +343,7 @@ async def update_approver_confirmation(data: dict, request: Request, db=Depends(
 @router.put("/manager/pre_examination_status")
 async def update_pre_examination_status(data: dict, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
+        p_application_header_basic = await crud.query_p_application_header_basic(db, data["p_application_header_id"])
         print("preliminary", bool(data.get("preliminary")))
         if data["pre_examination_status"] == 3:
             errors = manager_data_check(data["preliminary"])
@@ -285,10 +354,35 @@ async def update_pre_examination_status(data: dict, request: Request, db=Depends
             db, data["p_application_header_id"], data["pre_examination_status"]
         )
 
-        await utils.common_insert_c_access_log(
-            db, request, params={"body": data}, status_code=200, response_body=DEFAULT_200_MSG
-        )
+        operation_content_maps = {
+            0: "仮審査の操作状態: 書類確認",
+            1: "仮審査の操作状態: 書類不備対応中",
+            2: "仮審査の操作状態: 内容確認",
+            3: "仮審査の操作状態: 承認",
+            4: "仮審査の操作状態: 銀行へデータ連携",
+            5: "仮審査の操作状態: 提携会社へ審査結果公開",
+            6: "仮審査の操作状態: 申込人へ審査結果公開",
+            9: "仮審査の操作状態: 承認解除",
+        }
 
+        await utils.common_insert_c_access_log(
+            db,
+            request,
+            params={
+                "apply_no": p_application_header_basic["apply_no"],
+                "account_id": token.get("id"),
+                "account_type": token.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.UPDATE.value,
+                "operation_content": operation_content_maps[
+                    (
+                        9
+                        if data["pre_examination_status"] == 2
+                        and p_application_header_basic["pre_examination_status"] == 3
+                        else data["pre_examination_status"]
+                    )
+                ],
+            },
+        )
         return JSONResponse(status_code=200, content={"message": "successful"})
     except Exception as err:
         logger.exception(err)
@@ -302,7 +396,6 @@ async def update_pre_examination_status(start: Optional[str] = None, end: Option
     try:
         print(start, end)
         file = await utils.access_logs_output(start, end)
-        # file = download_from_s3(file_key)
         return JSONResponse(status_code=200, content=file)
     except Exception as err:
         logger.exception(err)

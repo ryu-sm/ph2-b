@@ -14,6 +14,7 @@ from constant import (
     JSON_DICT_FIELD_KEYS,
     JSON_LIST_FIELD_KEYS,
     INIT_NEW_HOUSE_PLANNED_RESIDENT_OVERVIEW,
+    OWNER_TYPE_EN_MAPS,
 )
 from constant import (
     P_UPLOAD_FILE_TYPE,
@@ -61,7 +62,8 @@ async def insert_p_application_headers(db: DB, data: dict, role_type, role_id, c
                 "owner_id": role_id,
                 "record_id": p_application_header_id,
                 "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
-                "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{file_field_key}",
+                # "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{file_field_key}",
+                "s3_key": f"{p_application_header_id}/{role_id}_{OWNER_TYPE_EN_MAPS[role_type]}/{file_field_key}/{p_upload_file_id}",
                 "file_name": file["name"],
             }
             utils.upload_base64_file_s3(
@@ -94,7 +96,8 @@ async def insert_p_applicant_persons(
                 "owner_id": role_id,
                 "record_id": p_applicant_person_id,
                 "type": type,
-                "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{file_field_key}",
+                # "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{file_field_key}",
+                "s3_key": f"{p_application_header_id}/{role_id}_{OWNER_TYPE_EN_MAPS[role_type]}/{file_field_key}/{p_upload_file_id}",
                 "file_name": file["name"],
             }
             utils.upload_base64_file_s3(
@@ -154,7 +157,8 @@ async def insert_p_borrowings(db: DB, data: typing.List[dict], p_application_hea
                     "owner_id": role_id,
                     "record_id": p_borrowing_id,
                     "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
-                    "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{file_field_key}",
+                    # "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{file_field_key}",
+                    "s3_key": f"{p_application_header_id}/{role_id}_{OWNER_TYPE_EN_MAPS[role_type]}/{file_field_key}/{p_upload_file_id}",
                     "file_name": file["name"],
                 }
                 utils.upload_base64_file_s3(
@@ -282,7 +286,7 @@ async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
             AND
             deleted IS NULL
             AND
-            s3_key LIKE '%/{key}';
+            s3_key LIKE '%/{key}%';
         """
         files_info = await db.fetch_all(sql)
 
@@ -477,7 +481,7 @@ async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int,
             AND
             deleted IS NULL
             AND
-            s3_key LIKE '%/{key}';
+            s3_key LIKE '%/{key}%';
         """
         files_info = await db.fetch_all(sql)
         temp_files = []
@@ -604,7 +608,7 @@ async def query_p_borrowings_for_ap(db: DB, p_application_header_id: int):
                 AND
                 deleted IS NULL
                 AND
-                s3_key LIKE '%/{key}';
+                s3_key LIKE '%/{key}%';
             """
             files_info = await db.fetch_all(sql)
             temp_files = []
@@ -681,7 +685,7 @@ async def diff_update_p_application_headers_for_ap(db: DB, data: dict, p_applica
                 AND
                 type = 0
                 AND
-                s3_key LIKE '%/{key}';
+                s3_key LIKE '%/{key}%';
             """
             old_files_info = await db.fetch_all(sql)
             old_files_id = [item["id"] for item in old_files_info]
@@ -700,7 +704,8 @@ async def diff_update_p_application_headers_for_ap(db: DB, data: dict, p_applica
                     "owner_id": role_id,
                     "record_id": p_application_header_id,
                     "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
-                    "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{key}",
+                    # "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{key}",
+                    "s3_key": f"{p_application_header_id}/{role_id}_{OWNER_TYPE_EN_MAPS[role_type]}/{key}/{p_upload_file_id}",
                     "file_name": update_file["name"],
                 }
                 utils.upload_base64_file_s3(
@@ -911,7 +916,7 @@ async def diff_update_p_applicant_persons_for_ap(db: DB, data: dict, p_applicati
                 AND
                 type = {type}
                 AND
-                s3_key LIKE '%/{key}';
+                s3_key LIKE '%/{key}%';
             """
             old_files_info = await db.fetch_all(sql)
             old_files_id = [item["id"] for item in old_files_info]
@@ -930,7 +935,8 @@ async def diff_update_p_applicant_persons_for_ap(db: DB, data: dict, p_applicati
                     "owner_id": role_id,
                     "record_id": p_applicant_persons_id,
                     "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
-                    "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{key}",
+                    # "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{key}",
+                    "s3_key": f"{p_application_header_id}/{role_id}_{OWNER_TYPE_EN_MAPS[role_type]}/{key}/{p_upload_file_id}",
                     "file_name": update_file["name"],
                 }
                 utils.upload_base64_file_s3(
@@ -1516,7 +1522,7 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
                     AND
                     type = 0
                     AND
-                    s3_key LIKE '%/{key}';
+                    s3_key LIKE '%/{key}%';
                 """
                 old_files_info = await db.fetch_all(sql)
                 old_files_id = [item["id"] for item in old_files_info]
@@ -1535,7 +1541,8 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
                         "owner_id": role_id,
                         "record_id": old_p_borrowing["id"],
                         "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
-                        "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{key}",
+                        # "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{key}",
+                        "s3_key": f"{p_application_header_id}/{role_id}_{OWNER_TYPE_EN_MAPS[role_type]}/{key}/{p_upload_file_id}",
                         "file_name": update_file["name"],
                     }
                     utils.upload_base64_file_s3(
@@ -1761,7 +1768,7 @@ async def query_p_application_headers_files_for_ap(db: DB, p_application_header_
             AND
             deleted IS NULL
             AND
-            s3_key LIKE '%/{key}';
+            s3_key LIKE '%/{key}%';
         """
         files_info = await db.fetch_all(sql)
         temp_files = []
@@ -1841,7 +1848,7 @@ async def query_p_applicant_persons_files_for_ap(db: DB, p_application_header_id
             AND
             deleted IS NULL
             AND
-            s3_key LIKE '%/{key}';
+            s3_key LIKE '%/{key}%';
         """
         files_info = await db.fetch_all(sql)
         temp_files = []
@@ -1885,7 +1892,7 @@ async def query_p_borrowings_files_for_ap(db: DB, p_application_header_id: int):
                 AND
                 deleted IS NULL
                 AND
-                s3_key LIKE '%/{key}';
+                s3_key LIKE '%/{key}%';
             """
             files_info = await db.fetch_all(sql)
             temp_files = []

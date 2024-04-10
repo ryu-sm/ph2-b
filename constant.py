@@ -95,6 +95,12 @@ FILE_FIELF_KEYS = [
     "I",
 ]
 
+OWNER_TYPE_EN_MAPS = {
+    1: "USER",
+    2: "SALES_PERSON",
+    3: "MANAGER",
+}
+
 
 # ENUM
 class USER_STATUS(Enum):
@@ -163,3 +169,11 @@ class OPERATE_TYPE(Enum):
     UPDATE = "1"
     CREATE = "2"
     DELETE = "9"
+
+
+class ACCESS_LOG_OPERATION(Enum):
+    LOGIN = "ログイン"
+    LOGOUT = "ログアウト"
+    UPDATE = "更新"
+    DELETE = "削除"
+    DOWNLOAD = "ダウンロード"

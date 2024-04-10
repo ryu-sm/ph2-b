@@ -12,6 +12,7 @@ from utils.s3 import download_from_s3
 from utils import blank_to_none
 
 from constant import (
+    ACCESS_LOG_OPERATION,
     TOKEN_ROLE_TYPE,
     P_APPLICANT_PERSONS_TYPE,
     P_BORROWING_DETAILS_TIME_TYPE,
@@ -286,13 +287,18 @@ async def get_raw_data(
     try:
 
         file = download_from_s3(f"{p_application_header_id}/row_data.xlsx")
-        # await utils.common_insert_c_access_log(
-        #     db,
-        #     request,
-        #     params={"path": {"p_application_header_id": p_application_header_id}},
-        #     status_code=200,
-        #     response_body=DEFAULT_200_MSG,
-        # )
+        p_application_header_basic = await crud.query_p_application_header_basic(db, p_application_header_id)
+        await utils.common_insert_c_access_log(
+            db,
+            request,
+            params={
+                "apply_no": p_application_header_basic["apply_no"],
+                "account_id": token.get("id"),
+                "account_type": token.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.DOWNLOAD.value,
+                "operation_content": "ローデータダウンロード: ダウンロードした",
+            },
+        )
         return JSONResponse(status_code=200, content=file)
     except Exception as err:
         logger.exception(err)

@@ -23,6 +23,8 @@ async def sales_person_insert_c_archive_files(data: dict, db=Depends(get_db), to
             data["files"],
             data["s_sales_person_id"],
             data["s_sales_company_org_id"],
+            token["role_type"],
+            token["id"],
         )
 
         return JSONResponse(status_code=200, content={"message": "successful"})
@@ -33,10 +35,10 @@ async def sales_person_insert_c_archive_files(data: dict, db=Depends(get_db), to
         )
 
 
-@router.get("/c_archive_files/{s_sales_company_org_id}")
-async def query_c_archive_files(s_sales_company_org_id: int, db=Depends(get_db), token=Depends(get_token)):
+@router.get("/sales-person/c_archive_files")
+async def query_c_archive_files(s_sales_company_org_ids: str, db=Depends(get_db)):
     try:
-        c_archive_files = await crud.query_c_archive_files_for_s_sales_person(db, s_sales_company_org_id)
+        c_archive_files = await crud.query_c_archive_files_for_s_sales_person(db, s_sales_company_org_ids)
 
         return JSONResponse(status_code=200, content=c_archive_files)
     except Exception as err:
@@ -46,7 +48,7 @@ async def query_c_archive_files(s_sales_company_org_id: int, db=Depends(get_db),
         )
 
 
-@router.get("/c_archive_files")
+@router.get("/manager/c_archive_files")
 async def query_c_archive_files(db=Depends(get_db), token=Depends(get_token)):
     try:
         c_archive_files = await crud.query_c_archive_files_for_manager(db)
@@ -59,7 +61,7 @@ async def query_c_archive_files(db=Depends(get_db), token=Depends(get_token)):
         )
 
 
-@router.get("/c_archive_file/{id}")
+@router.get("/c_archive_files/{id}")
 async def sales_person_insert_c_archive_files(id: int, db=Depends(get_db), token=Depends(get_token)):
     try:
         c_archive_file = await crud.query_c_archive_file(db, id)
@@ -72,7 +74,7 @@ async def sales_person_insert_c_archive_files(id: int, db=Depends(get_db), token
         )
 
 
-@router.delete("/c_archive_file/{id}")
+@router.delete("/c_archive_files/{id}")
 async def sales_person_insert_c_archive_files(id: int, db=Depends(get_db), token=Depends(get_token)):
     try:
         await crud.delete_c_archive_file(db, id)
@@ -85,10 +87,10 @@ async def sales_person_insert_c_archive_files(id: int, db=Depends(get_db), token
         )
 
 
-@router.put("/c_archive_file/{id}")
-async def sales_person_insert_c_archive_files(id: int, data: dict, db=Depends(get_db), token=Depends(get_token)):
+@router.delete("/c_archive_file/{id}")
+async def sales_person_insert_c_archive_files(id: int, db=Depends(get_db), token=Depends(get_token)):
     try:
-        has_files = await crud.delete_c_archive_file_for_sub(db, id, data)
+        has_files = await crud.delete_c_archive_file_for_sub(db, id)
 
         return JSONResponse(status_code=200, content={"has_file": has_files})
     except Exception as err:
