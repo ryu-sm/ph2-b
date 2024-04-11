@@ -1903,3 +1903,10 @@ async def query_p_borrowings_files_for_ap(db: DB, p_application_header_id: int):
         borrowings.append(none_to_blank({**borrowing, **files}))
 
     return borrowings
+
+
+async def query_pre_examination_status(db: DB, apply_no: str):
+    result = await db.fetch_one(
+        f"SELECT pre_examination_status FROM p_application_headers WHERE apply_no = '{apply_no}';"
+    )
+    return result["pre_examination_status"]

@@ -38,6 +38,16 @@ def gen_update_sql(table: str, params: dict, where: dict):
     where_items = []
 
     for field, value in params.items():
+        if field in JSON_DICT_FIELD_KEYS:
+            is_init = value == INIT_NEW_HOUSE_PLANNED_RESIDENT_OVERVIEW
+            t_value = f"'{json.dumps(value, ensure_ascii=False)}'" if value and not is_init else "NULL"
+            up_items.append(f"{field} = {t_value}")
+            continue
+        if field in JSON_LIST_FIELD_KEYS:
+            t_value = f"'{json.dumps(value, ensure_ascii=False)}'" if field else "NULL"
+            up_items.append(f"{field} = {t_value}")
+            continue
+
         t_value = f"'{value}'" if value else "NULL"
         up_items.append(f"{field} = {t_value}")
 

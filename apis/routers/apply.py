@@ -130,7 +130,6 @@ async def get_application(c_user_id: str, db=Depends(get_db), token: dict = Depe
         p_borrowing_details__1 = await crud.query_p_borrowing_details_for_ap(
             db, p_application_header_id, P_BORROWING_DETAILS_TIME_TYPE.ONE_TIME.value
         )
-        print(p_borrowing_details__1)
         application["p_borrowing_details__1"] = p_borrowing_details__1
 
         if p_application_headers["land_advance_plan"] == LAND_ADVANCE_PLAN.HOPE.value:
@@ -292,6 +291,18 @@ async def get_p_borrowings_files(c_user_id: str, db=Depends(get_db)):
         p_application_header_id = await crud.query_p_application_header_id_with_c_user_id(db, c_user_id)
         files = await crud.query_p_borrowings_files_for_ap(db, p_application_header_id)
         return JSONResponse(status_code=200, content=files)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
+
+
+@router.get("/pre_examination_status")
+async def get_pre_examination_status(apply_no: str, db=Depends(get_db)):
+    try:
+        pass
+        pre_examination_status = await crud.query_pre_examination_status(db, apply_no)
+
+        return JSONResponse(status_code=200, content={"pre_examination_status": pre_examination_status})
     except Exception as err:
         logger.exception(err)
         return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
