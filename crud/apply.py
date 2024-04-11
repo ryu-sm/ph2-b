@@ -180,6 +180,7 @@ async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
     SELECT
         apply_no,
         DATE_FORMAT(apply_date, '%Y/%m/%d') as apply_date,
+        DATE_FORMAT(created_at, '%Y/%m/%d %H:%i') as created_at,
         move_scheduled_date,
         loan_target,
         loan_target_type,
@@ -295,7 +296,7 @@ async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
             src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
             temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
         files[key] = temp_files
-
+    print(p_application_headers["created_at"])
     return none_to_blank({**p_application_headers, **files})
 
 
@@ -657,6 +658,7 @@ async def diff_update_p_application_headers_for_ap(db: DB, data: dict, p_applica
         await db.execute(
             f"DELETE FROM p_borrowing_details WHERE p_application_header_id = {p_application_header_id} AND time_type = {P_BORROWING_DETAILS_TIME_TYPE.TWO_TIME.value};"
         )
+
     for key, value in data.items():
         old_value = old_p_application_headers.get(key, "")
         if key in JSON_LIST_FIELD_KEYS:

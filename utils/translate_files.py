@@ -367,3 +367,35 @@ async def translate_c_access_logs(db: DB):
         data.append({"key": item["key"], "parameters": yaml.safe_load(item["parameters"])})
 
     return data
+
+
+async def translate_p_activities(db: DB):
+    # p_application_headers
+
+    sql = f"""
+    SELECT
+        h.apply_no,
+        a.key,
+        a.parameters
+    FROM
+        mortgage_staging.p_application_headers as h
+    LEFT JOIN
+        mortgage_loan_tool_be_production.activities as a
+        ON
+        a.trackable_id = h.old_id
+    WHERE
+        h.id = 100791550216242923
+        AND
+        a.trackable_type='PApplicationHeader'
+        -- AND
+        -- a.log_export = 0
+    """
+    data = []
+    PApplicationHeaders = await db.fetch_all(sql)
+    for item in PApplicationHeaders:
+
+        data.append(
+            {"apply_no": item["apply_no"], "key": item["key"], "parameters": yaml.safe_load(item["parameters"])}
+        )
+
+    return data
