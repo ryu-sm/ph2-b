@@ -36,9 +36,9 @@ async def sales_person_insert_c_archive_files(data: dict, db=Depends(get_db), to
 
 
 @router.get("/sales-person/c_archive_files")
-async def query_c_archive_files(s_sales_company_org_ids: str, db=Depends(get_db)):
+async def query_c_archive_files(db=Depends(get_db), token=Depends(get_token)):
     try:
-        c_archive_files = await crud.query_c_archive_files_for_s_sales_person(db, s_sales_company_org_ids)
+        c_archive_files = await crud.query_c_archive_files_for_s_sales_person(db, s_sales_person_id=token["id"])
 
         return JSONResponse(status_code=200, content=c_archive_files)
     except Exception as err:

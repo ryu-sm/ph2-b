@@ -38,7 +38,18 @@ async def insert_c_archive_files(
         await db.execute(utils.gen_insert_sql("c_archive_uploaded_files", c_archive_uploaded_file_sql_params))
 
 
-async def query_c_archive_files_for_s_sales_person(db: DB, s_sales_company_org_ids: str):
+async def query_c_archive_files_for_s_sales_person(db: DB, s_sales_person_id):
+    sql = f"SELECT CONVERT(s_sales_company_org_id,CHAR) AS s_sales_company_org_id, role FROM s_sales_person_s_sales_company_org_rels WHERE s_sales_person_id = {s_sales_person_id};"
+    orgs = await db.fetch_all(sql)
+    access_ids = []
+    for org in orgs:
+        if org["role"] == 1:
+            access_ids.append(str(s_sales_person_id))
+        if org["role"] == 9:
+            s_sales_persons = await crud.query_orgs_access_s_sales_persons(db, org["s_sales_company_org_id"])
+            s_sales_persons_id = [item["value"] for item in s_sales_persons]
+            access_ids += s_sales_persons_id
+    print(access_ids)
     sql = f"""
     SELECT
         CONVERT(c_archive_files.id,CHAR) AS id,
@@ -61,9 +72,10 @@ async def query_c_archive_files_for_s_sales_person(db: DB, s_sales_company_org_i
     WHERE
         c_archive_files.deleted is NULL
         AND
-        c_archive_files.s_sales_company_org_id in ({s_sales_company_org_ids});
+        c_archive_files.s_sales_person_id in ({', '.join(list(set(access_ids)))});
     """
     basic = await db.fetch_all(sql)
+    print(basic)
 
     c_archive_files = []
 
