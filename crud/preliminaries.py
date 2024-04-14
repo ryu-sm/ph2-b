@@ -76,20 +76,30 @@ async def update_p_application_headers_sales_area_id(db: DB, data: dict, role_ty
     sales_exhibition_hall_id = data.get("sales_exhibition_hall_id")
     s_sales_person_id = data.get("s_sales_person_id")
 
+    print(data)
+
     if sales_area_id:
         subUpdate = ""
         subUpdateKeys = []
 
         sales_exhibition_halls = await crud.query_children_s_sales_company_orgs_with_category(db, sales_area_id, "E")
         if sales_exhibition_hall_id not in [item["value"] for item in sales_exhibition_halls]:
-            subUpdate += ", sales_exhibition_hall_id = NULL"
-            subUpdateKeys.append("sales_exhibition_hall_id")
+            p = await db.fetch_one(
+                f"SELECT sales_exhibition_hall_id FROM p_application_headers WHERE id = {p_application_header_id}"
+            )
+            if p and p["sales_exhibition_hall_id"]:
+                subUpdate += ", sales_exhibition_hall_id = NULL"
+                subUpdateKeys.append("sales_exhibition_hall_id")
 
             orgs_id = sales_area_id or sales_company_id
             s_sales_persons = await crud.query_orgs_access_s_sales_persons(db, orgs_id)
             if s_sales_person_id not in [item["value"] for item in s_sales_persons]:
-                subUpdate += ", s_sales_person_id = NULL"
-                subUpdateKeys.append("s_sales_person_id")
+                p = await db.fetch_one(
+                    f"SELECT s_sales_person_id FROM p_application_headers WHERE id = {p_application_header_id}"
+                )
+                if p and p["s_sales_person_id"]:
+                    subUpdate += ", s_sales_person_id = NULL"
+                    subUpdateKeys.append("s_sales_person_id")
             else:
                 initResult["s_sales_person_id"] = s_sales_person_id
 
@@ -99,9 +109,12 @@ async def update_p_application_headers_sales_area_id(db: DB, data: dict, role_ty
             orgs_id = sales_exhibition_hall_id or sales_area_id or sales_company_id
             s_sales_persons = await crud.query_orgs_access_s_sales_persons(db, orgs_id)
             if s_sales_person_id not in [item["value"] for item in s_sales_persons]:
-
-                subUpdate += ", s_sales_person_id = NULL"
-                subUpdateKeys.append("s_sales_person_id")
+                p = await db.fetch_one(
+                    f"SELECT s_sales_person_id FROM p_application_headers WHERE id = {p_application_header_id}"
+                )
+                if p and p["s_sales_person_id"]:
+                    subUpdate += ", s_sales_person_id = NULL"
+                    subUpdateKeys.append("s_sales_person_id")
             else:
                 initResult["s_sales_person_id"] = s_sales_person_id
 
@@ -134,7 +147,7 @@ async def update_p_application_headers_sales_area_id(db: DB, data: dict, role_ty
         VALUES ({id}, {p_application_header_id}, {role_type}, {role_id}, 'p_application_headers', 'sales_area_id', {p_application_header_id}, NULL, 9);
         """
         await db.execute(sql)
-    return initResult
+    return utils.none_to_blank(initResult)
 
 
 async def update_p_application_headers_sales_exhibition_hall_id(db: DB, data: dict, role_type, role_id):
@@ -148,9 +161,13 @@ async def update_p_application_headers_sales_exhibition_hall_id(db: DB, data: di
         subUpdate = ""
         subUpdateKeys = []
         s_sales_persons = await crud.query_orgs_access_s_sales_persons(db, sales_exhibition_hall_id)
-        if s_sales_person_id not in [item["value"] for item in s_sales_persons]:
-            subUpdate += ", s_sales_person_id = NULL"
-            subUpdateKeys.append("s_sales_person_id")
+        if s_sales_person_id is not None and s_sales_person_id not in [item["value"] for item in s_sales_persons]:
+            p = await db.fetch_one(
+                f"SELECT s_sales_person_id FROM p_application_headers WHERE id = {p_application_header_id}"
+            )
+            if p and p["s_sales_person_id"]:
+                subUpdate += ", s_sales_person_id = NULL"
+                subUpdateKeys.append("s_sales_person_id")
         else:
             initResult["s_sales_person_id"] = s_sales_person_id
 
@@ -184,7 +201,7 @@ async def update_p_application_headers_sales_exhibition_hall_id(db: DB, data: di
         """
         await db.execute(sql)
 
-    return initResult
+    return utils.none_to_blank(initResult)
 
 
 async def delete_pair_laon(db: DB, ids: list, role_type, role_id):

@@ -24,6 +24,7 @@ from constant import (
     JOIN_GUARANTOR_UMU,
     CURR_BORROWING_STATUS,
     OPERATE_TYPE,
+    BANK_CODE,
 )
 from utils import none_to_blank
 import crud
@@ -441,6 +442,7 @@ async def query_p_join_guarantors_for_ad(db: DB, p_application_header_id: int):
 
 
 async def query_p_residents_for_ad(db: DB, p_application_header_id: int):
+    apply_created_at = await crud.query_p_application_header_created_at_minute(db, p_application_header_id)
     sql = f"""
     SELECT
         CONVERT(id,CHAR) AS id,
@@ -464,7 +466,8 @@ async def query_p_residents_for_ad(db: DB, p_application_header_id: int):
         prefecture_kana,
         city_kana,
         district_kana,
-        nationality
+        nationality,
+        (case when DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') ='{apply_created_at}' then 1 else 0 end) as is_applicant
     FROM
         p_residents
     WHERE
@@ -1881,4 +1884,52 @@ async def query_p_borrowings_files_for_ad_view(db: DB, p_application_header_id: 
 
 
 async def query_p_application_header_basic(db: DB, id: int):
-    return await db.fetch_one(f"SELECT apply_no, pre_examination_status FROM p_application_headers WHERE id = {id};")
+    return await db.fetch_one(
+        f"SELECT apply_no, pre_examination_status, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%S') as created_at FROM p_application_headers WHERE id = {id};"
+    )
+
+
+async def query_p_application_header_created_at_minute(db: DB, id: int):
+    result = await db.fetch_one(
+        f"SELECT DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') as created_at FROM p_application_headers WHERE id = {id};"
+    )
+
+    return result["created_at"]
+
+
+async def query_provisional_status(db: DB, p_application_header_id: int):
+    sql = f"""
+    SELECT
+        provisional_status
+    FROM
+        p_application_banks
+    JOIN
+        s_banks
+        ON
+        s_banks.id = p_application_banks.s_bank_id
+    WHERE
+        p_application_header_id = {p_application_header_id}
+        AND
+        s_banks.code = '{BANK_CODE.SBI.value}';
+    """
+
+    p_application_banks = await db.fetch_one(sql)
+
+    sql = f"""
+    SELECT
+        last_name_kanji,
+        first_name_kanji
+    FROM
+        p_applicant_persons
+    WHERE
+        p_application_header_id = {p_application_header_id}
+        AND
+        type = 0;
+    """
+
+    p_applicant_persons = await db.fetch_one(sql)
+
+    return {
+        "p_application_banks": none_to_blank(p_application_banks),
+        "p_applicant_persons__0": p_applicant_persons,
+    }

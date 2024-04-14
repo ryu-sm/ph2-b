@@ -130,27 +130,14 @@ async def query_c_user_token_payload(db: DB, c_user_id: int):
         CONVERT(c_users.s_sales_company_org_id,CHAR) AS s_sales_company_org_id,
         c_users.agent_sended,
         p_drafts.data as has_draft,
-        p_application_headers.apply_no,
-        p_application_headers.pre_examination_status,
         s_sales_company_orgs.display_pdf,
-        1 as role_type,
-        p_application_banks.provisional_result
+        1 as role_type
     FROM
         c_users
     LEFT JOIN
         p_drafts
         ON
         p_drafts.c_user_id = c_users.id
-    LEFT JOIN
-        p_application_headers
-        ON
-        p_application_headers.c_user_id = c_users.id
-    LEFT JOIN
-        p_application_banks
-        ON
-        p_application_banks.p_application_header_id = p_application_headers.id
-        AND
-        p_application_banks.s_bank_id = {sbi_id}
     LEFT JOIN
         s_sales_company_orgs
         ON

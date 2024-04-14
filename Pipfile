@@ -18,6 +18,7 @@ python-magic = "*"
 pandas = "*"
 openpyxl = "*"
 bcrypt = "*"
+deepdiff = "*"
 
 [dev-packages]
 

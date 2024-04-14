@@ -319,3 +319,15 @@ async def get_update_hitories(
         return JSONResponse(
             status_code=500, content={"message": "An unknown exception occurred, please try again later."}
         )
+
+
+@router.get("/provisional_status/{p_application_header_id}")
+async def get_provisional_status(p_application_header_id: int, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        result = await crud.query_provisional_status(db, p_application_header_id)
+        return JSONResponse(status_code=200, content=result)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )

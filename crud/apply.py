@@ -178,6 +178,7 @@ async def insert_p_residents(db: DB, data: typing.List[dict], p_application_head
 async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
     sql = f"""
     SELECT
+        pre_examination_status,
         apply_no,
         DATE_FORMAT(apply_date, '%Y/%m/%d') as apply_date,
         DATE_FORMAT(created_at, '%Y/%m/%d %H:%i') as created_at,

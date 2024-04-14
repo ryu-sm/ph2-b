@@ -621,7 +621,7 @@ def manager_data_check(data: dict):
     if not data["p_application_headers"]["funding_other_loan_amount"]:
         tab7_errors.append("その他の借り入れ")
     if (
-        data["p_application_headers"]["funding_other_amount"]
+        data["p_application_headers"]["funding_other_amount"] != "0"
         and not data["p_application_headers"]["funding_other_amount_detail"]
     ):
         tab7_errors.append("※詳細を入力ください。")
@@ -749,9 +749,6 @@ def manager_data_check(data: dict):
         ):
             tab2_1_errors.append("丁目以下・建物名・部屋番号（フリガナ）")
 
-        if not data["p_applicant_persons__1"]["email"]:
-            tab2_1_errors.append("ご連絡先用メールアドレス")
-
         if data["p_applicant_persons__1"]["email"]:
             result = re.fullmatch(REGEX["email"], data["p_applicant_persons__1"]["email"])
             if not result:
@@ -762,8 +759,6 @@ def manager_data_check(data: dict):
         # 収入合算者の職業
         tab3_1_errors = []
 
-        if not data["p_applicant_persons__1"]["office_occupation"]:
-            tab3_1_errors.append("ご職業")
         if (
             data["p_applicant_persons__1"]["office_occupation"] == "99"
             and not data["p_applicant_persons__1"]["office_occupation_other"]
@@ -776,28 +771,17 @@ def manager_data_check(data: dict):
         ):
             tab3_1_errors.append("勤務先　業種（その他）")
 
-        if not data["p_applicant_persons__1"]["office_occupation"]:
-            tab3_1_errors.append("職種")
         if (
             data["p_applicant_persons__1"]["office_occupation_detail"] == "99"
             and not data["p_applicant_persons__1"]["office_occupation_detail_other"]
         ):
             tab3_1_errors.append("勤務先　職種（その他）")
 
-        if not data["p_applicant_persons__1"]["office_employment_type"]:
-            tab3_1_errors.append("雇用形態")
-
-        if not data["p_applicant_persons__1"]["office_name_kanji"]:
-            tab3_1_errors.append("勤務先名")
-
         if (
             data["p_applicant_persons__1"]["office_name_kanji"]
             and len(data["p_applicant_persons__1"]["office_name_kanji"]) > 48
         ):
             tab3_1_errors.append("勤務先名")
-
-        if not data["p_applicant_persons__1"]["office_name_kana"]:
-            tab3_1_errors.append("勤務先名（フリガナ）")
 
         if (
             data["p_applicant_persons__1"]["office_name_kana"]
@@ -811,16 +795,10 @@ def manager_data_check(data: dict):
         ):
             tab3_1_errors.append("所属部課")
 
-        if not data["p_applicant_persons__1"]["office_phone"]:
-            tab3_1_errors.append("勤務先の電話番号")
-
         if data["p_applicant_persons__1"]["office_phone"]:
             result = re.fullmatch(REGEX["home_phone"], data["p_applicant_persons__1"]["office_phone"])
             if not result:
                 tab3_1_errors.append("勤務先の電話番号")
-
-        if not data["p_applicant_persons__1"]["office_head_location"]:
-            tab3_1_errors.append("勤務先本社所在地")
 
         if (
             data["p_applicant_persons__1"]["office_head_location"]
@@ -833,16 +811,10 @@ def manager_data_check(data: dict):
             if not result:
                 tab3_1_errors.append("勤務先設立年月日")
 
-        if not data["p_applicant_persons__1"]["office_postal_code"]:
-            tab3_1_errors.append("郵便番号")
-
         if data["p_applicant_persons__1"]["office_postal_code"]:
             result = re.fullmatch(REGEX["postal_code"], data["p_applicant_persons__1"]["office_postal_code"])
             if not result:
                 tab3_1_errors.append("郵便番号")
-
-        if not data["p_applicant_persons__1"]["office_prefecture_kanji"]:
-            tab3_1_errors.append("都道府県")
 
         if (
             data["p_applicant_persons__1"]["office_prefecture_kanji"]
@@ -868,9 +840,6 @@ def manager_data_check(data: dict):
         ):
             tab3_1_errors.append("丁目以下・建物名・部屋番号")
 
-        if not data["p_applicant_persons__1"]["office_prefecture_kana"]:
-            tab3_1_errors.append("都道府県（フリガナ）")
-
         if (
             data["p_applicant_persons__1"]["office_prefecture_kana"]
             and len(data["p_applicant_persons__1"]["office_prefecture_kana"]) > 8
@@ -894,15 +863,6 @@ def manager_data_check(data: dict):
             and len(data["p_applicant_persons__1"]["office_other_address_kana"]) > 138
         ):
             tab3_1_errors.append("丁目以下・建物名・部屋番号（フリガナ）")
-
-        if not data["p_applicant_persons__1"]["office_employee_num"]:
-            tab3_1_errors.append("従業員数")
-
-        if not data["p_applicant_persons__1"]["last_year_income"]:
-            tab3_1_errors.append("前年度年収")
-
-        if not data["p_applicant_persons__1"]["main_income_source"]:
-            tab3_1_errors.append("収入源（銀行送信用）")
 
         if data["p_applicant_persons__1"]["tax_return"] == "1":
             if not data["p_applicant_persons__1"]["tax_return_reasons"]:
