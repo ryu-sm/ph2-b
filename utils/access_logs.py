@@ -93,6 +93,15 @@ async def access_logs_output(start: str, end: str):
         )
     df = pd.DataFrame(
         json_data,
+        dtype={
+            "apply_no": str,
+            "account_id": str,
+            "account_type": str,
+            "account_name": str,
+            "created_at": str,
+            "operation": str,
+            "operation_content": str,
+        },
     )
     excel_buffer = BytesIO()
 
