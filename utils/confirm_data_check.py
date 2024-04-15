@@ -592,6 +592,9 @@ def manager_data_check(data: dict):
 
         if not p_resident["rel_to_applicant_a"]:
             tab5_errors.append(f"入居家族{index + 1} 続柄")
+    if tab5_errors:
+        errors["お住まい"] = tab5_errors
+
     # 現在の借入状況
     for index, p_borrowing in enumerate(data["p_borrowings"]):
         tab6_errors = []
