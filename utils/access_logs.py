@@ -91,18 +91,7 @@ async def access_logs_output(start: str, end: str):
                 "operation_content": access_log["operation_content"],
             }
         )
-    df = pd.DataFrame(
-        json_data,
-        dtype={
-            "apply_no": "string",
-            "account_id": "string",
-            "account_type": "string",
-            "account_name": "string",
-            "created_at": "string",
-            "operation": "string",
-            "operation_content": "string",
-        },
-    )
+    df = pd.DataFrame(json_data)
     excel_buffer = BytesIO()
 
     df.to_excel(excel_buffer, header=False, index=False)
