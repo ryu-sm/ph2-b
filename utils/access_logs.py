@@ -1,13 +1,9 @@
 import base64
-
 import magic
 import pytz
-from datetime import datetime
 from core.database import DB
-import json
 import pandas as pd
 from io import BytesIO
-import crud
 
 
 async def get_manager_name(db: DB, id):
@@ -38,6 +34,7 @@ async def access_logs_output(start: str, end: str):
     json_data = [
         {
             "apply_no": "申込の受付番号",
+            "account_id": "担当者ID",
             "account_type": "担当者区分",
             "account_name": "担当者名",
             "created_at": "日時",
@@ -86,6 +83,7 @@ async def access_logs_output(start: str, end: str):
         json_data.append(
             {
                 "apply_no": access_log["apply_no"],
+                "account_id": str(access_log["account_id"]),
                 "account_type": account_type_maps[access_log["account_type"]],
                 "account_name": user_name or sales_person_name or manager_name,
                 "created_at": access_log["created_at"],

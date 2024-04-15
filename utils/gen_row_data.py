@@ -6,6 +6,7 @@ from utils.gen_row_data_configs import CODE_CONFIGS
 from utils.ja_date import format_js_date_ym, format_js_date_ymd, gen_ja_apply_datetime
 from utils.ja_numeric import format_ja_numeric
 from utils.s3 import upload_buffer_to_s3
+from constant import BANK_CODE
 
 
 async def gen_row_data(p_application_header_id: int, data: dict):
@@ -46,17 +47,12 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         index = step_list.index(id)
         return str(index + 1).zfill(2)
 
-    # json_string = json.dumps(data, indent=4)  # indent for pretty printing
-
-    # # Specify the file path
-    # file_path = "tttt.json"
-
-    # # Write JSON data to a file
-    # with open(file_path, "w") as json_file:
-    #     json_file.write(json_string)
     db = DB()
     banks = await db.fetch_all("SELECT CONVERT(id,CHAR) as id, name FROM s_banks;")
     orgs = await db.fetch_all("SELECT CONVERT(id,CHAR) as id, name FROM s_sales_company_orgs;")
+    is_mcj = await db.fetch_one(
+        f"""SELECT id FROM s_banks WHERE code = '{BANK_CODE.MCJ.value}' AND id IN ({",".join(data["p_application_banks"])})"""
+    )
 
     json_data = [
         {"step": "STEP", "big_class": "大項目", "class": "小項目", "field_name": "項目名", "filed_value": "項目値"},
@@ -480,7 +476,7 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         }
     )
 
-    # tep03
+    # step03
     json_data.append(
         {
             "step": f"STEP {get_step_code(3)}：あなたのご職業",
@@ -676,24 +672,26 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             "filed_value": format_ja_numeric(data["p_applicant_persons__0"]["last_year_income"], "万円"),
         }
     )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(3)}：あなたのご職業",
-            "big_class": "",
-            "class": "うち、ボーナス",
-            "field_name": "ご年収　うち、ボーナス",
-            "filed_value": format_ja_numeric(data["p_applicant_persons__0"]["last_year_bonus_income"], "万円"),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(3)}：あなたのご職業",
-            "big_class": "",
-            "class": "前々年度年収 （MCJ固有項目）",
-            "field_name": "ご年収　前々年度年収 （MCJ固有項目）",
-            "filed_value": format_ja_numeric(data["p_applicant_persons__0"]["before_last_year_income"], "万円"),
-        }
-    )
+
+    if is_mcj:
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(3)}：あなたのご職業",
+                "big_class": "",
+                "class": "うち、ボーナス",
+                "field_name": "ご年収　うち、ボーナス",
+                "filed_value": format_ja_numeric(data["p_applicant_persons__0"]["last_year_bonus_income"], "万円"),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(3)}：あなたのご職業",
+                "big_class": "",
+                "class": "前々年度年収 （MCJ固有項目）",
+                "field_name": "ご年収　前々年度年収 （MCJ固有項目）",
+                "filed_value": format_ja_numeric(data["p_applicant_persons__0"]["before_last_year_income"], "万円"),
+            }
+        )
     json_data.append(
         {
             "step": f"STEP {get_step_code(3)}：あなたのご職業",
@@ -854,17 +852,18 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             "filed_value": format_js_date_ym(data["p_applicant_persons__0"]["maternity_paternity_leave_end_date"]),
         }
     )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(3)}：あなたのご職業",
-            "big_class": "介護休暇の取得状況（MCJ固有項目）※該当する方のみお答えください。",
-            "class": "",
-            "field_name": "介護休取得状況",
-            "filed_value": CODE_CONFIGS["p_applicant_persons__0.maternity_paternity_leave_start_date"].get(
-                data["p_applicant_persons__0"]["maternity_paternity_leave_start_date"], ""
-            ),
-        }
-    )
+    if is_mcj:
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(3)}：あなたのご職業",
+                "big_class": "介護休暇の取得状況（MCJ固有項目）※該当する方のみお答えください。",
+                "class": "",
+                "field_name": "介護休取得状況",
+                "filed_value": CODE_CONFIGS["p_applicant_persons__0.maternity_paternity_leave_start_date"].get(
+                    data["p_applicant_persons__0"]["maternity_paternity_leave_start_date"], ""
+                ),
+            }
+        )
 
     if data["p_application_headers"]["loan_type"] in ["3", "4"]:
         # step04
@@ -898,10 +897,19 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         json_data.append(
             {
                 "step": f"STEP {get_step_code(4)}：収入合算者",
+                "big_class": "続柄",
+                "class": "メイ",
+                "field_name": "収入合算者続柄",
+                "filed_value": data["p_applicant_persons__1"]["first_name_kana"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "",
                 "class": "メイ",
                 "field_name": "名　カナ",
-                "filed_value": data["p_applicant_persons__1"]["first_name_kana"],
+                "filed_value": data["p_applicant_persons__1"]["rel_to_applicant_a_name"],
             }
         )
         json_data.append(
@@ -1252,24 +1260,26 @@ async def gen_row_data(p_application_header_id: int, data: dict):
                 "filed_value": format_ja_numeric(data["p_applicant_persons__1"]["last_year_income"], "万円"),
             }
         )
-        json_data.append(
-            {
-                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
-                "big_class": "",
-                "class": "うち、ボーナス",
-                "field_name": "ご年収　うち、ボーナス",
-                "filed_value": format_ja_numeric(data["p_applicant_persons__1"]["last_year_bonus_income"], "万円"),
-            }
-        )
-        json_data.append(
-            {
-                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
-                "big_class": "",
-                "class": "前々年度年収 （MCJ固有項目）",
-                "field_name": "ご年収　前々年度年収 （MCJ固有項目）",
-                "filed_value": format_ja_numeric(data["p_applicant_persons__1"]["before_last_year_income"], "万円"),
-            }
-        )
+
+        if is_mcj:
+            json_data.append(
+                {
+                    "step": f"STEP {get_step_code(5)}：収入合算者の職業",
+                    "big_class": "",
+                    "class": "うち、ボーナス",
+                    "field_name": "ご年収　うち、ボーナス",
+                    "filed_value": format_ja_numeric(data["p_applicant_persons__1"]["last_year_bonus_income"], "万円"),
+                }
+            )
+            json_data.append(
+                {
+                    "step": f"STEP {get_step_code(5)}：収入合算者の職業",
+                    "big_class": "",
+                    "class": "前々年度年収 （MCJ固有項目）",
+                    "field_name": "ご年収　前々年度年収 （MCJ固有項目）",
+                    "filed_value": format_ja_numeric(data["p_applicant_persons__1"]["before_last_year_income"], "万円"),
+                }
+            )
         json_data.append(
             {
                 "step": f"STEP {get_step_code(5)}：収入合算者の職業",
@@ -1432,17 +1442,18 @@ async def gen_row_data(p_application_header_id: int, data: dict):
                 "filed_value": format_js_date_ym(data["p_applicant_persons__1"]["maternity_paternity_leave_end_date"]),
             }
         )
-        json_data.append(
-            {
-                "step": f"STEP {get_step_code(5)}：収入合算者の職業",
-                "big_class": "介護休暇の取得状況（MCJ固有項目）※該当する方のみお答えください。",
-                "class": "",
-                "field_name": "介護休取得状況",
-                "filed_value": CODE_CONFIGS["p_applicant_persons__1.maternity_paternity_leave_start_date"].get(
-                    data["p_applicant_persons__1"]["maternity_paternity_leave_start_date"], ""
-                ),
-            }
-        )
+        if is_mcj:
+            json_data.append(
+                {
+                    "step": f"STEP {get_step_code(5)}：収入合算者の職業",
+                    "big_class": "介護休暇の取得状況（MCJ固有項目）※該当する方のみお答えください。",
+                    "class": "",
+                    "field_name": "介護休取得状況",
+                    "filed_value": CODE_CONFIGS["p_applicant_persons__1.maternity_paternity_leave_start_date"].get(
+                        data["p_applicant_persons__1"]["maternity_paternity_leave_start_date"], ""
+                    ),
+                }
+            )
     # step06
     if data["p_application_headers"]["join_guarantor_umu"] == "1":
         for p_join_guarantor in data["p_join_guarantors"]:
@@ -1899,71 +1910,74 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             "filed_value": data["p_application_headers"]["property_apartment_and_room_no"],
         }
     )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "ご購入物件の面積",
-            "class": "専有面積",
-            "field_name": "融資対象物件　専有面積",
-            "filed_value": (
-                data["p_application_headers"]["property_private_area"] + "m²"
-                if data["p_application_headers"]["property_private_area"]
-                else ""
-            ),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "",
-            "class": "マンション全体の延べ床面積",
-            "field_name": "融資対象物件　マンション全体の延べ床面積",
-            "filed_value": (
-                data["p_application_headers"]["property_total_floor_area"] + "m²"
-                if data["p_application_headers"]["property_total_floor_area"]
-                else ""
-            ),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "",
-            "class": "土地の敷地面積",
-            "field_name": "融資対象物件　土地の敷地面積",
-            "filed_value": (
-                data["p_application_headers"]["property_land_area"] + "m²"
-                if data["p_application_headers"]["property_land_area"]
-                else ""
-            ),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "",
-            "class": "建物の延べ床面積",
-            "field_name": "融資対象物件　建物の延べ床面積",
-            "filed_value": (
-                data["p_application_headers"]["property_floor_area"] + "m²"
-                if data["p_application_headers"]["property_floor_area"]
-                else ""
-            ),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "現在のお住まいの床面積 (MCJ固有項目)",
-            "class": "",
-            "field_name": "現在居住　床面積",
-            "filed_value": (
-                data["p_application_headers"]["curr_house_floor_area"] + "m²"
-                if data["p_application_headers"]["curr_house_floor_area"]
-                else ""
-            ),
-        }
-    )
+    if data["p_application_headers"]["loan_target"] in ["2", "3"]:
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "ご購入物件の面積",
+                "class": "専有面積",
+                "field_name": "融資対象物件　専有面積",
+                "filed_value": (
+                    data["p_application_headers"]["property_private_area"] + "m²"
+                    if data["p_application_headers"]["property_private_area"]
+                    else ""
+                ),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "マンション全体の延べ床面積",
+                "field_name": "融資対象物件　マンション全体の延べ床面積",
+                "filed_value": (
+                    data["p_application_headers"]["property_total_floor_area"] + "m²"
+                    if data["p_application_headers"]["property_total_floor_area"]
+                    else ""
+                ),
+            }
+        )
+    else:
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "土地の敷地面積",
+                "field_name": "融資対象物件　土地の敷地面積",
+                "filed_value": (
+                    data["p_application_headers"]["property_land_area"] + "m²"
+                    if data["p_application_headers"]["property_land_area"]
+                    else ""
+                ),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "建物の延べ床面積",
+                "field_name": "融資対象物件　建物の延べ床面積",
+                "filed_value": (
+                    data["p_application_headers"]["property_floor_area"] + "m²"
+                    if data["p_application_headers"]["property_floor_area"]
+                    else ""
+                ),
+            }
+        )
+    if is_mcj:
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "現在のお住まいの床面積 (MCJ固有項目)",
+                "class": "",
+                "field_name": "現在居住　床面積",
+                "filed_value": (
+                    data["p_application_headers"]["curr_house_floor_area"] + "m²"
+                    if data["p_application_headers"]["curr_house_floor_area"]
+                    else ""
+                ),
+            }
+        )
     for p_resident in data["p_residents"]:
         json_data.append(
             {
@@ -2093,113 +2107,113 @@ async def gen_row_data(p_application_header_id: int, data: dict):
                 "filed_value": p_resident["other_address_kanji"],
             }
         )
-
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "ご購入物件の土地権利※該当する方のみお答えください。(MCJ固有項目)",
-            "class": "",
-            "field_name": "土地の情報　土地権利",
-            "filed_value": CODE_CONFIGS["p_application_headers.property_land_type"].get(
-                data["p_application_headers"]["property_land_type"], ""
-            ),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "買戻・保留地・仮換地※該当する方のみお答えください。(MCJ固有項目)",
-            "class": "",
-            "field_name": "土地の情報　買戻・保留地・仮換地",
-            "filed_value": CODE_CONFIGS["p_application_headers.property_purchase_type"].get(
-                data["p_application_headers"]["property_purchase_type"], ""
-            ),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "都市計画区域等 (MCJ固有項目)※「市街化区域」以外の方のみお答えください。",
-            "class": "",
-            "field_name": "土地の情報　都市計画区域",
-            "filed_value": CODE_CONFIGS["p_application_headers.property_planning_area"].get(
-                data["p_application_headers"]["property_planning_area"], ""
-            ),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "",
-            "class": "その他の方は詳細を入力ください。",
-            "field_name": "土地の情報　都市計画区域（その他）",
-            "filed_value": data["p_application_headers"]["property_planning_area_other"],
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "上記に該当する場合の「再建築理由」を教えてください。※該当する方のみお答えください。(MCJ固有項目)",
-            "class": "",
-            "field_name": "土地の情報　再建築理由",
-            "filed_value": CODE_CONFIGS["p_application_headers.property_rebuilding_reason"].get(
-                data["p_application_headers"]["property_rebuilding_reason"], ""
-            ),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "",
-            "class": "その他の方は詳細を入力ください。",
-            "field_name": "土地の情報　再建築理由（その他）",
-            "filed_value": data["p_application_headers"]["property_rebuilding_reason_other"],
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "フラット35S（優良住宅取得支援制度）対象項目※該当する方のみお答えください。(MCJ固有項目)",
-            "class": "",
-            "field_name": "その他物件情報　フラット35S適用プラン",
-            "filed_value": CODE_CONFIGS["p_application_headers.property_flat_35_plan"].get(
-                data["p_application_headers"]["property_flat_35_plan"], ""
-            ),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "維持保全型※該当する方のみお答えください。(MCJ固有項目)",
-            "class": "",
-            "field_name": "その他物件情報　維持保全型",
-            "filed_value": CODE_CONFIGS["p_application_headers.property_maintenance_type"].get(
-                data["p_application_headers"]["property_maintenance_type"], ""
-            ),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "フラット35S（優良住宅取得支援制度）対象項目②※該当する方のみお答えください。(MCJ固有項目)",
-            "class": "",
-            "field_name": "その他物件情報　フラット35S満たす技術基準",
-            "filed_value": CODE_CONFIGS["p_application_headers.property_flat_35_tech"].get(
-                data["p_application_headers"]["property_flat_35_tech"], ""
-            ),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(7)}：お住まいについて",
-            "big_class": "地域連携型・地方移住支援型※該当する方のみお答えください。(MCJ固有項目)",
-            "class": "",
-            "field_name": "その他物件情報　地域連携型・地方移住支援型",
-            "filed_value": CODE_CONFIGS["p_application_headers.property_region_type"].get(
-                data["p_application_headers"]["property_region_type"], ""
-            ),
-        }
-    )
+    if is_mcj:
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "ご購入物件の土地権利※該当する方のみお答えください。(MCJ固有項目)",
+                "class": "",
+                "field_name": "土地の情報　土地権利",
+                "filed_value": CODE_CONFIGS["p_application_headers.property_land_type"].get(
+                    data["p_application_headers"]["property_land_type"], ""
+                ),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "買戻・保留地・仮換地※該当する方のみお答えください。(MCJ固有項目)",
+                "class": "",
+                "field_name": "土地の情報　買戻・保留地・仮換地",
+                "filed_value": CODE_CONFIGS["p_application_headers.property_purchase_type"].get(
+                    data["p_application_headers"]["property_purchase_type"], ""
+                ),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "都市計画区域等 (MCJ固有項目)※「市街化区域」以外の方のみお答えください。",
+                "class": "",
+                "field_name": "土地の情報　都市計画区域",
+                "filed_value": CODE_CONFIGS["p_application_headers.property_planning_area"].get(
+                    data["p_application_headers"]["property_planning_area"], ""
+                ),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "その他の方は詳細を入力ください。",
+                "field_name": "土地の情報　都市計画区域（その他）",
+                "filed_value": data["p_application_headers"]["property_planning_area_other"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "上記に該当する場合の「再建築理由」を教えてください。※該当する方のみお答えください。(MCJ固有項目)",
+                "class": "",
+                "field_name": "土地の情報　再建築理由",
+                "filed_value": CODE_CONFIGS["p_application_headers.property_rebuilding_reason"].get(
+                    data["p_application_headers"]["property_rebuilding_reason"], ""
+                ),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "",
+                "class": "その他の方は詳細を入力ください。",
+                "field_name": "土地の情報　再建築理由（その他）",
+                "filed_value": data["p_application_headers"]["property_rebuilding_reason_other"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "フラット35S（優良住宅取得支援制度）対象項目※該当する方のみお答えください。(MCJ固有項目)",
+                "class": "",
+                "field_name": "その他物件情報　フラット35S適用プラン",
+                "filed_value": CODE_CONFIGS["p_application_headers.property_flat_35_plan"].get(
+                    data["p_application_headers"]["property_flat_35_plan"], ""
+                ),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "維持保全型※該当する方のみお答えください。(MCJ固有項目)",
+                "class": "",
+                "field_name": "その他物件情報　維持保全型",
+                "filed_value": CODE_CONFIGS["p_application_headers.property_maintenance_type"].get(
+                    data["p_application_headers"]["property_maintenance_type"], ""
+                ),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "フラット35S（優良住宅取得支援制度）対象項目②※該当する方のみお答えください。(MCJ固有項目)",
+                "class": "",
+                "field_name": "その他物件情報　フラット35S満たす技術基準",
+                "filed_value": CODE_CONFIGS["p_application_headers.property_flat_35_tech"].get(
+                    data["p_application_headers"]["property_flat_35_tech"], ""
+                ),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(7)}：お住まいについて",
+                "big_class": "地域連携型・地方移住支援型※該当する方のみお答えください。(MCJ固有項目)",
+                "class": "",
+                "field_name": "その他物件情報　地域連携型・地方移住支援型",
+                "filed_value": CODE_CONFIGS["p_application_headers.property_region_type"].get(
+                    data["p_application_headers"]["property_region_type"], ""
+                ),
+            }
+        )
     # step08
     json_data.append(
         {
@@ -2411,87 +2425,89 @@ async def gen_row_data(p_application_header_id: int, data: dict):
                 "filed_value": CODE_CONFIGS["p_borrowings.estate_setting"].get(p_borrowing["estate_setting"], ""),
             }
         )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
-            "big_class": "完済予定のお借入がある場合の完済原資について教えてください。（MCJ固有項目）",
-            "class": "完済原資の種類",
-            "field_name": "完済原資",
-            "filed_value": ", ".join(
-                [
-                    CODE_CONFIGS["p_application_headers.refund_source_type"].get(item, "")
-                    for item in data["p_application_headers"]["refund_source_type"]
-                ]
-            ),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
-            "big_class": "",
-            "class": "その他の方は詳細を入力ください。",
-            "field_name": "完済原資（その他）",
-            "filed_value": data["p_application_headers"]["refund_source_type_other"],
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
-            "big_class": "",
-            "class": "完済原資の内容 ※金融機関・預貯金種類など",
-            "field_name": "完済原資　内容",
-            "filed_value": data["p_application_headers"]["refund_source_content"],
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
-            "big_class": "",
-            "class": "完済原資の金額 ※金融機関・預貯金種類など",
-            "field_name": "完済原資　金額",
-            "filed_value": format_ja_numeric(data["p_application_headers"]["refund_source_amount"], "万円"),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
-            "big_class": "今回の住宅取得後も継続する支払地代・支払家賃があれば記入してください。（MCJ固有項目）",
-            "class": "支払地代",
-            "field_name": "支払いをしている方",
-            "filed_value": CODE_CONFIGS["p_application_headers.rent_to_be_paid_land_borrower"].get(
-                data["p_application_headers"]["rent_to_be_paid_land_borrower"], ""
-            ),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
-            "big_class": "",
-            "class": "支払地代",
-            "field_name": "月間の支払金額",
-            "filed_value": format_ja_numeric(data["p_application_headers"]["rent_to_be_paid_land"], "円"),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
-            "big_class": "",
-            "class": "支払家賃",
-            "field_name": "支払いをしている方",
-            "filed_value": CODE_CONFIGS["p_application_headers.rent_to_be_paid_house_borrower"].get(
-                data["p_application_headers"]["rent_to_be_paid_house_borrower"], ""
-            ),
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(8)}：現在のお借入状況",
-            "big_class": "",
-            "class": "支払家賃",
-            "field_name": "月間の支払金額",
-            "filed_value": format_ja_numeric(data["p_application_headers"]["rent_to_be_paid_house"], "円"),
-        }
-    )
+
+    if is_mcj:
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
+                "big_class": "完済予定のお借入がある場合の完済原資について教えてください。（MCJ固有項目）",
+                "class": "完済原資の種類",
+                "field_name": "完済原資",
+                "filed_value": ", ".join(
+                    [
+                        CODE_CONFIGS["p_application_headers.refund_source_type"].get(item, "")
+                        for item in data["p_application_headers"]["refund_source_type"]
+                    ]
+                ),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
+                "big_class": "",
+                "class": "その他の方は詳細を入力ください。",
+                "field_name": "完済原資（その他）",
+                "filed_value": data["p_application_headers"]["refund_source_type_other"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
+                "big_class": "",
+                "class": "完済原資の内容 ※金融機関・預貯金種類など",
+                "field_name": "完済原資　内容",
+                "filed_value": data["p_application_headers"]["refund_source_content"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
+                "big_class": "",
+                "class": "完済原資の金額 ※金融機関・預貯金種類など",
+                "field_name": "完済原資　金額",
+                "filed_value": format_ja_numeric(data["p_application_headers"]["refund_source_amount"], "万円"),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
+                "big_class": "今回の住宅取得後も継続する支払地代・支払家賃があれば記入してください。（MCJ固有項目）",
+                "class": "支払地代",
+                "field_name": "支払いをしている方",
+                "filed_value": CODE_CONFIGS["p_application_headers.rent_to_be_paid_land_borrower"].get(
+                    data["p_application_headers"]["rent_to_be_paid_land_borrower"], ""
+                ),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
+                "big_class": "",
+                "class": "支払地代",
+                "field_name": "月間の支払金額",
+                "filed_value": format_ja_numeric(data["p_application_headers"]["rent_to_be_paid_land"], "円"),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
+                "big_class": "",
+                "class": "支払家賃",
+                "field_name": "支払いをしている方",
+                "filed_value": CODE_CONFIGS["p_application_headers.rent_to_be_paid_house_borrower"].get(
+                    data["p_application_headers"]["rent_to_be_paid_house_borrower"], ""
+                ),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(8)}：現在のお借入状況",
+                "big_class": "",
+                "class": "支払家賃",
+                "field_name": "月間の支払金額",
+                "filed_value": format_ja_numeric(data["p_application_headers"]["rent_to_be_paid_house"], "円"),
+            }
+        )
     # step09
     json_data.append(
         {

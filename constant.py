@@ -119,6 +119,7 @@ class UNSUBCRIBED(Enum):
 
 class BANK_CODE(Enum):
     SBI = "0038"
+    MCJ = "0039"
 
 
 class TOKEN_ROLE_TYPE(Enum):
