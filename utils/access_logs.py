@@ -83,7 +83,7 @@ async def access_logs_output(start: str, end: str):
         json_data.append(
             {
                 "apply_no": access_log["apply_no"],
-                "account_id": str(access_log["account_id"]),
+                "account_id": f"'{access_log["account_id"]}",
                 "account_type": account_type_maps[access_log["account_type"]],
                 "account_name": user_name or sales_person_name or manager_name,
                 "created_at": access_log["created_at"],
