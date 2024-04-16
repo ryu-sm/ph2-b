@@ -810,6 +810,12 @@ insert into p_applicant_persons
 	,transfer_office_city_kanji    --  出向（派遣）先　市区郡　漢字        
 	,transfer_office_district_kanji    --  出向（派遣）先　町村字丁目　漢字        
 	,transfer_office_other_address_kanji    --  出向（派遣）先　補足　漢字        
+	,job_change    --  転職有無        1:有 ; 0:無
+	,job_change_office_name_kana    --  転職前勤務先　名　カナ        
+	,job_change_office_name_kanji    --  転職前勤務先　名　漢字        
+	,prev_office_year_num    --  転職前勤務先　勤続年数　年        
+	,prev_office_industry    --  転職前勤務先　業種        1: 製造業; 2: 農業; 3: 林業; 4: 漁業; 5: 鉱業; 6: 建設業; 7: 卸売・小売業; 8: 金融業; 9: 保険業; 10: 不動産業; 11: 運輸業; 12: 電気・ガス・熱供給・水道; 13: 飲食・宿泊; 14: 医療・福祉; 15: 教育・学習支援; 16: その他のサービス業; 17: 公務; 18: 公務 19: 複合サービス業; 99: その他
+	,prev_office_industry_other    --  転職前勤務先　業種（その他）  
 	,created_at    --  作成日付        
 	,updated_at    --  更新日付        
     ,old_id
@@ -1109,6 +1115,7 @@ insert into p_residents(
 	,district_kana    --  町村字丁目／丁目･番地･号　カナ        
 	,other_address_kana    --  補足／建物名･部屋番号等　カナ        
 	,loan_from_japan_house_finance_agency    --  住宅金融支援機構（旧：公庫）からの融資の有無        0: 無; 1: 有
+	,resident_type    --  入居予定者代表の区分   0: 入居予定者代表 1: 入居予定者
 	,created_at    --  作成日付        
 	,updated_at    --  更新日付        
 )
@@ -1137,6 +1144,7 @@ select
 	,r.district_kana as district_kana    --  町村字丁目／丁目･番地･号　カナ        
 	,r.other_address_kana as other_address_kana    --  補足／建物名･部屋番号等　カナ        
 	,r.loan_from_japan_housing_finance_agency as loan_from_japan_house_finance_agency    --  住宅金融支援機構（旧：公庫）からの融資の有無        0: 無; 1: 有
+	,r.resident_type    --  入居予定者代表の区分
 	,r.created_at    --  作成日付        
 	,r.updated_at    --  更新日付        
 from mortgage_loan_tool_be_production.p_residents r

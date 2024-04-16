@@ -586,6 +586,7 @@ CREATE TABLE `p_residents` (
   `district_kana` varchar(255) DEFAULT NULL COMMENT '町村字丁目／丁目･番地･号　カナ',
   `other_address_kana` varchar(255) DEFAULT NULL COMMENT '補足／建物名･部屋番号等　カナ',
   `loan_from_japan_house_finance_agency` tinyint DEFAULT NULL COMMENT '住宅金融支援機構（旧：公庫）からの融資の有無',
+  `resident_type` tinyint DEFAULT '1' COMMENT '入居予定者代表の区分',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日付',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日付',
   PRIMARY KEY (`id`) USING BTREE,

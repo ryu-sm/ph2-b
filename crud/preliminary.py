@@ -442,7 +442,6 @@ async def query_p_join_guarantors_for_ad(db: DB, p_application_header_id: int):
 
 
 async def query_p_residents_for_ad(db: DB, p_application_header_id: int):
-    apply_created_at = await crud.query_p_application_header_created_at_minute(db, p_application_header_id)
     sql = f"""
     SELECT
         CONVERT(id,CHAR) AS id,
@@ -467,7 +466,7 @@ async def query_p_residents_for_ad(db: DB, p_application_header_id: int):
         city_kana,
         district_kana,
         nationality,
-        (case when DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') ='{apply_created_at}' then 1 else 0 end) as is_applicant
+        resident_type
     FROM
         p_residents
     WHERE
@@ -1887,14 +1886,6 @@ async def query_p_application_header_basic(db: DB, id: int):
     return await db.fetch_one(
         f"SELECT apply_no, pre_examination_status, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%S') as created_at FROM p_application_headers WHERE id = {id};"
     )
-
-
-async def query_p_application_header_created_at_minute(db: DB, id: int):
-    result = await db.fetch_one(
-        f"SELECT DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') as created_at FROM p_application_headers WHERE id = {id};"
-    )
-
-    return result["created_at"]
 
 
 async def query_provisional_status(db: DB, p_application_header_id: int):

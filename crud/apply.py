@@ -545,10 +545,13 @@ async def query_p_residents_for_ap(db: DB, p_application_header_id: int):
         other_address_kanji,
         prefecture_kana,
         city_kana,
-        district_kana
+        district_kana,
+        resident_type
     FROM
         p_residents
     WHERE
+        resident_type = 0
+        AND
         p_application_header_id = {p_application_header_id};
     """
     p_residents = await db.fetch_all(sql)
