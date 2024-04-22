@@ -33,13 +33,13 @@ async def get_user_email(db: DB, id):
 async def access_logs_output(start: str, end: str):
     json_data = [
         {
-            "apply_no": "申込の受付番号",
-            "account_id": "担当者ID",
+            "created_at": "日時",
             "account_type": "担当者区分",
             "account_name": "担当者名",
-            "created_at": "日時",
-            "operation": "操作",
-            "operation_content": "操作内容",
+            "account_id": "担当者ID",
+            "operation": "イベント",
+            "operation_content": "イベント内容",
+            "apply_no": "申込の受付番号",
         }
     ]
     db = DB()
@@ -54,6 +54,7 @@ async def access_logs_output(start: str, end: str):
         DATE_FORMAT(created_at, '%Y/%m/%d %H:%i:%S') as created_at
     FROM
         c_access_logs
+    ORDER BY created_at DESC
     """
     jp_tz = pytz.timezone("Asia/Tokyo")
     where = ""
@@ -82,13 +83,13 @@ async def access_logs_output(start: str, end: str):
         }
         json_data.append(
             {
-                "apply_no": access_log["apply_no"],
-                "account_id": str(access_log["account_id"]),
+                "created_at": access_log["created_at"],
                 "account_type": account_type_maps[access_log["account_type"]],
                 "account_name": user_name or sales_person_name or manager_name,
-                "created_at": access_log["created_at"],
+                "account_id": str(access_log["account_id"]),
                 "operation": access_log["operation"],
                 "operation_content": access_log["operation_content"],
+                "apply_no": access_log["apply_no"],
             }
         )
     df = pd.DataFrame(json_data)

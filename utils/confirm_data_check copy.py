@@ -5,6 +5,8 @@ from schemas.regex import REGEX
 
 def manager_data_check(data: dict):
     errors = {}
+    # TODO:
+    mcj_id = "100730412732514738"
 
     # お借入のご希望
     tab1_errors = []
@@ -18,11 +20,30 @@ def manager_data_check(data: dict):
     if not data["p_application_headers"]["loan_type"]:
         tab1_errors.append("お借入形態")
 
+    # if data["p_application_headers"]["loan_type"] == "2":
+    #     if not data["p_application_headers"]["pair_loan_last_name"]:
+    #         tab1_errors.append("ペアローン　お名前（姓）")
+    #     if not data["p_application_headers"]["pair_loan_first_name"]:
+    #         tab1_errors.append("ペアローン　お名前（名）")
+    #     if not data["p_application_headers"]["pair_loan_rel"]:
+    #         tab1_errors.append("ペアローン　続柄（プルダウン）")
     if not data["p_borrowing_details__1"]["desired_borrowing_date"]:
         tab1_errors.append("お借入希望日")
 
     if not data["p_borrowing_details__1"]["desired_loan_amount"]:
         tab1_errors.append("お借入希望額")
+
+    # if (
+    #     data["p_borrowing_details__1"]["bonus_repayment_amount"]
+    #     and not data["p_borrowing_details__1"]["bonus_repayment_month"]
+    # ):
+    #     tab1_errors.append("ボーナス返済月")
+
+    # if (
+    #     data["p_borrowing_details__1"]["bonus_repayment_month"] != "1"
+    #     and not data["p_borrowing_details__1"]["bonus_repayment_amount"]
+    # ):
+    #     tab1_errors.append("お借入内容　うち、ボーナス返済分")
 
     if not data["p_borrowing_details__1"]["loan_term_year"]:
         tab1_errors.append("お借入内容　お借入期間（年）")
@@ -207,6 +228,12 @@ def manager_data_check(data: dict):
     ):
         tab3_errors.append("勤務先名（フリガナ）")
 
+    # if (
+    #     data["p_applicant_persons__0"]["office_department"]
+    #     and len(data["p_applicant_persons__0"]["office_department"]) > 46
+    # ):
+    #     tab3_errors.append("所属部課")
+
     if not data["p_applicant_persons__0"]["office_phone"]:
         tab3_errors.append("勤務先の電話番号")
 
@@ -297,6 +324,81 @@ def manager_data_check(data: dict):
     if not data["p_applicant_persons__0"]["last_year_income"]:
         tab3_errors.append("前年度年収")
 
+    # if not data["p_applicant_persons__0"]["main_income_source"]:
+    #     tab3_errors.append("収入源（銀行送信用）")
+
+    # if data["p_applicant_persons__0"]["tax_return"] == "1":
+    #     if not data["p_applicant_persons__0"]["tax_return_reasons"]:
+    #         tab3_errors.append("確定申告の理由")
+    #     if (
+    #         data["p_applicant_persons__0"]["tax_return_reasons"] == "99"
+    #         and not data["p_applicant_persons__0"]["tax_return_reason_other"]
+    #     ):
+    #         tab3_errors.append("確定申告の理由　その他")
+    # if data["p_applicant_persons__0"]["transfer_office"] == "1":
+    #     # if not data["p_applicant_persons__0"]["transfer_office_name_kanji"]:
+    #     #     tab3_errors.append("出向（派遣）勤務先名")
+    #     if (
+    #         data["p_applicant_persons__0"]["transfer_office_name_kanji"]
+    #         and len(data["p_applicant_persons__0"]["transfer_office_name_kanji"]) > 48
+    #     ):
+    #         tab3_errors.append("出向（派遣）勤務先名")
+
+    #     # if not data["p_applicant_persons__0"]["transfer_office_name_kana"]:
+    #     #     tab3_errors.append("出向（派遣）勤務先名（フリガナ）")
+    #     if (
+    #         data["p_applicant_persons__0"]["transfer_office_name_kana"]
+    #         and len(data["p_applicant_persons__0"]["transfer_office_name_kana"]) > 48
+    #     ):
+    #         tab3_errors.append("出向（派遣）勤務先名（フリガナ）")
+
+    #     # if not data["p_applicant_persons__0"]["transfer_office_phone"]:
+    #     #     tab3_errors.append("出向（派遣）先 電話番号")
+
+    #     if data["p_applicant_persons__0"]["transfer_office_phone"]:
+    #         result = re.fullmatch(REGEX["home_phone"], data["p_applicant_persons__0"]["transfer_office_phone"])
+    #         if not result:
+    #             tab3_errors.append("出向（派遣）先 電話番号")
+
+    #     # if not data["p_applicant_persons__0"]["transfer_office_postal_code"]:
+    #     #     tab3_errors.append("出向（派遣）先 郵便番号")
+
+    #     if data["p_applicant_persons__0"]["transfer_office_postal_code"]:
+    #         result = re.fullmatch(REGEX["postal_code"], data["p_applicant_persons__0"]["transfer_office_postal_code"])
+    #         if not result:
+    #             tab3_errors.append("出向（派遣）先 郵便番号")
+
+    #     # if not data["p_applicant_persons__0"]["transfer_office_prefecture_kanji"]:
+    #     #     tab3_errors.append("出向（派遣）先 都道府県")
+    #     if (
+    #         data["p_applicant_persons__0"]["transfer_office_prefecture_kanji"]
+    #         and len(data["p_applicant_persons__0"]["transfer_office_prefecture_kanji"]) > 8
+    #     ):
+    #         tab3_errors.append("出向（派遣）先 都道府県")
+
+    #     if (
+    #         data["p_applicant_persons__0"]["transfer_office_city_kanji"]
+    #         and len(data["p_applicant_persons__0"]["transfer_office_city_kanji"]) > 20
+    #     ):
+    #         tab3_errors.append("出向（派遣）先 市区郡")
+
+    #     if (
+    #         data["p_applicant_persons__0"]["transfer_office_district_kanji"]
+    #         and len(data["p_applicant_persons__0"]["transfer_office_district_kanji"]) > 40
+    #     ):
+    #         tab3_errors.append("出向（派遣）先 町村丁目")
+
+    #     if (
+    #         data["p_applicant_persons__0"]["transfer_office_other_address_kanji"]
+    #         and len(data["p_applicant_persons__0"]["transfer_office_other_address_kanji"]) > 99
+    #     ):
+    #         tab3_errors.append("出向（派遣）先 丁目以下・建物名・部屋番号")
+    # if data["p_applicant_persons__0"]["maternity_paternity_leave"]:
+    #     if not data["p_applicant_persons__0"]["maternity_paternity_leave_start_date"]:
+    #         tab3_errors.append("取得開始時期")
+
+    #     if not data["p_applicant_persons__0"]["maternity_paternity_leave_end_date"]:
+    #         tab3_errors.append("取得終了時期")
     if tab3_errors:
         errors["ご職業"] = tab3_errors
 
@@ -409,6 +511,12 @@ def manager_data_check(data: dict):
     if not data["p_application_headers"]["curr_house_residence_type"]:
         tab5_errors.append("現在のお住まいの種類")
 
+    # if data["p_application_headers"]["curr_house_residence_type"] == "4":
+    #     if not data["p_application_headers"]["curr_house_owner_name"]:
+    #         tab5_errors.append("所有者の氏名")
+    #     if not data["p_application_headers"]["curr_house_owner_rel"]:
+    #         tab5_errors.append("続柄")
+
     if data["p_application_headers"]["curr_house_residence_type"] == "6":
         if not data["p_application_headers"]["curr_house_schedule_disposal_type"]:
             tab5_errors.append("持家　処分方法")
@@ -417,6 +525,17 @@ def manager_data_check(data: dict):
             and not data["p_application_headers"]["curr_house_schedule_disposal_type_other"]
         ):
             tab5_errors.append("持家　処分方法（その他）")
+
+    # if not data["p_application_headers"]["new_house_acquire_reason"]:
+    #     tab5_errors.append("新しい住居を必要とする理由")
+    # if (
+    #     data["p_application_headers"]["new_house_acquire_reason"] == "99"
+    #     and not data["p_application_headers"]["new_house_acquire_reason_other"]
+    # ):
+    #     tab5_errors.append("新しい住居を必要とする理由（その他）")
+
+    # if not data["p_application_headers"]["new_house_self_resident"]:
+    #     tab5_errors.append("新しい住居に、あなたは居住しますか？")
 
     if data["p_application_headers"]["property_postal_code"]:
         result = re.fullmatch(REGEX["postal_code"], data["p_application_headers"]["property_postal_code"])
@@ -479,6 +598,26 @@ def manager_data_check(data: dict):
     if tab5_errors:
         errors["お住まい"] = tab5_errors
 
+    # 現在の借入状況
+    # for index, p_borrowing in enumerate(data["p_borrowings"]):
+    #     tab6_errors = []
+    #     if not p_borrowing["loan_start_date"]:
+    #         tab6_errors.append("当初カード契約年月" if p_borrowing["type"] == "2" else "当初借入年月")
+    #     if not p_borrowing["loan_amount"]:
+    #         tab6_errors.append("借入限度額" if p_borrowing["type"] == "2" else "当初借入額")
+    #     if tab6_errors:
+    #         errors[f"現在の借入状況（{index + 1}件目）"] = tab6_errors
+    # 現在の借入状況
+    # tab6_errors_basic = []
+    # if (
+    #     mcj_id in data["p_application_banks"]
+    #     and len([item for item in data["p_borrowings"] if item["scheduled_loan_payoff"] == "1"]) > 0
+    # ):
+    #     if not data["p_application_headers"]["refund_source_type"]:
+    #         tab6_errors_basic.append("完済原資の種類")
+    # if tab6_errors_basic:
+    #     errors["現在の借入状況"] = tab6_errors_basic
+
     # 資金計画
     tab7_errors = []
     if not data["p_application_headers"]["required_funds_additional_amount"]:
@@ -489,6 +628,11 @@ def manager_data_check(data: dict):
         tab7_errors.append("その他の借り入れ")
     if not data["p_application_headers"]["funding_relative_donation_amount"]:
         tab7_errors.append("親族からの贈与")
+    # if (
+    #     data["p_application_headers"]["funding_other_amount"] != "0"
+    #     and not data["p_application_headers"]["funding_other_amount_detail"]
+    # ):
+    #     tab7_errors.append("※詳細を入力ください。")
 
     if tab7_errors:
         errors["資金計画"] = tab7_errors
@@ -520,6 +664,9 @@ def manager_data_check(data: dict):
             or len(data["p_applicant_persons__1"]["first_name_kana"]) > 48
         ):
             tab2_1_errors.append("お名前（名）（フリガナ）")
+
+        # if not data["p_applicant_persons__1"]["gender"]:
+        #     tab2_1_errors.append("性別")
 
         if not data["p_applicant_persons__1"]["birthday"]:
             tab2_1_errors.append("生年月日")
@@ -578,14 +725,23 @@ def manager_data_check(data: dict):
         ):
             tab2_1_errors.append("丁目以下・建物名・部屋番号")
 
+        # if not data["p_applicant_persons__1"]["prefecture_kana"]:
+        #     tab2_1_errors.append("都道府県（フリガナ）")
+
         if (
             data["p_applicant_persons__1"]["prefecture_kana"]
             and len(data["p_applicant_persons__1"]["prefecture_kana"]) > 8
         ):
             tab2_1_errors.append("都道府県（フリガナ）")
 
+        # if not data["p_applicant_persons__1"]["city_kana"]:
+        #     tab2_1_errors.append("市区郡（フリガナ）")
+
         if data["p_applicant_persons__1"]["city_kana"] and len(data["p_applicant_persons__1"]["city_kana"]) > 20:
             tab2_1_errors.append("市区郡（フリガナ）")
+
+        # if not data["p_applicant_persons__1"]["district_kana"]:
+        #     tab2_1_errors.append("町村丁目（フリガナ）")
 
         if (
             data["p_applicant_persons__1"]["district_kana"]
@@ -611,6 +767,25 @@ def manager_data_check(data: dict):
 
         # 収入合算者の職業
         tab3_1_errors = []
+
+        if (
+            data["p_applicant_persons__1"]["office_occupation"] == "99"
+            and not data["p_applicant_persons__1"]["office_occupation_other"]
+        ):
+            tab3_1_errors.append("勤務先　職業（その他）")
+
+        if (
+            data["p_applicant_persons__1"]["office_industry"] == "99"
+            and not data["p_applicant_persons__1"]["office_industry_other"]
+        ):
+            tab3_1_errors.append("勤務先　業種（その他）")
+
+        if (
+            data["p_applicant_persons__1"]["office_occupation_detail"] == "99"
+            and not data["p_applicant_persons__1"]["office_occupation_detail_other"]
+        ):
+            tab3_1_errors.append("勤務先　職種（その他）")
+
         if (
             data["p_applicant_persons__1"]["office_name_kanji"]
             and len(data["p_applicant_persons__1"]["office_name_kanji"]) > 48
@@ -698,6 +873,80 @@ def manager_data_check(data: dict):
         ):
             tab3_1_errors.append("丁目以下・建物名・部屋番号（フリガナ）")
 
+        # if data["p_applicant_persons__1"]["tax_return"] == "1":
+        #     if not data["p_applicant_persons__1"]["tax_return_reasons"]:
+        #         tab3_1_errors.append("確定申告の理由")
+        #     if (
+        #         data["p_applicant_persons__1"]["tax_return_reasons"] == "99"
+        #         and not data["p_applicant_persons__1"]["tax_return_reason_other"]
+        #     ):
+        #         tab3_1_errors.append("確定申告の理由　その他")
+        # if data["p_applicant_persons__1"]["transfer_office"] == "1":
+        #     if not data["p_applicant_persons__1"]["transfer_office_name_kanji"]:
+        #         tab3_1_errors.append("出向（派遣）勤務先名")
+        #     if (
+        #         data["p_applicant_persons__1"]["transfer_office_name_kanji"]
+        #         and len(data["p_applicant_persons__1"]["transfer_office_name_kanji"]) > 48
+        #     ):
+        #         tab3_1_errors.append("出向（派遣）勤務先名")
+
+        #     if not data["p_applicant_persons__1"]["transfer_office_name_kana"]:
+        #         tab3_1_errors.append("出向（派遣）勤務先名（フリガナ）")
+        #     if (
+        #         data["p_applicant_persons__1"]["transfer_office_name_kana"]
+        #         and len(data["p_applicant_persons__1"]["transfer_office_name_kana"]) > 48
+        #     ):
+        #         tab3_1_errors.append("出向（派遣）勤務先名（フリガナ）")
+
+        #     if not data["p_applicant_persons__1"]["transfer_office_phone"]:
+        #         tab3_1_errors.append("出向（派遣）先 電話番号")
+
+        #     if data["p_applicant_persons__1"]["transfer_office_phone"]:
+        #         result = re.fullmatch(REGEX["home_phone"], data["p_applicant_persons__1"]["transfer_office_phone"])
+        #         if not result:
+        #             tab3_1_errors.append("出向（派遣）先 電話番号")
+
+        #     if not data["p_applicant_persons__1"]["transfer_office_postal_code"]:
+        #         tab3_1_errors.append("出向（派遣）先 郵便番号")
+
+        #     if data["p_applicant_persons__1"]["transfer_office_postal_code"]:
+        #         result = re.fullmatch(
+        #             REGEX["postal_code"], data["p_applicant_persons__1"]["transfer_office_postal_code"]
+        #         )
+        #         if not result:
+        #             tab3_1_errors.append("出向（派遣）先 郵便番号")
+
+        #     if not data["p_applicant_persons__1"]["transfer_office_prefecture_kanji"]:
+        #         tab3_1_errors.append("出向（派遣）先 都道府県")
+        #     if (
+        #         data["p_applicant_persons__1"]["transfer_office_prefecture_kanji"]
+        #         and len(data["p_applicant_persons__1"]["transfer_office_prefecture_kanji"]) > 8
+        #     ):
+        #         tab3_1_errors.append("出向（派遣）先 都道府県")
+
+        #     if (
+        #         data["p_applicant_persons__1"]["transfer_office_city_kanji"]
+        #         and len(data["p_applicant_persons__1"]["transfer_office_city_kanji"]) > 20
+        #     ):
+        #         tab3_1_errors.append("出向（派遣）先 市区郡")
+
+        #     if (
+        #         data["p_applicant_persons__1"]["transfer_office_district_kanji"]
+        #         and len(data["p_applicant_persons__1"]["transfer_office_district_kanji"]) > 40
+        #     ):
+        #         tab3_1_errors.append("出向（派遣）先 町村丁目")
+
+        #     if (
+        #         data["p_applicant_persons__1"]["transfer_office_other_address_kanji"]
+        #         and len(data["p_applicant_persons__1"]["transfer_office_other_address_kanji"]) > 99
+        #     ):
+        #         tab3_1_errors.append("出向（派遣）先 丁目以下・建物名・部屋番号")
+        # if data["p_applicant_persons__1"]["maternity_paternity_leave"]:
+        #     if not data["p_applicant_persons__1"]["maternity_paternity_leave_start_date"]:
+        #         tab3_1_errors.append("取得開始時期")
+
+        #     if not data["p_applicant_persons__1"]["maternity_paternity_leave_end_date"]:
+        #         tab3_1_errors.append("取得終了時期")
         if tab3_1_errors:
             errors["収入合算者の職業"] = tab3_1_errors
 

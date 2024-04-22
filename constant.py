@@ -173,6 +173,7 @@ class OPERATE_TYPE(Enum):
 
 
 class ACCESS_LOG_OPERATION(Enum):
+    REGISTER = "新規登録"
     LOGIN = "ログイン"
     LOGOUT = "ログアウト"
     UPDATE = "更新"

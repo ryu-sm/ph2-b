@@ -608,7 +608,7 @@ CREATE TABLE `p_uploaded_files` (
   `type` varchar(1) DEFAULT NULL COMMENT '区分',
   `s3_key` varchar(255) DEFAULT NULL COMMENT 'S3キー',
   `file_name` varchar(255) DEFAULT NULL COMMENT 'ファイル名',
-  `deleted` tinyint DEFAULT '0' COMMENT '論理削除',
+  `deleted` tinyint DEFAULT NULL COMMENT '論理削除',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日付',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日付',
   PRIMARY KEY (`id`) USING BTREE,

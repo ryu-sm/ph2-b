@@ -897,19 +897,10 @@ async def gen_row_data(p_application_header_id: int, data: dict):
         json_data.append(
             {
                 "step": f"STEP {get_step_code(4)}：収入合算者",
-                "big_class": "続柄",
-                "class": "メイ",
-                "field_name": "収入合算者続柄",
-                "filed_value": data["p_applicant_persons__1"]["first_name_kana"],
-            }
-        )
-        json_data.append(
-            {
-                "step": f"STEP {get_step_code(4)}：収入合算者",
                 "big_class": "",
                 "class": "メイ",
                 "field_name": "名　カナ",
-                "filed_value": data["p_applicant_persons__1"]["rel_to_applicant_a_name"],
+                "filed_value": data["p_applicant_persons__1"]["first_name_kana"],
             }
         )
         json_data.append(
@@ -921,6 +912,15 @@ async def gen_row_data(p_application_header_id: int, data: dict):
                 "filed_value": CODE_CONFIGS["p_applicant_persons__1.gender"].get(
                     data["p_applicant_persons__1"]["gender"], ""
                 ),
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(4)}：収入合算者",
+                "big_class": "続柄",
+                "class": "",
+                "field_name": "収入合算者続柄",
+                "filed_value": data["p_applicant_persons__1"]["rel_to_applicant_a_name"],
             }
         )
         json_data.append(

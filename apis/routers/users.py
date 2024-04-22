@@ -37,7 +37,7 @@ async def user_send_verify_email(data: dict, db=Depends(get_db)):
 
 
 @router.post("/user")
-async def user_register(data: dict, db=Depends(get_db)):
+async def user_register(data: dict, request: Request, db=Depends(get_db)):
     try:
         payload = utils.parse_token(data["token"])
         if payload is None:
@@ -55,6 +55,15 @@ async def user_register(data: dict, db=Depends(get_db)):
         access_token = utils.gen_token(
             payload=await crud.query_c_user_token_payload(db, c_user_id=new_user_id),
             expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
+        )
+        await utils.common_insert_c_access_log(
+            db,
+            request,
+            params={
+                "account_id": new_user_id,
+                "account_type": 1,
+                "operation": ACCESS_LOG_OPERATION.REGISTER.value,
+            },
         )
         return JSONResponse(status_code=200, content={"access_token": access_token})
     except Exception as err:
