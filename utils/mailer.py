@@ -4,12 +4,7 @@ from core.config import settings
 
 
 def send_email(to, template, link):
-    ses = boto3.client(
-        "ses",
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        region_name=settings.AWS_REGION,
-    )
+    ses = boto3.client("ses", region_name="ap-northeast-1")
     template_module = import_module(f"templates.{template}")
 
     ses.send_email(
@@ -23,12 +18,7 @@ def send_email(to, template, link):
 
 
 def send_emails(to, template, link):
-    ses = boto3.client(
-        "ses",
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        region_name=settings.AWS_REGION,
-    )
+    ses = boto3.client("ses", region_name="ap-northeast-1")
     template_module = import_module(f"templates.{template}")
 
     ses.send_email(

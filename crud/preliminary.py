@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import json
+import os
 import typing
 import crud
 from core.database import DB
@@ -13,6 +14,7 @@ from constant import (
     JSON_DICT_FIELD_KEYS,
     JSON_LIST_FIELD_KEYS,
     INIT_NEW_HOUSE_PLANNED_RESIDENT_OVERVIEW,
+    MANN_TRANSLATE_FIELDS,
 )
 from constant import (
     P_UPLOAD_FILE_TYPE,
@@ -238,6 +240,7 @@ async def query_p_application_banks_for_ad(db: DB, p_application_header_id: int)
 async def query_p_applicant_persons_for_ad(db: DB, p_application_header_id: int, type: int):
     sql = f"""
     SELECT
+        spouse,
         CONVERT(id,CHAR) AS id,
         rel_to_applicant_a_name,
         last_name_kanji,
@@ -631,45 +634,7 @@ async def diff_update_p_application_headers_for_ad(db: DB, data: dict, p_applica
                 total = await crud.query_update_history_count(
                     db, p_application_header_id, "p_application_headers", key, p_application_header_id
                 )
-                if total == 0 and len(old_files_info) == 0:
-                    JOBS.append(
-                        db.execute(
-                            utils.gen_insert_sql(
-                                "p_activities",
-                                {
-                                    "id": await db.uuid_short(),
-                                    "p_application_header_id": p_application_header_id,
-                                    "operator_type": role_type,
-                                    "operator_id": role_id,
-                                    "table_name": "p_application_headers",
-                                    "field_name": key,
-                                    "table_id": p_application_header_id,
-                                    "content": None,
-                                    "operate_type": OPERATE_TYPE.APPLY.value,
-                                },
-                            )
-                        )
-                    )
-                if total == 0 and len(old_files_info) > 0:
-                    for old_file in old_files_info:
-                        JOBS.append(
-                            db.execute(
-                                utils.gen_insert_sql(
-                                    "p_activities",
-                                    {
-                                        "id": await db.uuid_short(),
-                                        "p_application_header_id": p_application_header_id,
-                                        "operator_type": role_type,
-                                        "operator_id": role_id,
-                                        "table_name": "p_application_headers",
-                                        "field_name": key,
-                                        "table_id": p_application_header_id,
-                                        "content": old_file["file_name"],
-                                        "operate_type": OPERATE_TYPE.APPLY.value,
-                                    },
-                                )
-                            )
-                        )
+
                 JOBS.append(
                     db.execute(
                         utils.gen_insert_sql(
@@ -741,28 +706,6 @@ async def diff_update_p_application_headers_for_ad(db: DB, data: dict, p_applica
             )
         # field update
         else:
-            total = await crud.query_update_history_count(
-                db, p_application_header_id, "p_application_headers", key, p_application_header_id
-            )
-            if total == 0:
-                JOBS.append(
-                    db.execute(
-                        utils.gen_insert_sql(
-                            "p_activities",
-                            {
-                                "id": await db.uuid_short(),
-                                "p_application_header_id": p_application_header_id,
-                                "operator_type": role_type,
-                                "operator_id": role_id,
-                                "table_name": "p_application_headers",
-                                "field_name": key,
-                                "table_id": p_application_header_id,
-                                "content": old_value if old_value != "" else None,
-                                "operate_type": OPERATE_TYPE.APPLY.value,
-                            },
-                        )
-                    )
-                )
             JOBS.append(
                 db.execute(
                     utils.gen_insert_sql(
@@ -856,48 +799,6 @@ async def diff_update_p_applicant_persons_for_ad(db: DB, data: dict, p_applicati
                 )
                 await db.execute(utils.gen_insert_sql("p_uploaded_files", p_upload_file_sql_params))
 
-                total = await crud.query_update_history_count(
-                    db, p_application_header_id, "p_applicant_persons", key, p_applicant_persons_id
-                )
-                if total == 0 and len(old_files_info) == 0:
-                    JOBS.append(
-                        db.execute(
-                            utils.gen_insert_sql(
-                                "p_activities",
-                                {
-                                    "id": await db.uuid_short(),
-                                    "p_application_header_id": p_application_header_id,
-                                    "operator_type": role_type,
-                                    "operator_id": role_id,
-                                    "table_name": "p_applicant_persons",
-                                    "field_name": key,
-                                    "table_id": p_applicant_persons_id,
-                                    "content": None,
-                                    "operate_type": OPERATE_TYPE.APPLY.value,
-                                },
-                            )
-                        )
-                    )
-                if total == 0 and len(old_files_info) > 0:
-                    for old_file in old_files_info:
-                        JOBS.append(
-                            db.execute(
-                                utils.gen_insert_sql(
-                                    "p_activities",
-                                    {
-                                        "id": await db.uuid_short(),
-                                        "p_application_header_id": p_application_header_id,
-                                        "operator_type": role_type,
-                                        "operator_id": role_id,
-                                        "table_name": "p_applicant_persons",
-                                        "field_name": key,
-                                        "table_id": p_applicant_persons_id,
-                                        "content": old_file["file_name"],
-                                        "operate_type": OPERATE_TYPE.APPLY.value,
-                                    },
-                                )
-                            )
-                        )
                 JOBS.append(
                     db.execute(
                         utils.gen_insert_sql(
@@ -971,28 +872,6 @@ async def diff_update_p_applicant_persons_for_ad(db: DB, data: dict, p_applicati
 
         # field update
         else:
-            total = await crud.query_update_history_count(
-                db, p_application_header_id, "p_applicant_persons", key, p_applicant_persons_id
-            )
-            if total == 0:
-                JOBS.append(
-                    db.execute(
-                        utils.gen_insert_sql(
-                            "p_activities",
-                            {
-                                "id": await db.uuid_short(),
-                                "p_application_header_id": p_application_header_id,
-                                "operator_type": role_type,
-                                "operator_id": role_id,
-                                "table_name": "p_applicant_persons",
-                                "field_name": key,
-                                "table_id": p_applicant_persons_id,
-                                "content": old_value if old_value != "" else None,
-                                "operate_type": OPERATE_TYPE.APPLY.value,
-                            },
-                        )
-                    )
-                )
             JOBS.append(
                 db.execute(
                     utils.gen_insert_sql(
@@ -1028,7 +907,7 @@ async def diff_update_p_borrowing_details_for_ad(
     )
     if p_borrowing_details_basic is None:
         data_ = blank_to_none(data)
-        await crud.insert_p_borrowing_details(db, data_, p_application_header_id, time_type)
+        await crud.insert_p_borrowing_details(db, data_, p_application_header_id, time_type, role_type, role_id)
         return None
     p_borrowing_details_id = p_borrowing_details_basic["id"]
     old_p_borrowing_details = await query_p_borrowing_details_for_ad(db, p_application_header_id, time_type)
@@ -1060,28 +939,6 @@ async def diff_update_p_borrowing_details_for_ad(
 
         # field update
         else:
-            total = await crud.query_update_history_count(
-                db, p_application_header_id, "p_borrowing_details", key, p_borrowing_details_id
-            )
-            if total == 0:
-                JOBS.append(
-                    db.execute(
-                        utils.gen_insert_sql(
-                            "p_activities",
-                            {
-                                "id": await db.uuid_short(),
-                                "p_application_header_id": p_application_header_id,
-                                "operator_type": role_type,
-                                "operator_id": role_id,
-                                "table_name": "p_borrowing_details",
-                                "field_name": key,
-                                "table_id": p_borrowing_details_id,
-                                "content": old_value if old_value != "" else None,
-                                "operate_type": OPERATE_TYPE.APPLY.value,
-                            },
-                        )
-                    )
-                )
             JOBS.append(
                 db.execute(
                     utils.gen_insert_sql(
@@ -1187,7 +1044,7 @@ async def diff_update_p_join_guarantors_for_ad(
         filter = [item for item in old_p_join_guarantors if item["id"] == p_join_guarantor["id"]]
         if len(filter) == 0:
             data_ = utils.blank_to_none(p_join_guarantor)
-            await crud.insert_p_join_guarantors(db, [data_], p_application_header_id)
+            await crud.insert_p_join_guarantors(db, [data_], p_application_header_id, role_type, role_id)
             continue
         [old_p_join_guarantor] = filter
         for key, value in p_join_guarantor.items():
@@ -1218,28 +1075,6 @@ async def diff_update_p_join_guarantors_for_ad(
 
             # field update
             else:
-                total = await crud.query_update_history_count(
-                    db, p_application_header_id, "p_join_guarantors", key, old_p_join_guarantor["id"]
-                )
-                if total == 0:
-                    JOBS.append(
-                        db.execute(
-                            utils.gen_insert_sql(
-                                "p_activities",
-                                {
-                                    "id": await db.uuid_short(),
-                                    "p_application_header_id": p_application_header_id,
-                                    "operator_type": role_type,
-                                    "operator_id": role_id,
-                                    "table_name": "p_join_guarantors",
-                                    "field_name": key,
-                                    "table_id": old_p_join_guarantor["id"],
-                                    "content": old_value if old_value != "" else None,
-                                    "operate_type": OPERATE_TYPE.APPLY.value,
-                                },
-                            )
-                        )
-                    )
                 JOBS.append(
                     db.execute(
                         utils.gen_insert_sql(
@@ -1299,7 +1134,7 @@ async def diff_update_p_residents_for_ad(db: DB, data: typing.List[dict], p_appl
         filter = [item for item in old_p_residents if item["id"] == p_resident["id"]]
         if len(filter) == 0:
             data_ = utils.blank_to_none(p_resident)
-            await crud.insert_p_residents(db, [data_], p_application_header_id)
+            await crud.insert_p_residents(db, [data_], p_application_header_id, role_type, role_id)
             continue
         [old_p_resident] = filter
         for key, value in p_resident.items():
@@ -1330,28 +1165,6 @@ async def diff_update_p_residents_for_ad(db: DB, data: typing.List[dict], p_appl
 
             # field update
             else:
-                total = await crud.query_update_history_count(
-                    db, p_application_header_id, "p_residents", key, old_p_resident["id"]
-                )
-                if total == 0:
-                    JOBS.append(
-                        db.execute(
-                            utils.gen_insert_sql(
-                                "p_activities",
-                                {
-                                    "id": await db.uuid_short(),
-                                    "p_application_header_id": p_application_header_id,
-                                    "operator_type": role_type,
-                                    "operator_id": role_id,
-                                    "table_name": "p_residents",
-                                    "field_name": key,
-                                    "table_id": old_p_resident["id"],
-                                    "content": old_value if old_value != "" else None,
-                                    "operate_type": OPERATE_TYPE.APPLY.value,
-                                },
-                            )
-                        )
-                    )
                 JOBS.append(
                     db.execute(
                         utils.gen_insert_sql(
@@ -1459,48 +1272,6 @@ async def diff_update_p_borrowings_for_ad(db: DB, data: typing.List[dict], p_app
                     )
                     await db.execute(utils.gen_insert_sql("p_uploaded_files", p_upload_file_sql_params))
 
-                    total = await crud.query_update_history_count(
-                        db, p_application_header_id, "p_borrowings", key, old_p_borrowing["id"]
-                    )
-                    if total == 0 and len(old_files_info) == 0:
-                        JOBS.append(
-                            db.execute(
-                                utils.gen_insert_sql(
-                                    "p_activities",
-                                    {
-                                        "id": await db.uuid_short(),
-                                        "p_application_header_id": p_application_header_id,
-                                        "operator_type": role_type,
-                                        "operator_id": role_id,
-                                        "table_name": "p_borrowings",
-                                        "field_name": key,
-                                        "table_id": old_p_borrowing["id"],
-                                        "content": None,
-                                        "operate_type": OPERATE_TYPE.APPLY.value,
-                                    },
-                                )
-                            )
-                        )
-                    if total == 0 and len(old_files_info) > 0:
-                        for old_file in old_files_info:
-                            JOBS.append(
-                                db.execute(
-                                    utils.gen_insert_sql(
-                                        "p_activities",
-                                        {
-                                            "id": await db.uuid_short(),
-                                            "p_application_header_id": p_application_header_id,
-                                            "operator_type": role_type,
-                                            "operator_id": role_id,
-                                            "table_name": "p_borrowings",
-                                            "field_name": key,
-                                            "table_id": old_p_borrowing["id"],
-                                            "content": old_file["file_name"],
-                                            "operate_type": OPERATE_TYPE.APPLY.value,
-                                        },
-                                    )
-                                )
-                            )
                     JOBS.append(
                         db.execute(
                             utils.gen_insert_sql(
@@ -1732,8 +1503,14 @@ async def query_field_uodate_histories_for_ad(db: DB, p_application_header_id: i
         AND
         p_activities.table_id = '{table_id}'
     """
-
-    return await db.fetch_all(sql)
+    translate_histories = []
+    histories = await db.fetch_all(sql)
+    for history in histories:
+        if field_name in MANN_TRANSLATE_FIELDS and history["content"]:
+            translate_histories.append({**history, "content": str(int(int(history["content"]) / 10000))})
+        else:
+            translate_histories.append(history)
+    return translate_histories
 
 
 async def query_p_result(db: DB, p_application_header_id: int):
@@ -1764,6 +1541,7 @@ async def query_p_result(db: DB, p_application_header_id: int):
 
 
 async def query_p_uploaded_files_for_ad_view(db: DB, p_application_header_id: int, type: int, category: str):
+    print(category)
     temp_files = {}
     sql = f"""
     SELECT
@@ -1771,11 +1549,12 @@ async def query_p_uploaded_files_for_ad_view(db: DB, p_application_header_id: in
         p_uploaded_files.file_name,
         p_uploaded_files.s3_key,
         p_uploaded_files.owner_type,
-        DATE_FORMAT(p_uploaded_files.created_at, '%Y/%m/%d %H:%i') as created_at,
+        DATE_FORMAT(p_uploaded_files.created_at, '%Y/%m/%d %H:%i:%S') as created_at,
         p_uploaded_files.owner_type,
         CONCAT(p_applicant_persons.last_name_kanji, ' ', p_applicant_persons.first_name_kanji) as p_applicant_person_name,
         s_sales_persons.name_kanji as s_sales_person_name,
-        s_managers.name_kanji as s_manager_name
+        s_managers.name_kanji as s_manager_name,
+        p_application_headers.apply_no
     FROM
         p_uploaded_files
     JOIN
@@ -1809,10 +1588,41 @@ async def query_p_uploaded_files_for_ad_view(db: DB, p_application_header_id: in
     if len(files_info) > 0:
         files = []
         for file_info in files_info:
-            src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
-            files.append(
-                {"src": src, "name": file_info["file_name"], "key": file_info["s3_key"].split("/")[-1], **file_info}
-            )
+            src = utils.download_base64_from_s3(f"{file_info['s3_key']}/{file_info['file_name']}")
+            class_key = None
+            for key in file_info["s3_key"].split("/"):
+                if key.find(f"{category}") != -1:
+                    class_key = key
+            d_filename = None
+            basic, extension = os.path.splitext(file_info["file_name"])
+            if category in ["A", "B", "I", "J"]:
+                d_filename = (
+                    f"""{file_info["apply_no"]}_{file_info["p_applicant_person_name"]}___CLASS__{basic}{extension}"""
+                )
+            else:
+                sql = f"""
+                SELECT
+                    CONVERT(p_uploaded_files.id,CHAR) AS id
+                FROM
+                    p_uploaded_files
+                JOIN
+                    p_application_headers
+                    ON
+                    p_application_headers.id = p_uploaded_files.p_application_header_id
+                WHERE
+                    p_uploaded_files.p_application_header_id = {p_application_header_id}
+                    AND
+                    p_uploaded_files.deleted IS NULL
+                    AND
+                    p_uploaded_files.type = {type}
+                    AND
+                    p_uploaded_files.s3_key LIKE '%/{class_key}%';
+                """
+                print(sql)
+                group_ids = [item["id"] for item in await db.fetch_all(sql)]
+                file_no = str(group_ids.index(file_info["id"]) + 1).zfill(2)
+                d_filename = f"""{file_info["apply_no"]}_{file_info["p_applicant_person_name"]}___CLASS___{basic}_{file_no}{extension}"""
+            files.append({"src": src, "name": d_filename, "key": class_key, **file_info})
         temp_files[category] = files
     return temp_files
 
@@ -1835,11 +1645,12 @@ async def query_p_borrowings_files_for_ad_view(db: DB, p_application_header_id: 
             p_uploaded_files.file_name,
             p_uploaded_files.s3_key,
             p_uploaded_files.owner_type,
-            DATE_FORMAT(p_uploaded_files.created_at, '%Y/%m/%d %H:%i') as created_at,
+            DATE_FORMAT(p_uploaded_files.created_at, '%Y/%m/%d %H:%i:%S') as created_at,
             p_uploaded_files.owner_type,
             CONCAT(p_applicant_persons.last_name_kanji, ' ', p_applicant_persons.first_name_kanji) as p_applicant_person_name,
             s_sales_persons.name_kanji as s_sales_person_name,
-            s_managers.name_kanji as s_manager_name
+            s_managers.name_kanji as s_manager_name,
+            p_application_headers.apply_no
         FROM
             p_uploaded_files
         JOIN
@@ -1876,9 +1687,11 @@ async def query_p_borrowings_files_for_ad_view(db: DB, p_application_header_id: 
             continue
         else:
             borrowings = []
-            for file_info in files_info:
-                src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
-                borrowings.append({"times": index + 1, "src": src, "name": file_info["file_name"], **file_info})
+            for file_no, file_info in enumerate(files_info):
+                src = utils.download_base64_from_s3(f"{file_info['s3_key']}/{file_info['file_name']}")
+                basic, extension = os.path.splitext(file_info["file_name"])
+                d_filename = f"""{file_info["apply_no"]}_{file_info["p_applicant_person_name"]}___CLASS___{basic}_{str(file_no + 1).zfill(2)}{extension}"""
+                borrowings.append({"times": index + 1, "src": src, "name": d_filename, **file_info})
     return borrowings
 
 

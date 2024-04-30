@@ -3,6 +3,7 @@ from core.database import DB
 import utils
 import yaml
 from .db_filed_maps import p_application_header_parameters
+from core.config import settings
 
 
 def construct_ruby_bigdecimal(loader, node):
@@ -144,6 +145,12 @@ async def translate_p_archive_files(db: DB):
                 "file_name": old_file_info["old_filename"],
                 "created_at": old_file_info["old_created_at"],
             }
+        )
+        base64_encoded_data = utils.download_from_s3(old_file_info["old_s3_key"])
+        utils.upload_base64_file_s3(
+            f"{s3_key}/{old_file_info['old_filename']}",
+            base64_encoded_data,
+            settings.C_ARCHIVE_UPLOADED_FILES_BUCKET_NAME,
         )
 
     for data in new_data:

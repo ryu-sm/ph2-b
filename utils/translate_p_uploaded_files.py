@@ -121,6 +121,8 @@ async def translate_p_uploaded_files(db: DB):
                 "created_at": old_file_info["old_created_at"],
             }
         )
+        base64_encoded_data = utils.download_from_s3(old_file_info["old_s3_key"])
+        utils.upload_base64_file_s3(f"{s3_key}/{old_file_info['old_filename']}", base64_encoded_data)
 
     sql = """
     SELECT
@@ -184,6 +186,8 @@ async def translate_p_uploaded_files(db: DB):
                 "created_at": old_file_info["old_created_at"],
             }
         )
+        base64_encoded_data = utils.download_from_s3(old_file_info["old_s3_key"])
+        utils.upload_base64_file_s3(f"{s3_key}/{old_file_info['old_filename']}", base64_encoded_data)
 
     sql = """
     SELECT
@@ -248,6 +252,8 @@ async def translate_p_uploaded_files(db: DB):
                 "created_at": old_file_info["old_created_at"],
             }
         )
+        base64_encoded_data = utils.download_from_s3(old_file_info["old_s3_key"])
+        utils.upload_base64_file_s3(f"{s3_key}/{old_file_info['old_filename']}", base64_encoded_data)
 
     for data in new_data:
         await db.execute(utils.gen_insert_sql("mortgage_staging.p_uploaded_files", data))

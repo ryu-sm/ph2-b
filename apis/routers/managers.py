@@ -1,9 +1,10 @@
+import json
 from loguru import logger
 from datetime import datetime
 from fastapi import APIRouter, Request
 from fastapi import Depends
 from fastapi.responses import JSONResponse
-
+import requests
 from constant import ACCESS_LOG_OPERATION, DEFAULT_200_MSG, DEFAULT_500_MSG
 from core.config import settings
 from core.custom import LoggingContextRoute
@@ -132,7 +133,7 @@ async def manager_logout(request: Request, db=Depends(get_db), token=Depends(get
 async def manager_get_access_applications(status: int, db=Depends(get_db), token=Depends(get_token)):
 
     try:
-        p_application_headers_basic_list = await crud.query_manager_access_p_application_headers(
+        p_application_headers_basic_list = await crud.query_manager_access_p_application_headers_(
             db, status, token["id"]
         )
         return JSONResponse(status_code=200, content=p_application_headers_basic_list)
@@ -345,11 +346,23 @@ async def update_pre_examination_status(data: dict, request: Request, db=Depends
     try:
         p_application_header_basic = await crud.query_p_application_header_basic(db, data["p_application_header_id"])
         print("preliminary", bool(data.get("preliminary")))
+
         if data["pre_examination_status"] == 3:
             errors = manager_data_check(data["preliminary"])
 
             if errors:
                 return JSONResponse(status_code=400, content=errors)
+        if data["pre_examination_status"] == 4:
+            print(4)
+            response = requests.post(
+                url=f"https://mortgageloan-dev-if-api.milibank.co.jp/sbi/application/{data['p_application_header_id']}",
+            )
+            print(response.text)
+
+            if str(response.status_code) != "200":
+                body = json.loads(response.text)
+                return JSONResponse(status_code=response.status_code, content=body)
+
         await crud.update_p_application_headers_pre_examination_status(
             db, data["p_application_header_id"], data["pre_examination_status"]
         )

@@ -18,21 +18,44 @@ ALTER TABLE p_application_headers ADD COLUMN interface_status INT;
 ALTER TABLE p_application_headers ADD COLUMN send_date datetime;
 ALTER TABLE p_applicant_persons ADD COLUMN old_id bigINT;
 
-ALTER TABLE p_borrowing_details ADD COLUMN old_id INT;
-ALTER TABLE p_borrowings ADD COLUMN old_id INT;
-ALTER TABLE p_drafts ADD COLUMN old_id INT;
-ALTER TABLE p_join_guarantors ADD COLUMN old_id INT;
--- ALTER TABLE p_memos ADD COLUMN old_id INT;
-ALTER TABLE p_residents ADD COLUMN old_id bigINT;
-
--- 劉追加
-ALTER TABLE c_archive_files ADD COLUMN old_id bigINT;
-
-
+ALTER TABLE p_applicant_persons ADD COLUMN p_borrowing_details INT;
+ALTER TABLE p_applicant_persons ADD COLUMN p_borrowings INT;
+ALTER TABLE p_applicant_persons ADD COLUMN p_drafts INT;
+ALTER TABLE p_applicant_persons ADD COLUMN p_join_guarantors INT;
+ALTER TABLE p_applicant_persons ADD COLUMN p_memos INT;
+ALTER TABLE p_applicant_persons ADD COLUMN p_residents INT;
 
 ALTER TABLE p_application_banks ADD COLUMN old_header_id INT;
 ALTER TABLE p_application_banks ADD COLUMN bank_code varchar(10);
 
+
+/*
+ALTER TABLE s_sales_company_orgs DROP COLUMN old_id ;
+ALTER TABLE s_sales_company_orgs DROP COLUMN path ;
+ALTER TABLE s_sales_persons DROP COLUMN old_id ;
+ALTER TABLE s_banks DROP COLUMN old_id ;
+ALTER TABLE s_managers DROP COLUMN old_id ;
+ALTER TABLE c_users DROP COLUMN old_id ;
+ALTER TABLE p_application_headers DROP COLUMN old_id ;
+ALTER TABLE p_application_headers DROP COLUMN old_user_id ;
+ALTER TABLE p_application_headers DROP COLUMN application_status;
+ALTER TABLE p_application_headers DROP COLUMN provisional_result ;
+ALTER TABLE p_application_headers DROP COLUMN soudan_no ;
+ALTER TABLE p_application_headers DROP COLUMN under_review_status ;
+ALTER TABLE p_application_headers DROP COLUMN interface_status ;
+ALTER TABLE p_application_headers DROP COLUMN send_date ;
+ALTER TABLE p_applicant_persons DROP COLUMN old_id ;
+
+ALTER TABLE p_applicant_persons DROP COLUMN p_borrowing_details ;
+ALTER TABLE p_applicant_persons DROP COLUMN p_borrowings ;
+ALTER TABLE p_applicant_persons DROP COLUMN p_drafts ;
+ALTER TABLE p_applicant_persons DROP COLUMN p_join_guarantors ;
+ALTER TABLE p_applicant_persons DROP COLUMN p_memos ;
+ALTER TABLE p_applicant_persons DROP COLUMN p_residents ;
+
+ALTER TABLE p_application_banks DROP COLUMN old_header_id ;
+ALTER TABLE p_application_banks DROP COLUMN bank_code ;
+*/
 
 -- １，販売会社組織階層　データ移行
 -- 1.1 既存データ削除
@@ -404,7 +427,7 @@ insert into c_users
 	,email    --  Eメール
 	,hashed_pwd    --  パスワード
 	,s_sales_company_org_id    --  QRコードから組織ID
-	,agent_sended    --  銀代送信区分 ０：未送信；１：送信
+	,agent_sended    --  銀行送信区分 ０：未送信；１：送信
 	,status    --  状態 １：正常；２：ロック
 	,failed_time    --  ログイン失敗回数
 	,failed_first_at    --  ログイン失敗初回日付
@@ -417,7 +440,7 @@ select
 	,u.email    --  Eメール
 	,u.encrypted_password as hashed_pwd    --  パスワード
 	,sco.id as s_sales_company_org_id    --  QRコードから組織ID
-	,(case when p.user_id is not null then 1 else 0 end)  as agent_sended    --  銀行送信区分 　　→　
+	,null as agent_sended    --  銀行送信区分 　　→　
 	,1 as status    --  状態　１：正常；２：ロック　　　→　　1固定
 	,u.failed_attempts as failed_time    --  ログイン失敗回数
 	,u.first_failed_attempt_at as failed_first_at    --  ログイン失敗初回日付
@@ -427,8 +450,6 @@ select
 from mortgage_loan_tool_be_production.users u
  left join s_sales_company_orgs sco
    on sco.path like concat(case when u.sale_agent_id is not null then concat('%/',u.sale_agent_id) else '' end,case when u.store_id is not null then concat('/',u.store_id) else '' end,case when u.exhibition_id is not null then concat('/%/',u.exhibition_id) else '' end)
- left join mortgage_loan_tool_be_production.p_application_headers p
-	on p.user_id = u.id
 order by u.id
 ;
 -- 7. 案件メイン情報	p_application_headers
@@ -784,12 +805,6 @@ insert into p_applicant_persons
 	,transfer_office_city_kanji    --  出向（派遣）先　市区郡　漢字        
 	,transfer_office_district_kanji    --  出向（派遣）先　町村字丁目　漢字        
 	,transfer_office_other_address_kanji    --  出向（派遣）先　補足　漢字        
-	,job_change    --  転職有無        1:有 ; 0:無
-	,job_change_office_name_kana    --  転職前勤務先　名　カナ        
-	,job_change_office_name_kanji    --  転職前勤務先　名　漢字        
-	,prev_office_year_num    --  転職前勤務先　勤続年数　年        
-	,prev_office_industry    --  転職前勤務先　業種        1: 製造業; 2: 農業; 3: 林業; 4: 漁業; 5: 鉱業; 6: 建設業; 7: 卸売・小売業; 8: 金融業; 9: 保険業; 10: 不動産業; 11: 運輸業; 12: 電気・ガス・熱供給・水道; 13: 飲食・宿泊; 14: 医療・福祉; 15: 教育・学習支援; 16: その他のサービス業; 17: 公務; 18: 公務 19: 複合サービス業; 99: その他
-	,prev_office_industry_other    --  転職前勤務先　業種（その他）        
 	,created_at    --  作成日付        
 	,updated_at    --  更新日付        
     ,old_id
@@ -825,7 +840,7 @@ select
 	,ap.other_address_kana as other_address_kana    --  補足　カナ
 	,ap.last_year_income as last_year_income    --  前年年収　総額
 	,ap.bonus_income as last_year_bonus_income    --  前年年収　総額内ボーナス分（MCJ）
-	,ap.two_years_ago_income as before_last_year_income    --  前々年度年収 （MCJ）
+	,ap.last_year_income as before_last_year_income    --  前々年度年収 （MCJ）
 	,case when ap.income_source is not null then
 		concat('[',replace( replace( replace( REPLACE(REPLACE(REPLACE(ap.income_source, '-', ''),' ',''),'\n',','),'\',','"') ,',\'','"'),'\'',',"'),']') else null
 		end as income_sources    --  収入源 1:給与（固定制）; 2: 給与（歩合給）; 3: 給与（年俸制）; 4: 事業収入; 5: 不動産収入
@@ -875,12 +890,6 @@ select
 	,ap.transfer_office_city_kanji as transfer_office_city_kanji    --  出向（派遣）先　市区郡　漢字
 	,ap.transfer_office_district_kanji as transfer_office_district_kanji    --  出向（派遣）先　町村字丁目　漢字
 	,ap.transfer_office_other_address_kanji as transfer_office_other_address_kanji    --  出向（派遣）先　補足　漢字
-	,ap.job_change as job_change    --  転職有無        
-	,ap.job_change_company_name_kana as job_change_office_name_kana    --  転職前勤務先　名　カナ        
-	,ap.job_change_company_name_kanji as job_change_office_name_kanji    --  転職前勤務先　名　漢字        
-	,ap.prev_company_year_num as prev_office_year_num    --  転職前勤務先　勤続年数　年        
-	,ap.prev_company_industry as prev_office_industry    --  転職前勤務先　業種        
-	,ap.other_prev_company_industry as prev_office_industry_other    --  転職前勤務先　業種（その他）        
 	,ap.created_at    --  作成日付
 	,ap.updated_at    --  更新日付
 	,ap.id as old_id
@@ -904,8 +913,7 @@ insert into p_borrowing_details(
 	,loan_term_year    --  借入期間　ヶ年        
 	,loan_term_month    --  借入期間　ヶ月        
 	,created_at    --  作成日付        
-	,updated_at    --  更新日付   
-    ,old_id
+	,updated_at    --  更新日付        
 )
 select
 	UUID_SHORT() as id    --  ID        
@@ -919,8 +927,7 @@ select
 	,bd.loan_term_year_num as loan_term_year    --  借入期間　ヶ年        
 	,bd.loan_term_month_num as loan_term_month    --  借入期間　ヶ月        
 	,bd.created_at    --  作成日付        
-	,bd.updated_at    --  更新日付   
-    ,bd.id as old_id
+	,bd.updated_at    --  更新日付        
 from mortgage_loan_tool_be_production.p_borrowing_details bd
 	inner join p_application_headers ah
       on bd.p_application_header_id=ah.old_id
@@ -955,8 +962,7 @@ insert into p_borrowings(
 	,estate_setting    --  不動産担保設定        0: 無担保; 1: 有担保
 	,borrowing_from_house_finance_agency    --  住宅金融支援機構からの借入        0: いいえ; 1: はい
 	,created_at    --  作成日付        
-	,updated_at    --  更新日付  
-    ,old_id
+	,updated_at    --  更新日付        
 )
 select 
 	UUID_SHORT() as id    --  ID        
@@ -984,8 +990,7 @@ select
 	,b.estate_mortgage as estate_setting    --  不動産担保設定        0: 無担保; 1: 有担保
 	,b.borrowing_from_housing_finance_agency as borrowing_from_house_finance_agency    --  住宅金融支援機構からの借入        0: いいえ; 1: はい
 	,b.created_at    --  作成日付        
-	,b.updated_at    --  更新日付  
-    ,b.id as old_id
+	,b.updated_at    --  更新日付        
 from mortgage_loan_tool_be_production.p_borrowings b
   inner join p_application_headers ah
     on b.p_application_header_id=ah.old_id
@@ -1027,8 +1032,7 @@ insert into p_join_guarantors(
 	,work_address_kanji    --  勤務先　住所　漢字        
 	,work_address_kana    --  勤務先　住所　カナ        
 	,created_at    --  作成日付        
-	,updated_at    --  更新日付  
-    ,old_id
+	,updated_at    --  更新日付        
 )
 select 
 	UUID_SHORT() as id    --  ID        
@@ -1063,8 +1067,7 @@ select
 	,js.office_address_kanji as work_address_kanji    --  勤務先　住所　漢字        
 	,js.office_address_kana as work_address_kana    --  勤務先　住所　カナ        
 	,js.created_at    --  作成日付        
-	,js.updated_at    --  更新日付    
-    ,js.id as old_id
+	,js.updated_at    --  更新日付        
 from mortgage_loan_tool_be_production.p_join_guarantors js
   inner join p_application_headers ah
     on js.p_application_header_id=ah.old_id
@@ -1098,10 +1101,8 @@ insert into p_residents(
 	,district_kana    --  町村字丁目／丁目･番地･号　カナ        
 	,other_address_kana    --  補足／建物名･部屋番号等　カナ        
 	,loan_from_japan_house_finance_agency    --  住宅金融支援機構（旧：公庫）からの融資の有無        0: 無; 1: 有
-	,resident_type
 	,created_at    --  作成日付        
-	,updated_at    --  更新日付    
-    ,old_id
+	,updated_at    --  更新日付        
 )
 select 
 	UUID_SHORT() as id    --  ID        
@@ -1128,10 +1129,8 @@ select
 	,r.district_kana as district_kana    --  町村字丁目／丁目･番地･号　カナ        
 	,r.other_address_kana as other_address_kana    --  補足／建物名･部屋番号等　カナ        
 	,r.loan_from_japan_housing_finance_agency as loan_from_japan_house_finance_agency    --  住宅金融支援機構（旧：公庫）からの融資の有無        0: 無; 1: 有
-	,r.resident_type
 	,r.created_at    --  作成日付        
-	,r.updated_at    --  更新日付  
-    ,r.id as old_id
+	,r.updated_at    --  更新日付        
 from mortgage_loan_tool_be_production.p_residents r
   inner join p_application_headers ah
     on r.p_application_header_id=ah.old_id
@@ -1296,7 +1295,7 @@ insert into p_memos(
 	,s_manager_id    --  業者ID        
 	,content    --  内容        
 	,created_at    --  作成日付        
-	,updated_at    --  更新日付    
+	,updated_at    --  更新日付        
 )
 select 
 	UUID_SHORT() as id    --  ID        
@@ -1304,7 +1303,7 @@ select
 	,sm.id as s_manager_id    --  業者ID        
 	,m.memo as content    --  内容        
 	,m.created_at    --  作成日付        
-	,m.updated_at    --  更新日付   
+	,m.updated_at    --  更新日付        
 from mortgage_loan_tool_be_production.memos m
 	left join p_application_headers ah
 		on m.p_application_header_id=ah.old_id
@@ -1799,14 +1798,15 @@ ALTER TABLE p_application_headers DROP COLUMN interface_status ;
 ALTER TABLE p_application_headers DROP COLUMN send_date ;
 ALTER TABLE p_applicant_persons DROP COLUMN old_id ;
 
-ALTER TABLE p_borrowing_details DROP COLUMN old_id ;
-ALTER TABLE p_borrowings DROP COLUMN old_id ;
-ALTER TABLE p_drafts DROP COLUMN old_id ;
-ALTER TABLE p_join_guarantors DROP COLUMN old_id ;
-ALTER TABLE p_memos DROP COLUMN old_id ;
-ALTER TABLE p_residents DROP COLUMN old_id ;
+ALTER TABLE p_applicant_persons DROP COLUMN p_borrowing_details ;
+ALTER TABLE p_applicant_persons DROP COLUMN p_borrowings ;
+ALTER TABLE p_applicant_persons DROP COLUMN p_drafts ;
+ALTER TABLE p_applicant_persons DROP COLUMN p_join_guarantors ;
+ALTER TABLE p_applicant_persons DROP COLUMN p_memos ;
+ALTER TABLE p_applicant_persons DROP COLUMN p_residents ;
 
 ALTER TABLE p_application_banks DROP COLUMN old_header_id ;
 ALTER TABLE p_application_banks DROP COLUMN bank_code ;
+
 
 SET FOREIGN_KEY_CHECKS = 1;

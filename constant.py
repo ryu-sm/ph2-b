@@ -101,6 +101,44 @@ OWNER_TYPE_EN_MAPS = {
     3: "MANAGER",
 }
 
+MANN_TRANSLATE_FIELDS = [
+    # 年收入
+    "last_year_income",
+    "last_year_bonus_income",
+    "before_last_year_income",
+    # 剩余LOAN
+    "curr_house_shell_scheduled_price",
+    # 物件
+    "property_building_price",
+    "property_land_price",
+    "property_total_price",
+    # 资金计划
+    "required_funds_land_amount",
+    "required_funds_house_amount",
+    "required_funds_accessory_amount",
+    "required_funds_additional_amount",
+    "required_funds_refinance_loan_balance",
+    "required_funds_upgrade_amount",
+    "required_funds_loan_plus_amount",
+    "required_funds_total_amount",
+    "funding_saving_amount",
+    "funding_other_saving_amount",
+    "funding_estate_sale_amount",
+    "funding_self_amount",
+    "funding_relative_donation_amount",
+    "funding_loan_amount",
+    "funding_pair_loan_amount",
+    "funding_other_amount",
+    "funding_other_loan_amount",
+    "funding_other_refinance_amount",
+    "funding_total_amount",
+    # 完済原資
+    "refund_source_amount",
+    # 借入
+    "desired_loan_amount",
+    "bonus_repayment_amount",
+]
+
 
 # ENUM
 class USER_STATUS(Enum):
@@ -173,9 +211,9 @@ class OPERATE_TYPE(Enum):
 
 
 class ACCESS_LOG_OPERATION(Enum):
-    REGISTER = "新規登録"
     LOGIN = "ログイン"
     LOGOUT = "ログアウト"
     UPDATE = "更新"
     DELETE = "削除"
     DOWNLOAD = "ダウンロード"
+    REGISTER = "登録"

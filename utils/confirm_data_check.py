@@ -18,8 +18,8 @@ def manager_data_check(data: dict):
     if not data["p_application_headers"]["loan_type"]:
         tab1_errors.append("お借入形態")
 
-    if not data["p_borrowing_details__1"]["desired_borrowing_date"]:
-        tab1_errors.append("お借入希望日")
+    # if not data["p_borrowing_details__1"]["desired_borrowing_date"]:
+    #     tab1_errors.append("お借入希望日")
 
     if not data["p_borrowing_details__1"]["desired_loan_amount"]:
         tab1_errors.append("お借入希望額")
@@ -30,14 +30,14 @@ def manager_data_check(data: dict):
     if not data["p_borrowing_details__1"]["repayment_method"]:
         tab1_errors.append("お借入内容　返済方法")
 
-    if data["p_application_headers"]["land_advance_plan"] == "1":
-        if not data["p_borrowing_details__2"]["desired_borrowing_date"]:
-            tab1_errors.append("お借入希望日（2回目融資）")
+    # if data["p_application_headers"]["land_advance_plan"] == "1":
+    #     if not data["p_borrowing_details__2"]["desired_borrowing_date"]:
+    #         tab1_errors.append("お借入希望日（2回目融資）")
 
-        if not data["p_borrowing_details__2"]["desired_loan_amount"]:
-            tab1_errors.append("お借入希望額（2回目融資）")
+    #     if not data["p_borrowing_details__2"]["desired_loan_amount"]:
+    #         tab1_errors.append("お借入希望額（2回目融資）")
     if tab1_errors:
-        errors["お借入のご希望"] = tab1_errors
+        errors["申込人＿お借入のご希望:"] = tab1_errors
     # あなたの情報
     tab2_errors = []
 
@@ -160,31 +160,31 @@ def manager_data_check(data: dict):
         if not result:
             tab2_errors.append("ご連絡先用メールアドレス")
     if tab2_errors:
-        errors["あなたの情報"] = tab2_errors
+        errors["申込人＿あなたの情報:"] = tab2_errors
     # ご職業
     tab3_errors = []
 
     if not data["p_applicant_persons__0"]["office_occupation"]:
         tab3_errors.append("ご職業")
-    if (
-        data["p_applicant_persons__0"]["office_occupation"] == "99"
-        and not data["p_applicant_persons__0"]["office_occupation_other"]
-    ):
-        tab3_errors.append("勤務先　職業（その他）")
+    # if (
+    #     data["p_applicant_persons__0"]["office_occupation"] == "99"
+    #     and not data["p_applicant_persons__0"]["office_occupation_other"]
+    # ):
+    #     tab3_errors.append("勤務先　職業（その他）")
 
-    if (
-        data["p_applicant_persons__0"]["office_industry"] == "99"
-        and not data["p_applicant_persons__0"]["office_industry_other"]
-    ):
-        tab3_errors.append("勤務先　業種（その他）")
+    # if (
+    #     data["p_applicant_persons__0"]["office_industry"] == "99"
+    #     and not data["p_applicant_persons__0"]["office_industry_other"]
+    # ):
+    #     tab3_errors.append("勤務先　業種（その他）")
 
-    if not data["p_applicant_persons__0"]["office_occupation"]:
-        tab3_errors.append("職種")
-    if (
-        data["p_applicant_persons__0"]["office_occupation_detail"] == "99"
-        and not data["p_applicant_persons__0"]["office_occupation_detail_other"]
-    ):
-        tab3_errors.append("勤務先　職種（その他）")
+    # if not data["p_applicant_persons__0"]["office_occupation"]:
+    #     tab3_errors.append("職種")
+    # if (
+    #     data["p_applicant_persons__0"]["office_occupation_detail"] == "99"
+    #     and not data["p_applicant_persons__0"]["office_occupation_detail_other"]
+    # ):
+    #     tab3_errors.append("勤務先　職種（その他）")
 
     if not data["p_applicant_persons__0"]["office_employment_type"]:
         tab3_errors.append("雇用形態")
@@ -297,8 +297,11 @@ def manager_data_check(data: dict):
     if not data["p_applicant_persons__0"]["last_year_income"]:
         tab3_errors.append("前年度年収")
 
+    if not data["p_applicant_persons__0"]["main_income_source"]:
+        tab3_errors.append("収入源（銀行送信用）")
+
     if tab3_errors:
-        errors["ご職業"] = tab3_errors
+        errors["申込人＿ご職業:"] = tab3_errors
 
     # 担保提供者
     if data["p_application_headers"]["join_guarantor_umu"]:
@@ -396,7 +399,7 @@ def manager_data_check(data: dict):
                     tab4_errors.append("ご連絡先用メールアドレス")
 
             if tab4_errors:
-                errors[f"担保提供者（{index + 1}人目）"] = tab4_errors
+                errors[f"申込人＿担保提供者（{index + 1}人目）:"] = tab4_errors
 
     # お住まい
     tab5_errors = []
@@ -412,11 +415,6 @@ def manager_data_check(data: dict):
     if data["p_application_headers"]["curr_house_residence_type"] == "6":
         if not data["p_application_headers"]["curr_house_schedule_disposal_type"]:
             tab5_errors.append("持家　処分方法")
-        if (
-            data["p_application_headers"]["curr_house_schedule_disposal_type"] == "99"
-            and not data["p_application_headers"]["curr_house_schedule_disposal_type_other"]
-        ):
-            tab5_errors.append("持家　処分方法（その他）")
 
     if data["p_application_headers"]["property_postal_code"]:
         result = re.fullmatch(REGEX["postal_code"], data["p_application_headers"]["property_postal_code"])
@@ -475,10 +473,24 @@ def manager_data_check(data: dict):
             tab5_errors.append(f"入居家族{index + 1} 名　カナ")
 
         if not p_resident["rel_to_applicant_a"]:
-            tab5_errors.append(f"入居家族{index + 1} 続柄")
+            tab5_errors.append(f"入居家族{index + 1} 続柄（プルダウン）")
     if tab5_errors:
-        errors["お住まい"] = tab5_errors
+        errors["申込人＿お住まい:"] = tab5_errors
 
+    tab6_errors = []
+    if data["p_application_headers"]["loan_target"] == "7":
+        p_borrowing_types = [item["type"] for item in data["p_borrowings"]]
+        if "1" in p_borrowing_types:
+            for index, p_borrowing in enumerate(data["p_borrowings"]):
+                if p_borrowing["type"] == "1":
+                    if not p_borrowing["loan_amount"]:
+                        tab6_errors.append(f"{index + 1}件目 当初借入額")
+                    if not p_borrowing["loan_start_date"]:
+                        tab6_errors.append(f"{index + 1}件目 当初借入年月")
+        else:
+            tab6_errors.append("借換対象のデータがありあません。")
+    if tab6_errors:
+        errors["申込人＿現在の借入状況:"] = tab6_errors
     # 資金計画
     tab7_errors = []
     if not data["p_application_headers"]["required_funds_additional_amount"]:
@@ -491,7 +503,7 @@ def manager_data_check(data: dict):
         tab7_errors.append("親族からの贈与")
 
     if tab7_errors:
-        errors["資金計画"] = tab7_errors
+        errors["申込人＿資金計画:"] = tab7_errors
 
     # 収入合算者
     if data["p_application_headers"]["loan_type"] in ["3", "4"]:
@@ -606,8 +618,12 @@ def manager_data_check(data: dict):
             result = re.fullmatch(REGEX["email"], data["p_applicant_persons__1"]["email"])
             if not result:
                 tab2_1_errors.append("ご連絡先用メールアドレス")
+
+        if not data["p_applicant_persons__1"]["rel_to_applicant_a"]:
+            tab2_1_errors.append("続柄（プルダウン）")
+
         if tab2_1_errors:
-            errors["収入合算者情報"] = tab2_1_errors
+            errors["収入合算者＿収入合算者の情報:"] = tab2_1_errors
 
         # 収入合算者の職業
         tab3_1_errors = []
@@ -622,12 +638,6 @@ def manager_data_check(data: dict):
             and len(data["p_applicant_persons__1"]["office_name_kana"]) > 48
         ):
             tab3_1_errors.append("勤務先名（フリガナ）")
-
-        if (
-            data["p_applicant_persons__1"]["office_department"]
-            and len(data["p_applicant_persons__1"]["office_department"]) > 46
-        ):
-            tab3_1_errors.append("所属部課")
 
         if data["p_applicant_persons__1"]["office_phone"]:
             result = re.fullmatch(REGEX["home_phone"], data["p_applicant_persons__1"]["office_phone"])
@@ -699,6 +709,6 @@ def manager_data_check(data: dict):
             tab3_1_errors.append("丁目以下・建物名・部屋番号（フリガナ）")
 
         if tab3_1_errors:
-            errors["収入合算者の職業"] = tab3_1_errors
+            errors["収入合算者＿収入合算者の職業:"] = tab3_1_errors
 
     return errors

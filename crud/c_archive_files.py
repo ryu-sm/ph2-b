@@ -7,6 +7,7 @@ import crud
 import utils
 from utils.common import none_to_blank
 from utils.s3 import delete_from_s3, upload_to_s3, download_from_s3
+from core.config import settings
 
 
 async def insert_c_archive_files(
@@ -34,6 +35,7 @@ async def insert_c_archive_files(
         utils.upload_base64_file_s3(
             f"{c_archive_uploaded_file_sql_params.get('s3_key')}/{c_archive_uploaded_file_sql_params.get('file_name')}",
             file["src"],
+            settings.C_ARCHIVE_UPLOADED_FILES_BUCKET_NAME,
         )
         await db.execute(utils.gen_insert_sql("c_archive_uploaded_files", c_archive_uploaded_file_sql_params))
 
@@ -49,7 +51,6 @@ async def query_c_archive_files_for_s_sales_person(db: DB, s_sales_person_id):
             s_sales_persons = await crud.query_orgs_access_s_sales_persons(db, org["s_sales_company_org_id"])
             s_sales_persons_id = [item["value"] for item in s_sales_persons]
             access_ids += s_sales_persons_id
-    print(access_ids)
     sql = f"""
     SELECT
         CONVERT(c_archive_files.id,CHAR) AS id,
@@ -75,7 +76,6 @@ async def query_c_archive_files_for_s_sales_person(db: DB, s_sales_person_id):
         c_archive_files.s_sales_person_id in ({', '.join(list(set(access_ids)))});
     """
     basic = await db.fetch_all(sql)
-    print(basic)
 
     c_archive_files = []
 
@@ -142,7 +142,9 @@ async def query_c_archive_file(db: DB, id: int):
     files_info = await db.fetch_all(sql)
     files = []
     for file_info in files_info:
-        src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
+        src = utils.generate_presigned_url(
+            f"{file_info['s3_key']}/{file_info['file_name']}", settings.C_ARCHIVE_UPLOADED_FILES_BUCKET_NAME
+        )
         files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
     return files
 

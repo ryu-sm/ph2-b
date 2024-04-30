@@ -1,8 +1,11 @@
 import base64
 import json
 import uuid
+from constant import BANK_CODE
 from core.database import DB
 import crud
+import utils
+from utils.common import none_to_blank
 from utils.s3 import upload_to_s3
 
 
@@ -83,6 +86,242 @@ async def query_sales_person_access_p_application_headers(db: DB, status: int, o
             all = [*all, *orgs_l]
     unique_data = list({item["id"]: item for item in all}.values())
     return unique_data
+
+
+async def query_sales_person_access_p_application_headers_(db: DB, status: int, orgs: list, role_id: int):
+    sbi = await db.fetch_one(f"SELECT id, name FROM s_banks WHERE code = '{BANK_CODE.SBI.value}';")
+    access_p_application_headers_id = []
+    for org in orgs:
+        if org["role"] == 1:
+            basic_sql = f"""
+            SELECT
+                CONVERT(p_application_headers.id,CHAR) AS id
+            FROM
+                p_application_headers
+            JOIN
+                p_application_banks
+                ON
+                p_application_banks.p_application_header_id = p_application_headers.id
+                AND
+                p_application_banks.s_bank_id = {sbi["id"]}
+            WHERE
+                p_application_headers.s_sales_person_id = {role_id}
+            """
+            if status == 1:
+                sql = f"""
+                {basic_sql}
+                AND
+                p_application_headers.unsubcribed IS NULL
+                AND
+                p_application_banks.provisional_after_result IS NULL
+                """
+                p_application_headers_basic = await db.fetch_all(sql)
+                access_p_application_headers_id = access_p_application_headers_id + [
+                    item["id"] for item in p_application_headers_basic
+                ]
+            if status == 2:
+                sql = f"""
+                {basic_sql}
+                AND
+                p_application_headers.unsubcribed IS NULL
+                AND
+                p_application_banks.provisional_after_result = 1
+                """
+                p_application_headers_basic = await db.fetch_all(sql)
+                access_p_application_headers_id = access_p_application_headers_id + [
+                    item["id"] for item in p_application_headers_basic
+                ]
+            if status == 3:
+                sql = f"""
+                {basic_sql}
+                AND
+                p_application_headers.unsubcribed = 1
+                OR
+                p_application_banks.provisional_after_result in (0, 2, 3, 4, 5)
+                """
+                p_application_headers_basic = await db.fetch_all(sql)
+                access_p_application_headers_id = access_p_application_headers_id + [
+                    item["id"] for item in p_application_headers_basic
+                ]
+        if org["role"] == 9:
+            access_orgs = await crud.query_child_s_sales_company_orgs(db, org["s_sales_company_org_id"])
+            access_orgs_id = [item["id"] for item in access_orgs]
+            basic_sql = f"""
+            SELECT
+                CONVERT(p_application_headers.id,CHAR) AS id
+            FROM
+                p_application_headers
+            JOIN
+                p_application_banks
+                ON
+                p_application_banks.p_application_header_id = p_application_headers.id
+                AND
+                p_application_banks.s_bank_id = {sbi["id"]}
+            WHERE
+                (p_application_headers.sales_company_id IN ({', '.join(access_orgs_id)})
+                OR
+                p_application_headers.sales_area_id IN ({', '.join(access_orgs_id)})
+                OR
+                p_application_headers.sales_exhibition_hall_id IN ({', '.join(access_orgs_id)}))
+            """
+            if status == 1:
+                sql = f"""
+                {basic_sql}
+                AND
+                p_application_headers.unsubcribed IS NULL
+                AND
+                p_application_banks.provisional_after_result IS NULL
+                """
+                p_application_headers_basic = await db.fetch_all(sql)
+                access_p_application_headers_id = access_p_application_headers_id + [
+                    item["id"] for item in p_application_headers_basic
+                ]
+            if status == 2:
+                sql = f"""
+                {basic_sql}
+                AND
+                p_application_headers.unsubcribed IS NULL
+                AND
+                p_application_banks.provisional_after_result = 1
+                """
+                p_application_headers_basic = await db.fetch_all(sql)
+                access_p_application_headers_id = access_p_application_headers_id + [
+                    item["id"] for item in p_application_headers_basic
+                ]
+            if status == 3:
+                sql = f"""
+                {basic_sql}
+                AND
+                p_application_headers.unsubcribed = 1
+                OR
+                p_application_banks.provisional_after_result in (0, 2, 3, 4, 5)
+                """
+                p_application_headers_basic = await db.fetch_all(sql)
+                access_p_application_headers_id = access_p_application_headers_id + [
+                    item["id"] for item in p_application_headers_basic
+                ]
+    if len(access_p_application_headers_id) == 0:
+        return []
+    basic_info_sql = f"""
+    SELECT
+        CONVERT(p_application_headers.id,CHAR) AS id,
+        p_application_headers.apply_no,
+        DATE_FORMAT(p_application_headers.created_at, '%Y/%m/%d %H:%i:%S') as created_at,
+        p_application_headers.pre_examination_status,
+        CONVERT(p_application_headers.s_sales_person_id,CHAR) AS s_sales_person_id,
+        CONVERT(p_application_headers.s_manager_id,CHAR) AS s_manager_id,
+        CONVERT(p_application_headers.sales_company_id,CHAR) AS sales_company_id,
+        CONVERT(p_application_headers.loan_type,CHAR) AS loan_type,
+        CONVERT(p_application_headers.pair_loan_id,CHAR) AS pair_loan_id,
+        null as pair_loan_data,
+        CONVERT(p_application_headers.sales_area_id,CHAR) AS sales_area_id,
+        CONVERT(p_application_headers.sales_exhibition_hall_id,CHAR) AS sales_exhibition_hall_id,
+        CONCAT(p_applicant_persons.last_name_kanji, ' ', p_applicant_persons.first_name_kanji) as name_kanji,
+        DATE_FORMAT(p_borrowing_details.desired_borrowing_date, '%Y/%m/%d') as desired_borrowing_date,
+        p_borrowing_details.desired_loan_amount,
+        '{sbi["name"]}' as bank_name,
+        CONVERT(p_application_banks.s_bank_id,CHAR) AS s_bank_id,
+        p_application_banks.provisional_status,
+        p_application_banks.provisional_result,
+        p_application_banks.provisional_after_result,
+        CONVERT(p_application_headers.unsubcribed,CHAR) AS unsubcribed
+    FROM
+        p_application_headers
+    LEFT JOIN
+        p_application_banks
+        ON
+        p_application_banks.p_application_header_id = p_application_headers.id
+        AND
+        p_application_banks.s_bank_id = {sbi["id"]}
+    LEFT JOIN
+        p_applicant_persons
+        ON
+        p_applicant_persons.p_application_header_id = p_application_headers.id
+        AND
+        p_applicant_persons.type = 0
+    LEFT JOIN
+        p_borrowing_details
+        ON
+        p_borrowing_details.p_application_header_id  = p_application_headers.id
+        AND
+        p_borrowing_details.time_type = 1
+    WHERE
+        p_application_headers.id IN ({','.join(access_p_application_headers_id)})
+    """
+
+    print(basic_info_sql)
+
+    general_result = []
+    manager_options = await crud.query_manager_options(db)
+    for item in await db.fetch_all(f"{basic_info_sql} AND p_application_headers.pair_loan_id is NULL"):
+        p_application_header_id = item["id"]
+        messages = await db.fetch_all(
+            f"SELECT CONVERT(id,CHAR) AS id, viewed FROM c_messages WHERE p_application_header_id = {p_application_header_id}"
+        )
+        unviewed = 0
+        for message in messages:
+            if role_id in json.loads(message["viewed"]):
+                continue
+            else:
+                unviewed += 1
+        general_result.append(
+            none_to_blank(
+                {
+                    **utils.to_mann(item),
+                    "unviewed": unviewed,
+                    "manager_options": manager_options,
+                }
+            )
+        )
+    paired_b_ids = []
+    paired_result = []
+    pair_data = await db.fetch_all(f"{basic_info_sql} AND p_application_headers.pair_loan_id is NOT NULL")
+    for pair_a in pair_data:
+        if pair_a["id"] in paired_b_ids:
+            continue
+        filter = [item for item in pair_data if item["id"] == pair_a["pair_loan_id"]]
+        if len(filter) == 0:
+            continue
+        [pair_b] = filter
+        paired_b_ids.append(pair_b["id"])
+        p_application_header_id = pair_b["id"]
+
+        messages = await db.fetch_all(
+            f"SELECT CONVERT(id,CHAR) AS id, viewed FROM c_messages WHERE p_application_header_id = {p_application_header_id}"
+        )
+        unviewed_b = 0
+        for message in messages:
+            if role_id in json.loads(message["viewed"]):
+                continue
+            unviewed_b += 1
+
+        p_application_header_id = pair_a["id"]
+
+        messages = await db.fetch_all(
+            f"SELECT CONVERT(id,CHAR) AS id, viewed FROM c_messages WHERE p_application_header_id = {p_application_header_id}"
+        )
+        unviewed_a = 0
+        for message in messages:
+            if role_id in json.loads(message["viewed"]):
+                continue
+            unviewed_a += 1
+
+        paired_result.append(
+            none_to_blank(
+                {
+                    **utils.to_mann(pair_a),
+                    "unviewed": unviewed_b,
+                    "manager_options": manager_options,
+                    "pair_loan_data": {
+                        **none_to_blank(utils.to_mann(pair_b)),
+                        "unviewed": unviewed_b,
+                        "manager_options": manager_options,
+                    },
+                }
+            )
+        )
+    # return general_result + paired_result
+    return list({item["id"]: item for item in [*general_result, *paired_result]}.values())
 
 
 async def query_sales_person_basic_info(db: DB, s_sales_person_id: int):

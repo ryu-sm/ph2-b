@@ -42,16 +42,16 @@ app = FastAPI(
 
 
 # ROUTER追加
-app.include_router(tools_router)
-app.include_router(users_router)
-app.include_router(optipns_router)
-app.include_router(orgs_router)
-app.include_router(apply_router)
-app.include_router(managers_router)
-app.include_router(c_archive_files_router)
-app.include_router(sales_persons_router)
-app.include_router(preliminaries_router)
-app.include_router(messages_router)
+app.include_router(tools_router, prefix="/new")
+app.include_router(users_router, prefix="/new")
+app.include_router(optipns_router, prefix="/new")
+app.include_router(orgs_router, prefix="/new")
+app.include_router(apply_router, prefix="/new")
+app.include_router(managers_router, prefix="/new")
+app.include_router(c_archive_files_router, prefix="/new")
+app.include_router(messages_router, prefix="/new")
+app.include_router(sales_persons_router, prefix="/new")
+app.include_router(preliminaries_router, prefix="/new")
 
 
 # カスタム認証例外追加
@@ -63,7 +63,7 @@ async def custom_auth_exception_handler(request: Request, exception: AuthExcepti
 # CORS設定
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://d1kqlatyhax1v4.cloudfront.net", "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

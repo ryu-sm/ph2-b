@@ -62,7 +62,6 @@ async def insert_p_application_headers(db: DB, data: dict, role_type, role_id, c
                 "owner_id": role_id,
                 "record_id": p_application_header_id,
                 "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
-                # "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{file_field_key}",
                 "s3_key": f"{p_application_header_id}/{role_id}_{OWNER_TYPE_EN_MAPS[role_type]}/{file_field_key}/{p_upload_file_id}",
                 "file_name": file["name"],
             }
@@ -71,6 +70,69 @@ async def insert_p_application_headers(db: DB, data: dict, role_type, role_id, c
                 file["src"],
             )
             await db.execute(utils.gen_insert_sql("p_uploaded_files", p_upload_file_sql_params))
+    JOBS = []
+    for field_name, content in data.items():
+        if field_name in P_APPLICATION_HEADERS_FILE_FIELF_KEYS:
+            if len(content) == 0:
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_application_headers",
+                                "field_name": field_name,
+                                "table_id": p_application_header_id,
+                                "content": None,
+                                "operate_type": OPERATE_TYPE.APPLY.value,
+                            },
+                        )
+                    )
+                )
+            else:
+                for file_item in content:
+                    JOBS.append(
+                        db.execute(
+                            utils.gen_insert_sql(
+                                "p_activities",
+                                {
+                                    "id": await db.uuid_short(),
+                                    "p_application_header_id": p_application_header_id,
+                                    "operator_type": role_type,
+                                    "operator_id": role_id,
+                                    "table_name": "p_application_headers",
+                                    "field_name": field_name,
+                                    "table_id": p_application_header_id,
+                                    "content": file_item["name"],
+                                    "operate_type": OPERATE_TYPE.APPLY.value,
+                                },
+                            )
+                        )
+                    )
+        else:
+            JOBS.append(
+                db.execute(
+                    utils.gen_insert_sql(
+                        "p_activities",
+                        {
+                            "id": await db.uuid_short(),
+                            "p_application_header_id": p_application_header_id,
+                            "operator_type": role_type,
+                            "operator_id": role_id,
+                            "table_name": "p_application_headers",
+                            "field_name": field_name,
+                            "table_id": p_application_header_id,
+                            "content": content,
+                            "operate_type": OPERATE_TYPE.APPLY.value,
+                        },
+                    )
+                )
+            )
+    if JOBS:
+        await asyncio.wait(JOBS)
     return p_application_header_id
 
 
@@ -106,8 +168,75 @@ async def insert_p_applicant_persons(
             )
             await db.execute(utils.gen_insert_sql("p_uploaded_files", p_upload_file_sql_params))
 
+    JOBS = []
+    for field_name, content in data.items():
+        if field_name in P_APPLICANT_PERSONS_FILE_FIELF_KEYS:
+            if len(content) == 0:
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_applicant_persons",
+                                "field_name": field_name,
+                                "table_id": p_applicant_person_id,
+                                "content": None,
+                                "operate_type": OPERATE_TYPE.APPLY.value,
+                            },
+                        )
+                    )
+                )
+            else:
+                for file_item in content:
+                    JOBS.append(
+                        db.execute(
+                            utils.gen_insert_sql(
+                                "p_activities",
+                                {
+                                    "id": await db.uuid_short(),
+                                    "p_application_header_id": p_application_header_id,
+                                    "operator_type": role_type,
+                                    "operator_id": role_id,
+                                    "table_name": "p_applicant_persons",
+                                    "field_name": field_name,
+                                    "table_id": p_applicant_person_id,
+                                    "content": file_item["name"],
+                                    "operate_type": OPERATE_TYPE.APPLY.value,
+                                },
+                            )
+                        )
+                    )
+        else:
+            JOBS.append(
+                db.execute(
+                    utils.gen_insert_sql(
+                        "p_activities",
+                        {
+                            "id": await db.uuid_short(),
+                            "p_application_header_id": p_application_header_id,
+                            "operator_type": role_type,
+                            "operator_id": role_id,
+                            "table_name": "p_applicant_persons",
+                            "field_name": field_name,
+                            "table_id": p_applicant_person_id,
+                            "content": content,
+                            "operate_type": OPERATE_TYPE.APPLY.value,
+                        },
+                    )
+                )
+            )
 
-async def insert_p_borrowing_details(db: DB, data: dict, p_application_header_id: int, time_type: int):
+    if JOBS:
+        await asyncio.wait(JOBS)
+
+
+async def insert_p_borrowing_details(
+    db: DB, data: dict, p_application_header_id: int, time_type: int, role_type: int, role_id: int
+):
     p_borrowing_detail_id = await db.uuid_short()
     basic_p_borrowing_detail_sql_params = {
         "id": p_borrowing_detail_id,
@@ -115,6 +244,28 @@ async def insert_p_borrowing_details(db: DB, data: dict, p_application_header_id
         "time_type": time_type,
     }
     await db.execute(utils.gen_insert_sql("p_borrowing_details", {**data, **basic_p_borrowing_detail_sql_params}))
+    JOBS = []
+    for field_name, content in data.items():
+        JOBS.append(
+            db.execute(
+                utils.gen_insert_sql(
+                    "p_activities",
+                    {
+                        "id": await db.uuid_short(),
+                        "p_application_header_id": p_application_header_id,
+                        "operator_type": role_type,
+                        "operator_id": role_id,
+                        "table_name": "p_borrowing_details",
+                        "field_name": field_name,
+                        "table_id": p_borrowing_detail_id,
+                        "content": content,
+                        "operate_type": OPERATE_TYPE.APPLY.value,
+                    },
+                )
+            )
+        )
+    if JOBS:
+        await asyncio.wait(JOBS)
 
 
 async def instert_p_application_banks(db: DB, data: list, p_application_header_id: int):
@@ -128,7 +279,9 @@ async def instert_p_application_banks(db: DB, data: list, p_application_header_i
         await db.execute(utils.gen_insert_sql("p_application_banks", p_application_banks_sql_params))
 
 
-async def insert_p_join_guarantors(db: DB, data: typing.List[dict], p_application_header_id: int):
+async def insert_p_join_guarantors(
+    db: DB, data: typing.List[dict], p_application_header_id: int, role_type: int, role_id: int
+):
     for join_guarantor in data:
         p_join_guarantor_id = await db.uuid_short()
         basic_p_join_guarantor_sql_params = {
@@ -138,6 +291,28 @@ async def insert_p_join_guarantors(db: DB, data: typing.List[dict], p_applicatio
         await db.execute(
             utils.gen_insert_sql("p_join_guarantors", {**join_guarantor, **basic_p_join_guarantor_sql_params})
         )
+        JOBS = []
+        for field_name, content in join_guarantor.items():
+            JOBS.append(
+                db.execute(
+                    utils.gen_insert_sql(
+                        "p_activities",
+                        {
+                            "id": await db.uuid_short(),
+                            "p_application_header_id": p_application_header_id,
+                            "operator_type": role_type,
+                            "operator_id": role_id,
+                            "table_name": "p_join_guarantors",
+                            "field_name": field_name,
+                            "table_id": p_join_guarantor_id,
+                            "content": content,
+                            "operate_type": OPERATE_TYPE.APPLY.value,
+                        },
+                    )
+                )
+            )
+        if JOBS:
+            await asyncio.wait(JOBS)
 
 
 async def insert_p_borrowings(db: DB, data: typing.List[dict], p_application_header_id: int, role_type, role_id):
@@ -157,7 +332,6 @@ async def insert_p_borrowings(db: DB, data: typing.List[dict], p_application_hea
                     "owner_id": role_id,
                     "record_id": p_borrowing_id,
                     "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
-                    # "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{file_field_key}",
                     "s3_key": f"{p_application_header_id}/{role_id}_{OWNER_TYPE_EN_MAPS[role_type]}/{file_field_key}/{p_upload_file_id}",
                     "file_name": file["name"],
                 }
@@ -166,13 +340,99 @@ async def insert_p_borrowings(db: DB, data: typing.List[dict], p_application_hea
                     file["src"],
                 )
                 await db.execute(utils.gen_insert_sql("p_uploaded_files", p_upload_file_sql_params))
+        JOBS = []
+        for field_name, content in borrowing.items():
+            if field_name in P_BORROWINGS_FILE_FIELF_KEYS:
+                if len(content) == 0:
+                    JOBS.append(
+                        db.execute(
+                            utils.gen_insert_sql(
+                                "p_activities",
+                                {
+                                    "id": await db.uuid_short(),
+                                    "p_application_header_id": p_application_header_id,
+                                    "operator_type": role_type,
+                                    "operator_id": role_id,
+                                    "table_name": "p_borrowings",
+                                    "field_name": field_name,
+                                    "table_id": p_borrowing_id,
+                                    "content": None,
+                                    "operate_type": OPERATE_TYPE.APPLY.value,
+                                },
+                            )
+                        )
+                    )
+                else:
+                    for file_item in content:
+                        JOBS.append(
+                            db.execute(
+                                utils.gen_insert_sql(
+                                    "p_activities",
+                                    {
+                                        "id": await db.uuid_short(),
+                                        "p_application_header_id": p_application_header_id,
+                                        "operator_type": role_type,
+                                        "operator_id": role_id,
+                                        "table_name": "p_borrowings",
+                                        "field_name": field_name,
+                                        "table_id": p_borrowing_id,
+                                        "content": file_item["name"],
+                                        "operate_type": OPERATE_TYPE.APPLY.value,
+                                    },
+                                )
+                            )
+                        )
+            else:
+                JOBS.append(
+                    db.execute(
+                        utils.gen_insert_sql(
+                            "p_activities",
+                            {
+                                "id": await db.uuid_short(),
+                                "p_application_header_id": p_application_header_id,
+                                "operator_type": role_type,
+                                "operator_id": role_id,
+                                "table_name": "p_borrowings",
+                                "field_name": field_name,
+                                "table_id": p_borrowing_id,
+                                "content": content,
+                                "operate_type": OPERATE_TYPE.APPLY.value,
+                            },
+                        )
+                    )
+                )
+        if JOBS:
+            await asyncio.wait(JOBS)
 
 
-async def insert_p_residents(db: DB, data: typing.List[dict], p_application_header_id: int):
+async def insert_p_residents(db: DB, data: typing.List[dict], p_application_header_id: int, role_type, role_id):
     for resident in data:
         p_resident_id = await db.uuid_short()
         basic_p_resident_sql_params = {"id": p_resident_id, "p_application_header_id": p_application_header_id}
         await db.execute(utils.gen_insert_sql("p_residents", {**resident, **basic_p_resident_sql_params}))
+
+        JOBS = []
+        for field_name, content in resident.items():
+            JOBS.append(
+                db.execute(
+                    utils.gen_insert_sql(
+                        "p_activities",
+                        {
+                            "id": await db.uuid_short(),
+                            "p_application_header_id": p_application_header_id,
+                            "operator_type": role_type,
+                            "operator_id": role_id,
+                            "table_name": "p_residents",
+                            "field_name": field_name,
+                            "table_id": p_resident_id,
+                            "content": content,
+                            "operate_type": OPERATE_TYPE.APPLY.value,
+                        },
+                    )
+                )
+            )
+        if JOBS:
+            await asyncio.wait(JOBS)
 
 
 async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
@@ -344,6 +604,7 @@ async def query_p_application_banks_for_ap(db: DB, p_application_header_id: int)
 async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int, type: int):
     sql = f"""
     SELECT
+        spouse,
         rel_to_applicant_a_name,
         last_name_kanji,
         first_name_kanji,
@@ -710,7 +971,6 @@ async def diff_update_p_application_headers_for_ap(db: DB, data: dict, p_applica
                     "owner_id": role_id,
                     "record_id": p_application_header_id,
                     "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
-                    # "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{key}",
                     "s3_key": f"{p_application_header_id}/{role_id}_{OWNER_TYPE_EN_MAPS[role_type]}/{key}/{p_upload_file_id}",
                     "file_name": update_file["name"],
                 }
@@ -720,48 +980,6 @@ async def diff_update_p_application_headers_for_ap(db: DB, data: dict, p_applica
                 )
                 await db.execute(utils.gen_insert_sql("p_uploaded_files", p_upload_file_sql_params))
 
-                total = await crud.query_update_history_count(
-                    db, p_application_header_id, "p_application_headers", key, p_application_header_id
-                )
-                if total == 0 and len(old_files_info) == 0:
-                    JOBS.append(
-                        db.execute(
-                            utils.gen_insert_sql(
-                                "p_activities",
-                                {
-                                    "id": await db.uuid_short(),
-                                    "p_application_header_id": p_application_header_id,
-                                    "operator_type": role_type,
-                                    "operator_id": role_id,
-                                    "table_name": "p_application_headers",
-                                    "field_name": key,
-                                    "table_id": p_application_header_id,
-                                    "content": None,
-                                    "operate_type": OPERATE_TYPE.APPLY.value,
-                                },
-                            )
-                        )
-                    )
-                if total == 0 and len(old_files_info) > 0:
-                    for old_file in old_files_info:
-                        JOBS.append(
-                            db.execute(
-                                utils.gen_insert_sql(
-                                    "p_activities",
-                                    {
-                                        "id": await db.uuid_short(),
-                                        "p_application_header_id": p_application_header_id,
-                                        "operator_type": role_type,
-                                        "operator_id": role_id,
-                                        "table_name": "p_application_headers",
-                                        "field_name": key,
-                                        "table_id": p_application_header_id,
-                                        "content": old_file["file_name"],
-                                        "operate_type": OPERATE_TYPE.APPLY.value,
-                                    },
-                                )
-                            )
-                        )
                 JOBS.append(
                     db.execute(
                         utils.gen_insert_sql(
@@ -833,28 +1051,6 @@ async def diff_update_p_application_headers_for_ap(db: DB, data: dict, p_applica
             )
         # field update
         else:
-            total = await crud.query_update_history_count(
-                db, p_application_header_id, "p_application_headers", key, p_application_header_id
-            )
-            if total == 0:
-                JOBS.append(
-                    db.execute(
-                        utils.gen_insert_sql(
-                            "p_activities",
-                            {
-                                "id": await db.uuid_short(),
-                                "p_application_header_id": p_application_header_id,
-                                "operator_type": role_type,
-                                "operator_id": role_id,
-                                "table_name": "p_application_headers",
-                                "field_name": key,
-                                "table_id": p_application_header_id,
-                                "content": old_value if old_value != "" else None,
-                                "operate_type": OPERATE_TYPE.APPLY.value,
-                            },
-                        )
-                    )
-                )
             JOBS.append(
                 db.execute(
                     utils.gen_insert_sql(
@@ -877,7 +1073,6 @@ async def diff_update_p_application_headers_for_ap(db: DB, data: dict, p_applica
         JOBS.append(
             db.execute(utils.gen_update_sql("p_application_headers", {key: value}, {"id": p_application_header_id}))
         )
-
     if JOBS:
         await asyncio.wait(JOBS)
 
@@ -900,9 +1095,7 @@ async def diff_update_p_applicant_persons_for_ap(db: DB, data: dict, p_applicati
         if key in JSON_LIST_FIELD_KEYS:
             if sorted(value) == sorted(old_value):
                 continue
-        # if key in JSON_DICT_FIELD_KEYS:
-        #     if INIT_NEW_HOUSE_PLANNED_RESIDENT_OVERVIEW == value and not old_value:
-        #         continue
+
         if value == old_value:
             continue
         if key in FILE_FIELF_KEYS:
@@ -941,7 +1134,6 @@ async def diff_update_p_applicant_persons_for_ap(db: DB, data: dict, p_applicati
                     "owner_id": role_id,
                     "record_id": p_applicant_persons_id,
                     "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
-                    # "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{key}",
                     "s3_key": f"{p_application_header_id}/{role_id}_{OWNER_TYPE_EN_MAPS[role_type]}/{key}/{p_upload_file_id}",
                     "file_name": update_file["name"],
                 }
@@ -951,48 +1143,6 @@ async def diff_update_p_applicant_persons_for_ap(db: DB, data: dict, p_applicati
                 )
                 await db.execute(utils.gen_insert_sql("p_uploaded_files", p_upload_file_sql_params))
 
-                total = await crud.query_update_history_count(
-                    db, p_application_header_id, "p_applicant_persons", key, p_applicant_persons_id
-                )
-                if total == 0 and len(old_files_info) == 0:
-                    JOBS.append(
-                        db.execute(
-                            utils.gen_insert_sql(
-                                "p_activities",
-                                {
-                                    "id": await db.uuid_short(),
-                                    "p_application_header_id": p_application_header_id,
-                                    "operator_type": role_type,
-                                    "operator_id": role_id,
-                                    "table_name": "p_applicant_persons",
-                                    "field_name": key,
-                                    "table_id": p_applicant_persons_id,
-                                    "content": None,
-                                    "operate_type": OPERATE_TYPE.APPLY.value,
-                                },
-                            )
-                        )
-                    )
-                if total == 0 and len(old_files_info) > 0:
-                    for old_file in old_files_info:
-                        JOBS.append(
-                            db.execute(
-                                utils.gen_insert_sql(
-                                    "p_activities",
-                                    {
-                                        "id": await db.uuid_short(),
-                                        "p_application_header_id": p_application_header_id,
-                                        "operator_type": role_type,
-                                        "operator_id": role_id,
-                                        "table_name": "p_applicant_persons",
-                                        "field_name": key,
-                                        "table_id": p_applicant_persons_id,
-                                        "content": old_file["file_name"],
-                                        "operate_type": OPERATE_TYPE.APPLY.value,
-                                    },
-                                )
-                            )
-                        )
                 JOBS.append(
                     db.execute(
                         utils.gen_insert_sql(
@@ -1066,28 +1216,6 @@ async def diff_update_p_applicant_persons_for_ap(db: DB, data: dict, p_applicati
 
         # field update
         else:
-            total = await crud.query_update_history_count(
-                db, p_application_header_id, "p_applicant_persons", key, p_applicant_persons_id
-            )
-            if total == 0:
-                JOBS.append(
-                    db.execute(
-                        utils.gen_insert_sql(
-                            "p_activities",
-                            {
-                                "id": await db.uuid_short(),
-                                "p_application_header_id": p_application_header_id,
-                                "operator_type": role_type,
-                                "operator_id": role_id,
-                                "table_name": "p_applicant_persons",
-                                "field_name": key,
-                                "table_id": p_applicant_persons_id,
-                                "content": old_value if old_value != "" else None,
-                                "operate_type": OPERATE_TYPE.APPLY.value,
-                            },
-                        )
-                    )
-                )
             JOBS.append(
                 db.execute(
                     utils.gen_insert_sql(
@@ -1123,7 +1251,7 @@ async def diff_update_p_borrowing_details_for_ap(
     )
     if p_borrowing_details_basic is None:
         data_ = utils.blank_to_none(data)
-        await insert_p_borrowing_details(db, data_, p_application_header_id, time_type)
+        await insert_p_borrowing_details(db, data_, p_application_header_id, time_type, role_type, role_id)
         return None
     p_borrowing_details_id = p_borrowing_details_basic["id"]
     old_p_borrowing_details = await query_p_borrowing_details_for_ap(db, p_application_header_id, time_type)
@@ -1154,29 +1282,8 @@ async def diff_update_p_borrowing_details_for_ap(
             )
 
         # field update
+
         else:
-            total = await crud.query_update_history_count(
-                db, p_application_header_id, "p_borrowing_details", key, p_borrowing_details_id
-            )
-            if total == 0:
-                JOBS.append(
-                    db.execute(
-                        utils.gen_insert_sql(
-                            "p_activities",
-                            {
-                                "id": await db.uuid_short(),
-                                "p_application_header_id": p_application_header_id,
-                                "operator_type": role_type,
-                                "operator_id": role_id,
-                                "table_name": "p_borrowing_details",
-                                "field_name": key,
-                                "table_id": p_borrowing_details_id,
-                                "content": old_value if old_value != "" else None,
-                                "operate_type": OPERATE_TYPE.APPLY.value,
-                            },
-                        )
-                    )
-                )
             JOBS.append(
                 db.execute(
                     utils.gen_insert_sql(
@@ -1282,7 +1389,7 @@ async def diff_update_p_join_guarantors_for_ap(
         filter = [item for item in old_p_join_guarantors if item["id"] == p_join_guarantor["id"]]
         if len(filter) == 0:
             data_ = utils.blank_to_none(p_join_guarantor)
-            await insert_p_join_guarantors(db, [data_], p_application_header_id)
+            await insert_p_join_guarantors(db, [data_], p_application_header_id, role_type, role_id)
             continue
         [old_p_join_guarantor] = filter
         for key, value in p_join_guarantor.items():
@@ -1313,28 +1420,6 @@ async def diff_update_p_join_guarantors_for_ap(
 
             # field update
             else:
-                total = await crud.query_update_history_count(
-                    db, p_application_header_id, "p_join_guarantors", key, old_p_join_guarantor["id"]
-                )
-                if total == 0:
-                    JOBS.append(
-                        db.execute(
-                            utils.gen_insert_sql(
-                                "p_activities",
-                                {
-                                    "id": await db.uuid_short(),
-                                    "p_application_header_id": p_application_header_id,
-                                    "operator_type": role_type,
-                                    "operator_id": role_id,
-                                    "table_name": "p_join_guarantors",
-                                    "field_name": key,
-                                    "table_id": old_p_join_guarantor["id"],
-                                    "content": old_value if old_value != "" else None,
-                                    "operate_type": OPERATE_TYPE.APPLY.value,
-                                },
-                            )
-                        )
-                    )
                 JOBS.append(
                     db.execute(
                         utils.gen_insert_sql(
@@ -1425,28 +1510,6 @@ async def diff_update_p_residents_for_ap(db: DB, data: typing.List[dict], p_appl
 
             # field update
             else:
-                total = await crud.query_update_history_count(
-                    db, p_application_header_id, "p_residents", key, old_p_resident["id"]
-                )
-                if total == 0:
-                    JOBS.append(
-                        db.execute(
-                            utils.gen_insert_sql(
-                                "p_activities",
-                                {
-                                    "id": await db.uuid_short(),
-                                    "p_application_header_id": p_application_header_id,
-                                    "operator_type": role_type,
-                                    "operator_id": role_id,
-                                    "table_name": "p_residents",
-                                    "field_name": key,
-                                    "table_id": old_p_resident["id"],
-                                    "content": old_value if old_value != "" else None,
-                                    "operate_type": OPERATE_TYPE.APPLY.value,
-                                },
-                            )
-                        )
-                    )
                 JOBS.append(
                     db.execute(
                         utils.gen_insert_sql(
@@ -1557,48 +1620,6 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
                     )
                     await db.execute(utils.gen_insert_sql("p_uploaded_files", p_upload_file_sql_params))
 
-                    total = await crud.query_update_history_count(
-                        db, p_application_header_id, "p_borrowings", key, old_p_borrowing["id"]
-                    )
-                    if total == 0 and len(old_files_info) == 0:
-                        JOBS.append(
-                            db.execute(
-                                utils.gen_insert_sql(
-                                    "p_activities",
-                                    {
-                                        "id": await db.uuid_short(),
-                                        "p_application_header_id": p_application_header_id,
-                                        "operator_type": role_type,
-                                        "operator_id": role_id,
-                                        "table_name": "p_borrowings",
-                                        "field_name": key,
-                                        "table_id": old_p_borrowing["id"],
-                                        "content": None,
-                                        "operate_type": OPERATE_TYPE.APPLY.value,
-                                    },
-                                )
-                            )
-                        )
-                    if total == 0 and len(old_files_info) > 0:
-                        for old_file in old_files_info:
-                            JOBS.append(
-                                db.execute(
-                                    utils.gen_insert_sql(
-                                        "p_activities",
-                                        {
-                                            "id": await db.uuid_short(),
-                                            "p_application_header_id": p_application_header_id,
-                                            "operator_type": role_type,
-                                            "operator_id": role_id,
-                                            "table_name": "p_borrowings",
-                                            "field_name": key,
-                                            "table_id": old_p_borrowing["id"],
-                                            "content": old_file["file_name"],
-                                            "operate_type": OPERATE_TYPE.APPLY.value,
-                                        },
-                                    )
-                                )
-                            )
                     JOBS.append(
                         db.execute(
                             utils.gen_insert_sql(
@@ -1676,28 +1697,6 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
 
             # field update
             else:
-                total = await crud.query_update_history_count(
-                    db, p_application_header_id, "p_borrowings", key, old_p_borrowing["id"]
-                )
-                if total == 0:
-                    JOBS.append(
-                        db.execute(
-                            utils.gen_insert_sql(
-                                "p_activities",
-                                {
-                                    "id": await db.uuid_short(),
-                                    "p_application_header_id": p_application_header_id,
-                                    "operator_type": role_type,
-                                    "operator_id": role_id,
-                                    "table_name": "p_borrowings",
-                                    "field_name": key,
-                                    "table_id": old_p_borrowing["id"],
-                                    "content": old_value if old_value != "" else None,
-                                    "operate_type": OPERATE_TYPE.APPLY.value,
-                                },
-                            )
-                        )
-                    )
                 JOBS.append(
                     db.execute(
                         utils.gen_insert_sql(

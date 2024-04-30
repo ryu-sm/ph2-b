@@ -133,7 +133,7 @@ async def sales_person_logout(request: Request, db=Depends(get_db), token=Depend
 async def sales_person_get_access_applications(status: int, db=Depends(get_db), token=Depends(get_token)):
 
     try:
-        preliminaries = await crud.query_sales_person_access_p_application_headers(
+        preliminaries = await crud.query_sales_person_access_p_application_headers_(
             db, status, token["orgs"], token["id"]
         )
 

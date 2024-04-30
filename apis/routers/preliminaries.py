@@ -9,7 +9,7 @@ from apis.deps import get_token
 import crud
 import utils
 from utils.s3 import download_from_s3
-from utils import blank_to_none
+from utils import blank_to_none, mann_to, to_mann
 
 from constant import (
     ACCESS_LOG_OPERATION,
@@ -88,42 +88,46 @@ async def common_get_preliminary(p_application_header_id: int, db=Depends(get_db
     try:
         preliminary = {}
         p_application_headers = await crud.query_p_application_headers_for_ad(db, p_application_header_id)
-        preliminary["p_application_headers"] = p_application_headers
+        preliminary["p_application_headers"] = to_mann(p_application_headers)
 
         p_borrowing_details__1 = await crud.query_p_borrowing_details_for_ad(
             db, p_application_header_id, P_BORROWING_DETAILS_TIME_TYPE.ONE_TIME.value
         )
-        preliminary["p_borrowing_details__1"] = p_borrowing_details__1
+        preliminary["p_borrowing_details__1"] = to_mann(p_borrowing_details__1)
 
         if p_application_headers["land_advance_plan"] == LAND_ADVANCE_PLAN.HOPE.value:
-            preliminary["p_borrowing_details__2"] = await crud.query_p_borrowing_details_for_ad(
+            p_borrowing_details__2 = await crud.query_p_borrowing_details_for_ad(
                 db, p_application_header_id, P_BORROWING_DETAILS_TIME_TYPE.TWO_TIME.value
             )
+            preliminary["p_borrowing_details__2"] = to_mann(p_borrowing_details__2)
 
         preliminary["p_application_banks"] = await crud.query_p_application_banks_for_ad(db, p_application_header_id)
 
         p_applicant_persons__0 = await crud.query_p_applicant_persons_for_ad(
             db, p_application_header_id, P_APPLICANT_PERSONS_TYPE.APPLICANT.value
         )
-        preliminary["p_applicant_persons__0"] = p_applicant_persons__0
+        preliminary["p_applicant_persons__0"] = to_mann(p_applicant_persons__0)
 
         if p_application_headers["loan_type"] in [
             LOAN_TYPE.TOTAL_INCOME_EQUITY.value,
             LOAN_TYPE.TOTAL_INCOME_NO_EQUITY.value,
         ]:
-            preliminary["p_applicant_persons__1"] = await crud.query_p_applicant_persons_for_ad(
+            p_applicant_persons__1 = await crud.query_p_applicant_persons_for_ad(
                 db, p_application_header_id, P_APPLICANT_PERSONS_TYPE.TOTAL_INCOME.value
             )
+            preliminary["p_applicant_persons__1"] = to_mann(p_applicant_persons__1)
 
         if p_application_headers["join_guarantor_umu"] == JOIN_GUARANTOR_UMU.HAVE.value:
-            preliminary["p_join_guarantors"] = await crud.query_p_join_guarantors_for_ad(db, p_application_header_id)
+            p_join_guarantors = await crud.query_p_join_guarantors_for_ad(db, p_application_header_id)
+            preliminary["p_join_guarantors"] = [to_mann(item) for item in p_join_guarantors]
 
         p_residents = await crud.query_p_residents_for_ad(db, p_application_header_id)
         if p_residents:
-            preliminary["p_residents"] = p_residents
+            preliminary["p_residents"] = [to_mann(item) for item in p_residents]
 
         if p_application_headers["curr_borrowing_status"] == CURR_BORROWING_STATUS.HAVE.value:
-            preliminary["p_borrowings"] = await crud.query_p_borrowings_for_ad(db, p_application_header_id)
+            p_borrowings = await crud.query_p_borrowings_for_ad(db, p_application_header_id)
+            preliminary["p_borrowings"] = [to_mann(item) for item in p_borrowings]
 
         preliminary["p_activities"] = await crud.query_p_activities_for_ad(db, p_application_header_id)
         preliminary["files_p_activities"] = await crud.query_files_p_activities_for_ad(db, p_application_header_id)
@@ -148,102 +152,150 @@ async def put_preliminary(
         print("sub_tab", sub_tab)
         if main_tab == 1 and sub_tab == 1:
             await crud.diff_update_p_application_headers_for_ad(
-                db, data["p_application_headers"], p_application_header_id, token["role_type"], token["id"]
+                db, mann_to(data["p_application_headers"]), p_application_header_id, token["role_type"], token["id"]
             )
             await crud.diff_update_p_application_banks_for_ad(
                 db, data["p_application_banks"], p_application_header_id, token["role_type"], token["id"]
             )
             await crud.diff_update_p_borrowing_details_for_ad(
-                db, data["p_borrowing_details__1"], p_application_header_id, 1, token["role_type"], token["id"]
+                db, mann_to(data["p_borrowing_details__1"]), p_application_header_id, 1, token["role_type"], token["id"]
             )
             if data["p_application_headers"]["land_advance_plan"] == "1":
                 await crud.diff_update_p_borrowing_details_for_ad(
-                    db, data["p_borrowing_details__2"], p_application_header_id, 2, token["role_type"], token["id"]
+                    db,
+                    mann_to(data["p_borrowing_details__2"]),
+                    p_application_header_id,
+                    2,
+                    token["role_type"],
+                    token["id"],
                 )
 
         if main_tab == 1 and sub_tab in [2, 3]:
             await crud.diff_update_p_applicant_persons_for_ad(
-                db, data["p_applicant_persons__0"], p_application_header_id, 0, token["role_type"], token["id"]
+                db, mann_to(data["p_applicant_persons__0"]), p_application_header_id, 0, token["role_type"], token["id"]
             )
 
         if main_tab == 1 and sub_tab == 4:
             if data.get("p_application_headers") is not None:
                 await crud.diff_update_p_application_headers_for_ad(
-                    db, data["p_application_headers"], p_application_header_id, token["role_type"], token["id"]
+                    db, mann_to(data["p_application_headers"]), p_application_header_id, token["role_type"], token["id"]
                 )
                 await crud.diff_update_p_application_banks_for_ad(
                     db, data["p_application_banks"], p_application_header_id, token["role_type"], token["id"]
                 )
                 await crud.diff_update_p_borrowing_details_for_ad(
-                    db, data["p_borrowing_details__1"], p_application_header_id, 1, token["role_type"], token["id"]
+                    db,
+                    mann_to(data["p_borrowing_details__1"]),
+                    p_application_header_id,
+                    1,
+                    token["role_type"],
+                    token["id"],
                 )
                 if data["p_application_headers"]["land_advance_plan"] == "1":
                     await crud.diff_update_p_borrowing_details_for_ad(
-                        db, data["p_borrowing_details__2"], p_application_header_id, 2, token["role_type"], token["id"]
+                        db,
+                        mann_to(data["p_borrowing_details__2"]),
+                        p_application_header_id,
+                        2,
+                        token["role_type"],
+                        token["id"],
                     )
             await crud.diff_update_p_join_guarantors_for_ad(
-                db, data["p_join_guarantors"], p_application_header_id, token["role_type"], token["id"]
+                db,
+                [mann_to(item) for item in data["p_join_guarantors"]],
+                p_application_header_id,
+                token["role_type"],
+                token["id"],
             )
 
         if main_tab == 1 and sub_tab == 5:
             await crud.diff_update_p_application_headers_for_ad(
-                db, data["p_application_headers"], p_application_header_id, token["role_type"], token["id"]
+                db, mann_to(data["p_application_headers"]), p_application_header_id, token["role_type"], token["id"]
             )
             await crud.diff_update_p_residents_for_ad(
-                db, data["p_residents"], p_application_header_id, token["role_type"], token["id"]
+                db,
+                [mann_to(item) for item in data["p_residents"]],
+                p_application_header_id,
+                token["role_type"],
+                token["id"],
+            )
+            await crud.diff_update_p_applicant_persons_for_ad(
+                db, mann_to(data["p_applicant_persons__0"]), p_application_header_id, 0, token["role_type"], token["id"]
             )
         if main_tab == 1 and sub_tab == 6:
             await crud.diff_update_p_application_headers_for_ad(
-                db, data["p_application_headers"], p_application_header_id, token["role_type"], token["id"]
+                db, mann_to(data["p_application_headers"]), p_application_header_id, token["role_type"], token["id"]
             )
             if data["p_application_headers"]["curr_borrowing_status"] == "1":
                 await crud.diff_update_p_borrowings_for_ad(
-                    db, data["p_borrowings"], p_application_header_id, token["role_type"], token["id"]
+                    db,
+                    [mann_to(item) for item in data["p_borrowings"]],
+                    p_application_header_id,
+                    token["role_type"],
+                    token["id"],
                 )
         if main_tab == 1 and sub_tab in [7, 8]:
             await crud.diff_update_p_application_headers_for_ad(
-                db, data["p_application_headers"], p_application_header_id, token["role_type"], token["id"]
+                db, mann_to(data["p_application_headers"]), p_application_header_id, token["role_type"], token["id"]
             )
 
         if main_tab == 1 and sub_tab == 9:
             await crud.diff_update_p_application_headers_for_ad(
-                db, data["p_application_headers"], p_application_header_id, token["role_type"], token["id"]
+                db, mann_to(data["p_application_headers"]), p_application_header_id, token["role_type"], token["id"]
             )
             await crud.diff_update_p_borrowings_for_ad(
-                db, data["p_borrowings"], p_application_header_id, token["role_type"], token["id"]
+                db,
+                [mann_to(item) for item in data["p_borrowings"]],
+                p_application_header_id,
+                token["role_type"],
+                token["id"],
             )
             await crud.diff_update_p_applicant_persons_for_ad(
-                db, data["p_applicant_persons__0"], p_application_header_id, 0, token["role_type"], token["id"]
+                db, mann_to(data["p_applicant_persons__0"]), p_application_header_id, 0, token["role_type"], token["id"]
             )
 
         if main_tab == 2 and sub_tab in [2, 3]:
             await crud.diff_update_p_applicant_persons_for_ad(
-                db, data["p_applicant_persons__1"], p_application_header_id, 1, token["role_type"], token["id"]
+                db, mann_to(data["p_applicant_persons__1"]), p_application_header_id, 1, token["role_type"], token["id"]
             )
         if main_tab == 2 and sub_tab == 9:
             if data.get("p_application_headers") is not None:
                 await crud.diff_update_p_application_headers_for_ad(
-                    db, data["p_application_headers"], p_application_header_id, token["role_type"], token["id"]
+                    db, mann_to(data["p_application_headers"]), p_application_header_id, token["role_type"], token["id"]
                 )
                 await crud.diff_update_p_application_banks_for_ad(
                     db, data["p_application_banks"], p_application_header_id, token["role_type"], token["id"]
                 )
                 await crud.diff_update_p_borrowing_details_for_ad(
-                    db, data["p_borrowing_details__1"], p_application_header_id, 1, token["role_type"], token["id"]
+                    db,
+                    mann_to(data["p_borrowing_details__1"]),
+                    p_application_header_id,
+                    1,
+                    token["role_type"],
+                    token["id"],
                 )
 
                 if data["p_application_headers"]["land_advance_plan"] == "1":
                     await crud.diff_update_p_borrowing_details_for_ad(
-                        db, data["p_borrowing_details__2"], p_application_header_id, 2, token["role_type"], token["id"]
+                        db,
+                        mann_to(data["p_borrowing_details__2"]),
+                        p_application_header_id,
+                        2,
+                        token["role_type"],
+                        token["id"],
                     )
 
             if data.get("p_join_guarantors") is not None:
                 await crud.diff_update_p_join_guarantors_for_ad(
-                    db, data["p_join_guarantors"], p_application_header_id, token["role_type"], token["id"]
+                    db,
+                    [mann_to(item) for item in data["p_join_guarantors"]],
+                    p_application_header_id,
+                    token["role_type"],
+                    token["id"],
                 )
 
             await crud.diff_update_p_applicant_persons_for_ad(
-                db, data["p_applicant_persons__1"], p_application_header_id, 1, token["role_type"], token["id"]
+                db, mann_to(data["p_applicant_persons__1"]), p_application_header_id, 1, token["role_type"], token["id"]
             )
 
         return JSONResponse(status_code=200, content={"message": "successful"})

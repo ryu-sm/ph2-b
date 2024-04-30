@@ -1,6 +1,8 @@
 from constant import OPERATE_TYPE
 from core.database import DB
 import yaml
+
+import utils
 from .db_filed_maps import p_borrowings_parameters
 
 
@@ -13,49 +15,14 @@ def construct_ruby_bigdecimal(loader, node):
 yaml.SafeLoader.add_constructor("!ruby/object:BigDecimal", construct_ruby_bigdecimal)
 
 
-prekey_maps = {
-    "driver_license_back_image": "A__01__a",
-    "driver_license_front_image": "A__01__b",
-    "card_number_front_image": "A__02",
-    "resident_register_back_image": "A__03__a",
-    "resident_register_front_image": "A__03__b",
-    "insurance_file": "B__a",
-    "insurance_file_back_image": "B__b",
-    "first_withholding_slip_file": "C__01",
-    "second_withholding_slip_file": "C__02",
-    "first_income_file": "C__03",
-    "second_income_file": "C__04",
-    "third_income_file": "C__05",
-    "financial_statement_1_file": "D__01",
-    "financial_statement_2_file": "D__02",
-    "financial_statement_3_file": "D__03",
-    "employment_agreement_file": "E",
-    "business_tax_return_1_file": "F__01",
-    "business_tax_return_2_file": "F__02",
-    "business_tax_return_3_file": "F__03",
-    "property_information_file": "G",
-    "residence_file": "H__a",
-    "residence_file_back_image": "H__b",
-    "repayment_schedule_image": "I",
-    "business_card": "J",
-    "other_document_file": "K",
-    "examination_file": "R",
-}
-
 owner_type_maps = {
     "User": 1,
     "SSalePerson": 2,
     "Manager": 3,
 }
 
-owner_type_kanji_maps = {
-    1: "USER",
-    2: "SALES_PERSON",
-    3: "MANAGER",
-}
 
-
-async def translate_p_activities_p_borrowings(db: DB):
+async def translate_p_activities_p_borrowings(db: DB, p_application_header_id):
     # p_borrowings
     sql = f"""
     SELECT
@@ -74,7 +41,7 @@ async def translate_p_activities_p_borrowings(db: DB):
         ON
         a.trackable_id = p.old_id
     WHERE
-        p.p_application_header_id = 100791550216253282
+        p.p_application_header_id = {p_application_header_id}
         AND
         a.trackable_type='PBorrowing'
         
@@ -127,8 +94,8 @@ async def translate_p_activities_p_borrowings(db: DB):
                             "operator_type": operator_type,
                             "operator_id": operator_id,
                             "table_name": "p_borrowings",
-                            "field_name": new_key,
-                            "table_id": PBorrowingCreateData["p_applicant_person_id"],
+                            "field_name": "I",
+                            "table_id": PBorrowingCreateData["p_borrowing_id"],
                             "content": None,
                             "operate_type": OPERATE_TYPE.APPLY.value,
                             "created_at": PBorrowingCreateData["old_created_at"],
@@ -143,8 +110,8 @@ async def translate_p_activities_p_borrowings(db: DB):
                                 "operator_type": operator_type,
                                 "operator_id": operator_id,
                                 "table_name": "p_borrowings",
-                                "field_name": new_key,
-                                "table_id": PBorrowingCreateData["p_applicant_person_id"],
+                                "field_name": "I",
+                                "table_id": PBorrowingCreateData["p_borrowing_id"],
                                 "content": file,
                                 "operate_type": OPERATE_TYPE.APPLY.value,
                                 "created_at": PBorrowingCreateData["old_created_at"],
@@ -237,6 +204,8 @@ async def translate_p_activities_p_borrowings(db: DB):
         else:
             new_data[new_key] = {"create": create, "update": update}
 
-    # return new_data
-    return PBorrowingsCreateData + PBorrowingsUpdateData
-    # return PApplicationHeadersUpdateData + PApplicationHeadersUpdateData
+    for key, value in new_data.items():
+        datas = value["create"] + value["update"]
+        for data in datas:
+            id = await db.uuid_short()
+            await db.execute(utils.gen_insert_sql("mortgage_staging.p_activities", {"id": id, **data}))

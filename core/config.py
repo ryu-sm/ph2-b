@@ -28,13 +28,10 @@ class Settings(BaseSettings):
     JWT_SECRETS_KEY: str
     JWT_ALGORITHM: str
 
-    # メーラー情報
+    # AWS
     AWS_MAIL_SENDER: str
-
-    AWS_ACCESS_KEY_ID: str
-    AWS_SECRET_ACCESS_KEY: str
-    AWS_REGION: str
-    AWS_BUCKET_NAME: str
+    C_ARCHIVE_UPLOADED_FILES_BUCKET_NAME: str
+    P_UPLOADED_FILES_BUCKET_NAME: str
 
     # フロントエンド情報
     FRONTEND_BASE_URL: str

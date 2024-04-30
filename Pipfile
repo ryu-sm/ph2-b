@@ -19,6 +19,7 @@ pandas = "*"
 openpyxl = "*"
 bcrypt = "*"
 deepdiff = "*"
+requests = "*"
 
 [dev-packages]
 

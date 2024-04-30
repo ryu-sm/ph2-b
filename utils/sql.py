@@ -27,6 +27,13 @@ def gen_insert_sql(table: str, params: dict):
                 values.append(f"'{json_str}'")
                 fields.append(field)
                 continue
+            if isinstance(value, list):
+                if len(value) == 0:
+                    continue
+                json_str = json.dumps(value, ensure_ascii=False)
+                values.append(f"'{json_str}'")
+                fields.append(field)
+                continue
             values.append(f"'{value}'")
             fields.append(field)
 

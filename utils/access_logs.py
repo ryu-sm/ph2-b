@@ -102,4 +102,4 @@ async def access_logs_output(start: str, end: str):
     base64_encoded_data = base64.b64encode(file_content).decode("utf-8")
     src = f"data:{mime_type};base64,{base64_encoded_data}"
 
-    return {"src": src, "name": file_name}
+    return {"src": src, "name": f"{file_name}.xlsx"}

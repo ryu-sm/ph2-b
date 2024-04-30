@@ -51,3 +51,17 @@ async def query_update_history_count(db: DB, p_application_header_id, table_name
     sql = f"SELECT COUNT(*) AS total FROM p_activities WHERE p_application_header_id = {p_application_header_id} AND table_name = '{table_name}' AND field_name = '{field_name}' AND table_id={table_id}"
     result = await db.fetch_one(sql)
     return result["total"]
+
+
+async def query_init_role_infos(db: DB, p_application_header_id):
+    default = {"id": None, "type": 1}
+    p_application_header = await db.fetch_one(
+        f"SELECT c_user_id, s_sales_person_id FROM p_application_headers WHERE id = {p_application_header_id};"
+    )
+    if p_application_header and p_application_header["c_user_id"] is None:
+        default["type"] = 2
+        default["id"] = p_application_header["s_sales_person_id"]
+    if p_application_header and p_application_header["c_user_id"]:
+        default["type"] = 1
+        default["id"] = p_application_header["c_user_id"]
+    return default
