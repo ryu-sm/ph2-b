@@ -82,6 +82,7 @@ async def insert_init_message(db: DB, c_user_id, content):
             {
                 "id": await db.uuid_short(),
                 "c_user_id": c_user_id,
+                "sender_type": TOKEN_ROLE_TYPE.MANAGER.value,
                 "content": content,
                 "viewed": json.dumps(
                     [
@@ -212,9 +213,7 @@ async def query_manager_dashboard_messages(db: DB, role_id):
         """
         message = await db.fetch_one(sql)
         if message:
-            if TOKEN_ROLE_TYPE.SALES_PERSON.value in [
-                item["viewed_account_type"] for item in json.loads(message["viewed"])
-            ]:
+            if TOKEN_ROLE_TYPE.MANAGER.value in [item["viewed_account_type"] for item in json.loads(message["viewed"])]:
                 messages.append({**message, "type": "0", "unviewed": "0"})
             else:
                 messages.append({**message, "type": "0", "unviewed": "1"})
@@ -244,9 +243,7 @@ async def query_manager_dashboard_messages(db: DB, role_id):
         """
         message = await db.fetch_one(sql)
         if message:
-            if TOKEN_ROLE_TYPE.SALES_PERSON.value in [
-                item["viewed_account_type"] for item in json.loads(message["viewed"])
-            ]:
+            if TOKEN_ROLE_TYPE.MANAGER.value in [item["viewed_account_type"] for item in json.loads(message["viewed"])]:
                 messages.append({**message, "type": "1", "unviewed": "0"})
             else:
                 messages.append({**message, "type": "1", "unviewed": "1"})
