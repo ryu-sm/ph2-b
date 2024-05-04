@@ -220,3 +220,4 @@ class ACCESS_LOG_OPERATION(Enum):
     DELETE = "削除"
     DOWNLOAD = "ダウンロード"
     REGISTER = "登録"
+    UNSUBCRIBED = "退会"

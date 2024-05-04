@@ -232,6 +232,15 @@ async def user_change_email(data: dict, request: Request, db=Depends(get_db)):
 async def user_withdrawal(request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
         await crud.delete_c_user(db, id=token.get("id"))
+        await utils.common_insert_c_access_log(
+            db,
+            request,
+            params={
+                "account_id": token.get("id"),
+                "account_type": token.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.UNSUBCRIBED.value,
+            },
+        )
 
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
     except Exception as err:
