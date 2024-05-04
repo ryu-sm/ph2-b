@@ -351,7 +351,7 @@ async def get_raw_data(
                 "operation_content": "ローデータダウンロード: ダウンロードした",
             },
         )
-        return JSONResponse(status_code=200, content={"src":file})
+        return JSONResponse(status_code=200, content={"src": file})
     except Exception as err:
         logger.exception(err)
         return JSONResponse(
@@ -378,6 +378,30 @@ async def get_provisional_status(p_application_header_id: int, db=Depends(get_db
     try:
         result = await crud.query_provisional_status(db, p_application_header_id)
         return JSONResponse(status_code=200, content=result)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.get("/s_sales_company_orgs/upload_file/{p_application_header_id}")
+async def get_provisional_status(p_application_header_id: int, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        result = await crud.query_s_sales_company_orgs_upload_file(db, p_application_header_id, token["id"])
+        return JSONResponse(status_code=200, content=result)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.get("/s_sales_company_org_id")
+async def get_provisional_status(db=Depends(get_db), token=Depends(get_token)):
+    try:
+        s_sales_company_orgs = await crud.query_parents_orgs_for_ad_with_sales_person_id(db, token["id"])
+        return JSONResponse(status_code=200, content=s_sales_company_orgs)
     except Exception as err:
         logger.exception(err)
         return JSONResponse(

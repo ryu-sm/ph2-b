@@ -108,6 +108,36 @@ async def query_parents_orgs_for_ap_with_id(db: DB, child_id):
     return temp
 
 
+async def query_parents_orgs_for_ad_with_sales_person_id(db: DB, sales_person_id):
+    sql = f"""
+    SELECT
+        s_sales_company_org_id
+    FROM
+        s_sales_person_s_sales_company_org_rels
+    WHERE
+        s_sales_person_id = {sales_person_id}
+    """
+    orgs = []
+    for child in await db.fetch_all(sql):
+        sql = f"""
+        WITH RECURSIVE child AS (
+        SELECT id, pid, category, name FROM s_sales_company_orgs WHERE id = {child["s_sales_company_org_id"]}
+        union
+        SELECT parents.id, parents.pid, parents.category, parents.name FROM s_sales_company_orgs as parents INNER JOIN child ON parents.id = child.pid
+        )
+        SELECT
+            CONVERT(child.id,CHAR) as id,
+            child.category
+        FROM
+            child
+        WHERE
+            child.pid IS NOT NULL;
+        """
+        for org in await db.fetch_all(sql):
+            orgs.append(org)
+    return orgs
+
+
 async def query_s_sales_company_orgs_with_categories(db: DB, categories: str):
     categories_ = [f"'{item}'" for item in categories.split(",")]
 

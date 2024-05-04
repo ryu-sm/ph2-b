@@ -1738,3 +1738,75 @@ async def query_provisional_status(db: DB, p_application_header_id: int):
         "p_application_banks": none_to_blank(p_application_banks),
         "p_applicant_persons__0": p_applicant_persons,
     }
+
+
+async def query_s_sales_company_orgs_upload_file(db: DB, p_application_header_id, sales_person_id):
+    upload_file = 0
+    rels_sql = f"""
+    SELECT
+        s_sales_person_s_sales_company_org_rels.role,
+        s_sales_person_s_sales_company_org_rels.s_sales_company_org_id,
+        s_sales_company_orgs.upload_file,
+        s_sales_company_orgs.category
+    FROM
+        s_sales_person_s_sales_company_org_rels
+    JOIN
+        s_sales_company_orgs
+        ON
+        s_sales_company_orgs.id = s_sales_person_s_sales_company_org_rels.s_sales_company_org_id
+    WHERE
+        s_sales_person_s_sales_company_org_rels.s_sales_person_id = {sales_person_id}
+    """
+
+    header_sql = f"""
+    SELECT
+        p_application_headers.s_sales_person_id,
+        p_application_headers.sales_company_id,
+        p_application_headers.sales_area_id,
+        p_application_headers.sales_exhibition_hall_id
+    FROM
+        p_application_headers
+    WHERE
+        p_application_headers.id = {p_application_header_id}
+    """
+    for item in await db.fetch_all(rels_sql + "AND s_sales_person_s_sales_company_org_rels.role = 1"):
+        if item["category"] == "C":
+            header = await db.fetch_one(
+                header_sql + f"AND p_application_headers.sales_company_id = {item['s_sales_company_org_id']}"
+            )
+            if header:
+                upload_file = item["upload_file"]
+        if item["category"] == "B":
+            header = await db.fetch_one(
+                header_sql + f"AND p_application_headers.sales_area_id = {item['s_sales_company_org_id']}"
+            )
+            if header:
+                upload_file = item["upload_file"]
+        if item["category"] == "E":
+            header = await db.fetch_one(
+                header_sql + f"AND p_application_headers.sales_exhibition_hall_id = {item['s_sales_company_org_id']}"
+            )
+            if header:
+                upload_file = item["upload_file"]
+
+    for item in await db.fetch_all(rels_sql + "AND s_sales_person_s_sales_company_org_rels.role = 9"):
+        if item["category"] == "C":
+            header = await db.fetch_one(
+                header_sql + f"AND p_application_headers.sales_company_id = {item['s_sales_company_org_id']}"
+            )
+            if header:
+                upload_file = item["upload_file"]
+        if item["category"] == "B":
+            header = await db.fetch_one(
+                header_sql + f"AND p_application_headers.sales_area_id = {item['s_sales_company_org_id']}"
+            )
+            print(header_sql + f"AND p_application_headers.sales_area_id = {item['s_sales_company_org_id']}")
+            if header:
+                upload_file = item["upload_file"]
+        if item["category"] == "E":
+            header = await db.fetch_one(
+                header_sql + f"AND p_application_headers.sales_exhibition_hall_id = {item['s_sales_company_org_id']}"
+            )
+            if header:
+                upload_file = item["upload_file"]
+    return {"upload_file": upload_file}
