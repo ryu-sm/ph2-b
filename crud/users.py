@@ -15,6 +15,7 @@ async def query_c_user_with_email(db: DB, email: str):
         email,
         CONVERT(s_sales_company_org_id,CHAR) AS s_sales_company_org_id,
         status,
+        DATE_FORMAT(failed_first_at, '%Y-%m-%d %H:%i:%S') as failed_first_at,
         failed_first_at,
         failed_time,
         hashed_pwd
@@ -57,7 +58,7 @@ async def update_c_user_failed_first_at(db: DB, id: int, failed_time: int = 1):
 
 
 async def update_c_user_status_locked(db: DB, id: int):
-    sql_params = {"status": USER_STATUS.LOCK.value, "failed_time": None}
+    sql_params = {"status": USER_STATUS.LOCK.value, "failed_time": 0}
     sql_where = {"id": id}
     await db.execute(utils.gen_update_sql("c_users", sql_params, sql_where))
 
@@ -129,7 +130,7 @@ async def query_c_user_token_payload(db: DB, c_user_id: int):
         c_users.email,
         CONVERT(c_users.s_sales_company_org_id,CHAR) AS s_sales_company_org_id,
         c_users.agent_sended,
-        p_drafts.data as has_draft,
+        p_drafts.id as has_draft,
         s_sales_company_orgs.display_pdf,
         1 as role_type
     FROM
@@ -146,7 +147,9 @@ async def query_c_user_token_payload(db: DB, c_user_id: int):
         c_users.id = {c_user_id};
     """
     result = await db.fetch_one(sql)
+    print(sql)
     result["has_draft"] = bool(result["has_draft"])
+
     return result
 
 

@@ -1,0 +1,6 @@
+---
+- !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+  viewed_account_id: 10
+  viewed_account_type: Manager
+- viewed_account_id: 20
+  viewed_account_type: SSalePerson

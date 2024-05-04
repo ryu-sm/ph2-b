@@ -6,7 +6,7 @@ import utils
 from utils.common import none_to_blank
 from utils.s3 import delete_from_s3, upload_to_s3
 
-from constant import BANK_CODE
+from constant import BANK_CODE, TOKEN_ROLE_TYPE
 
 
 async def check_s_manager_with_email(db: DB, email: str):
@@ -274,7 +274,6 @@ async def query_manager_access_p_application_headers_(db: DB, status: int, role_
             """
             p_application_headers_basic = await db.fetch_all(sql)
 
-            return len(p_application_headers_basic)
         if status == 2:
             sql = f"""
             {basic_sql}
@@ -355,7 +354,7 @@ async def query_manager_access_p_application_headers_(db: DB, status: int, role_
         )
         unviewed = 0
         for message in messages:
-            if role_id in json.loads(message["viewed"]):
+            if TOKEN_ROLE_TYPE.MANAGER.value in [item["viewed_account_type"] for item in json.loads(message["viewed"])]:
                 continue
             else:
                 unviewed += 1
@@ -388,7 +387,7 @@ async def query_manager_access_p_application_headers_(db: DB, status: int, role_
         )
         unviewed_b = 0
         for message in messages:
-            if role_id in json.loads(message["viewed"]):
+            if TOKEN_ROLE_TYPE.MANAGER.value in [item["viewed_account_type"] for item in json.loads(message["viewed"])]:
                 continue
             unviewed_b += 1
 
@@ -399,7 +398,7 @@ async def query_manager_access_p_application_headers_(db: DB, status: int, role_
         )
         unviewed_a = 0
         for message in messages:
-            if role_id in json.loads(message["viewed"]):
+            if TOKEN_ROLE_TYPE.MANAGER.value in [item["viewed_account_type"] for item in json.loads(message["viewed"])]:
                 continue
             unviewed_a += 1
 

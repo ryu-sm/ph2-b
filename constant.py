@@ -137,6 +137,9 @@ MANN_TRANSLATE_FIELDS = [
     # 借入
     "desired_loan_amount",
     "bonus_repayment_amount",
+    "loan_amount",
+    "curr_loan_balance_amount",
+    "annual_repayment_amount",
 ]
 
 

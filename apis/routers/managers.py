@@ -144,6 +144,21 @@ async def manager_get_access_applications(status: int, db=Depends(get_db), token
         )
 
 
+@router.get("/manager/preliminaries/file")
+async def manager_get_access_applications_file(status: int, db=Depends(get_db), token=Depends(get_token)):
+    try:
+        p_application_headers_basic_list = await crud.query_manager_access_p_application_headers_(
+            db, status, token["id"]
+        )
+        file = await utils.preliminaries_output(p_application_headers_basic_list)
+        return JSONResponse(status_code=200, content=file)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
 @router.put("/manager/un-pair-loan")
 async def un_pair_laon(data: dict, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:

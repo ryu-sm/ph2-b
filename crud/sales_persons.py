@@ -1,7 +1,7 @@
 import base64
 import json
 import uuid
-from constant import BANK_CODE
+from constant import BANK_CODE, TOKEN_ROLE_TYPE
 from core.database import DB
 import crud
 import utils
@@ -200,6 +200,7 @@ async def query_sales_person_access_p_application_headers_(db: DB, status: int, 
                 access_p_application_headers_id = access_p_application_headers_id + [
                     item["id"] for item in p_application_headers_basic
                 ]
+    access_p_application_headers_id = list(set(access_p_application_headers_id))
     if len(access_p_application_headers_id) == 0:
         return []
     basic_info_sql = f"""
@@ -260,7 +261,9 @@ async def query_sales_person_access_p_application_headers_(db: DB, status: int, 
         )
         unviewed = 0
         for message in messages:
-            if role_id in json.loads(message["viewed"]):
+            if TOKEN_ROLE_TYPE.SALES_PERSON.value in [
+                item["viewed_account_type"] for item in json.loads(message["viewed"])
+            ]:
                 continue
             else:
                 unviewed += 1
@@ -291,7 +294,9 @@ async def query_sales_person_access_p_application_headers_(db: DB, status: int, 
         )
         unviewed_b = 0
         for message in messages:
-            if role_id in json.loads(message["viewed"]):
+            if TOKEN_ROLE_TYPE.SALES_PERSON.value in [
+                item["viewed_account_type"] for item in json.loads(message["viewed"])
+            ]:
                 continue
             unviewed_b += 1
 
@@ -302,7 +307,9 @@ async def query_sales_person_access_p_application_headers_(db: DB, status: int, 
         )
         unviewed_a = 0
         for message in messages:
-            if role_id in json.loads(message["viewed"]):
+            if TOKEN_ROLE_TYPE.SALES_PERSON.value in [
+                item["viewed_account_type"] for item in json.loads(message["viewed"])
+            ]:
                 continue
             unviewed_a += 1
 
@@ -320,7 +327,6 @@ async def query_sales_person_access_p_application_headers_(db: DB, status: int, 
                 }
             )
         )
-    # return general_result + paired_result
     return list({item["id"]: item for item in [*general_result, *paired_result]}.values())
 
 

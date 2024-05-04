@@ -665,7 +665,8 @@ async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int,
         maternity_paternity_leave_end_date,
         nursing_leave,
         identity_verification_type,
-        before_last_year_income
+        before_last_year_income,
+        rel_to_applicant_a_other
     FROM
         p_applicant_persons
     WHERE

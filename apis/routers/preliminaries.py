@@ -338,7 +338,7 @@ async def get_raw_data(
 ):
     try:
 
-        file = download_from_s3(f"{p_application_header_id}/row_data.xlsx")
+        file = utils.download_base64_from_s3(f"{p_application_header_id}/row_data.xlsx")
         p_application_header_basic = await crud.query_p_application_header_basic(db, p_application_header_id)
         await utils.common_insert_c_access_log(
             db,
@@ -351,7 +351,7 @@ async def get_raw_data(
                 "operation_content": "ローデータダウンロード: ダウンロードした",
             },
         )
-        return JSONResponse(status_code=200, content=file)
+        return JSONResponse(status_code=200, content={"src":file})
     except Exception as err:
         logger.exception(err)
         return JSONResponse(

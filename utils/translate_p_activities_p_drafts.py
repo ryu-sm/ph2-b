@@ -81,6 +81,10 @@ async def translate_p_activities_p_drafts(db: DB, old_draft_id=61):
             if new_key in ["property_business_type", "refund_source_type"]:
                 p_application_headers[new_key] = p_application_header[old_key] if p_application_header[old_key] else []
                 continue
+            if new_key == "loan_plus":
+                p_application_headers[new_key] = "1" if p_application_header[old_key] == "true" else "0"
+                continue
+
             p_application_headers[new_key] = p_application_header[old_key]
 
     for new_key, old_key in p_drafts_p_application_headers_sub_p_referral_agency.items():
@@ -124,6 +128,11 @@ async def translate_p_activities_p_drafts(db: DB, old_draft_id=61):
             if old_key == "lived_length_year_num" or old_key == "lived_length_month_num":
                 p_application_headers[new_key] = (
                     str(int(p_applicant_persons_type_0[old_key])) if p_applicant_persons_type_0[old_key] else ""
+                )
+                continue
+            if old_key == "expected_house_selling_price":
+                p_application_headers[new_key] = (
+                    str(int(p_applicant_persons_type_0[old_key]) * 10000) if p_applicant_persons_type_0[old_key] else ""
                 )
                 continue
             p_application_headers[new_key] = p_applicant_persons_type_0[old_key]
@@ -177,7 +186,7 @@ async def translate_p_activities_p_drafts(db: DB, old_draft_id=61):
         new_p_draft["p_applicant_persons_b_agreement"] = (
             True if p_application_header["general_income_confirmation"] == "1" else False
         )
-    new_p_draft["apCurrStepId"] = int(p_draft["current_step"]) - 1
+    new_p_draft["apCurrStepId"] = int(p_draft["current_step"])
     new_p_draft["p_application_headers"] = utils.to_mann(p_application_headers)
 
     p_application_banks = []
@@ -186,7 +195,7 @@ async def translate_p_activities_p_drafts(db: DB, old_draft_id=61):
 
         for bank_id in p_application_header["master_bank_ids"]:
             bank_code = bank_maps[bank_id]
-            new_bank = await db.fetch_one(f"SELECT id FROM mortgage_staging.s_banks WHERE code = '{bank_code}';")
+            new_bank = await db.fetch_one(f"SELECT id FROM mortgage_staging_v1.s_banks WHERE code = '{bank_code}';")
             p_application_banks.append(str(new_bank["id"]))
 
     new_p_draft["isMCJ"] = True if len(p_application_banks) > 1 else False
@@ -208,6 +217,7 @@ async def translate_p_activities_p_drafts(db: DB, old_draft_id=61):
                     str(int(p_applicant_persons_type_0[old_key]) + 1) if p_applicant_persons_type_0[old_key] else ""
                 )
                 continue
+
             p_applicant_persons__0[new_key] = p_applicant_persons_type_0[old_key]
 
     # 文件转换
@@ -429,15 +439,15 @@ async def translate_p_activities_p_drafts(db: DB, old_draft_id=61):
     if p_residents:
         new_p_draft["p_residents"] = p_residents
     new_user = await db.fetch_one(
-        f"""SELECT id FROM mortgage_staging.c_users as u WHERE u.old_id = {p_draft["user_id"]};"""
+        f"""SELECT id FROM mortgage_staging_v1.c_users as u WHERE u.old_id = {p_draft["user_id"]};"""
     )
     new_p_draft_json = json.dumps(new_p_draft, ensure_ascii=False)
     id = await db.uuid_short()
-    sql = f"""INSERT INTO mortgage_staging.p_drafts (id, c_user_id, data)
+    sql = f"""INSERT INTO mortgage_staging_v1.p_drafts (id, c_user_id, data)
     VALUES ({id}, {new_user["id"]}, '{new_p_draft_json}')
     """
     await db.execute(sql)
 
-    # with open("data.json", "w") as json_file:
-    #     json.dump(new_p_draft, json_file, ensure_ascii=False)
+    with open("data.json", "w") as json_file:
+        json.dump(new_p_draft, json_file, ensure_ascii=False)
     # print(json.dumps(p_borrowings, ensure_ascii=False, indent=4))

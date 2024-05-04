@@ -449,6 +449,7 @@ p_drafts_p_application_header = {
 
 
 p_drafts_p_application_headers_sub_main = {
+    "apply_date": "loan_apply_date",
     "move_scheduled_date": "scheduled_date_moving",
     "loan_target": "loan_target",
     "loan_target_type": "loan_target_zero",
@@ -457,7 +458,7 @@ p_drafts_p_application_headers_sub_main = {
     "pair_loan_last_name": "pair_loan_applicant_last_name",
     "pair_loan_first_name": "pair_loan_applicant_first_name",
     "pair_loan_rel_name": "pair_loan_relationship_name",
-    "join_guarantor_umu": "has_join_guarantor",
+    # "join_guarantor_umu": "has_join_guarantor",
     "loan_plus": "is_home_loan_plus",
     "property_publish_url": "property_information_url",
     "new_house_self_resident": "person_occupancy",
@@ -470,7 +471,7 @@ p_drafts_p_application_headers_sub_main = {
     "property_private_area": "occupied_area",
     "property_total_floor_area": "collateral_total_floor_area",
     "property_land_area": "collateral_land_area",
-    "property_floor_area": "collateral_floor_area",
+    "property_floor_area": "collateral_total_floor_area",
     "property_land_type": "land_ownership",
     "property_purchase_type": "purchase_purpose",
     "property_planning_area": "planning_area",
@@ -528,11 +529,12 @@ p_drafts_p_application_headers_sub_person = {
     "curr_house_loan_balance_type": "current_home_loan",  # p_applicant_persons
     "new_house_acquire_reason": "reason_acquire_home",  # p_applicant_persons
     "new_house_acquire_reason_other": "other_reason_acquire_home",  # p_applicant_persons
-    "curr_borrowing_status": "",  # p_applicant_persons
+    "curr_borrowing_status": "borrowing_status",  # p_applicant_persons
     "rent_to_be_paid_land_borrower": "",  # p_applicant_persons
-    "rent_to_be_paid_land": "",  # p_applicant_persons
+    "rent_to_be_paid_land": "land_rent_to_be_paid",  # p_applicant_persons
     "rent_to_be_paid_house_borrower": "",  # p_applicant_persons
-    "rent_to_be_paid_house": "",  # p_applicant_persons
+    "rent_to_be_paid_house": "house_rent_to_be_paid",  # p_applicant_persons
+    "join_guarantor_umu": "has_join_guarantor",
 }
 
 p_drafts_p_application_headers_sub_file = {
@@ -590,7 +592,7 @@ p_drafts_p_applicant_persons_0_sub_main = {
     "transfer_office": "transfer_office",
     "transfer_office_name_kanji": "transfer_office_name_kanji",
     "transfer_office_name_kana": "transfer_office_name_kana",
-    "transfer_office_phone": "transfer_office_phone",
+    "transfer_office_phone": "transfer_office_phone_number",
     "transfer_office_postal_code": "transfer_office_postal_code",
     "transfer_office_prefecture_kanji": "transfer_office_prefecture_kanji",
     "transfer_office_city_kanji": "transfer_office_city_kanji",
@@ -652,7 +654,7 @@ p_drafts_p_applicant_persons_1_sub_main = {
     "transfer_office": "transfer_office",
     "transfer_office_name_kanji": "transfer_office_name_kanji",
     "transfer_office_name_kana": "transfer_office_name_kana",
-    "transfer_office_phone": "transfer_office_phone",
+    "transfer_office_phone": "transfer_office_phone_number",
     "transfer_office_postal_code": "transfer_office_postal_code",
     "transfer_office_prefecture_kanji": "transfer_office_prefecture_kanji",
     "transfer_office_city_kanji": "transfer_office_city_kanji",
@@ -688,7 +690,6 @@ p_drafts_p_applicant_persons_sub_file = {
     "F__03": "business_tax_return_3_file",
     "H__a": "residence_file",
     "H__b": "residence_file_back_image",
-    # "I": "repayment_schedule_image", # p_borrowings
     "K": "other_document_file",
 }
 
@@ -747,7 +748,7 @@ p_drafts_p_join_guarantors = {
     "home_phone": "home_phone_number",
     "postal_code": "postal_code",
     "prefecture_kanji": "prefecture_kanji",
-    "city_kanji": "district_kanji",
+    "city_kanji": "city_kanji",
     "district_kanji": "district_kanji",
     "other_address_kanji": "other_address_kanji",
     "prefecture_kana": "prefecture_kana",

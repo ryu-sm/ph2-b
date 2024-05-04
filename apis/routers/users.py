@@ -4,6 +4,7 @@ from fastapi import APIRouter
 from fastapi import Request
 from fastapi import Depends
 from fastapi.responses import JSONResponse
+import pytz
 
 from core.config import settings
 from apis.deps import get_db
@@ -12,7 +13,7 @@ import crud
 import utils
 import schemas
 
-from constant import DEFAULT_200_MSG, DEFAULT_500_MSG, ACCESS_LOG_OPERATION
+from constant import DEFAULT_200_MSG, DEFAULT_500_MSG, ACCESS_LOG_OPERATION, TOKEN_ROLE_TYPE
 from templates.user_register_init_message import INIT_MESSAGE
 
 router = APIRouter()
@@ -51,7 +52,7 @@ async def user_register(data: dict, request: Request, db=Depends(get_db)):
             hashed_pwd=utils.hash_password(data["password"]),
             s_sales_company_org_id=payload.get("s_sales_company_org_id"),
         )
-        await crud.insert_c_message(db, c_user_id=new_user_id, sender_type=3, content=INIT_MESSAGE)
+        await crud.insert_init_message(db, c_user_id=new_user_id, content=INIT_MESSAGE)
         access_token = utils.gen_token(
             payload=await crud.query_c_user_token_payload(db, c_user_id=new_user_id),
             expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
@@ -118,7 +119,13 @@ async def user_login(data: dict, request: Request, db=Depends(get_db)):
             return JSONResponse(status_code=423, content={"message": "account is locked."})
         if not utils.verify_password(data["password"], is_exist["hashed_pwd"]):
             if is_exist["failed_first_at"]:
-                if (datetime.now() - is_exist["failed_first_at"]).seconds < 300 and is_exist["failed_time"] == 4:
+                if (
+                    datetime.strptime(
+                        datetime.now().astimezone(pytz.timezone("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M:%S"),
+                        "%Y-%m-%d %H:%M:%S",
+                    )
+                    - datetime.strptime(is_exist["failed_first_at"], "%Y-%m-%d %H:%M:%S")
+                ).seconds < 300 and is_exist["failed_time"] == 4:
                     await crud.update_c_user_status_locked(db, id=is_exist["id"])
                     return JSONResponse(status_code=423, content={"message": "account is locked."})
                 else:

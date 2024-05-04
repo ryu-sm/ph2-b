@@ -42,16 +42,16 @@ app = FastAPI(
 
 
 # ROUTER追加
-app.include_router(tools_router, prefix="/new")
-app.include_router(users_router, prefix="/new")
-app.include_router(optipns_router, prefix="/new")
-app.include_router(orgs_router, prefix="/new")
-app.include_router(apply_router, prefix="/new")
-app.include_router(managers_router, prefix="/new")
-app.include_router(c_archive_files_router, prefix="/new")
-app.include_router(messages_router, prefix="/new")
-app.include_router(sales_persons_router, prefix="/new")
-app.include_router(preliminaries_router, prefix="/new")
+app.include_router(tools_router, prefix="/v1")
+app.include_router(users_router, prefix="/v1")
+app.include_router(optipns_router, prefix="/v1")
+app.include_router(orgs_router, prefix="/v1")
+app.include_router(apply_router, prefix="/v1")
+app.include_router(managers_router, prefix="/v1")
+app.include_router(c_archive_files_router, prefix="/v1")
+app.include_router(messages_router, prefix="/v1")
+app.include_router(sales_persons_router, prefix="/v1")
+app.include_router(preliminaries_router, prefix="/v1")
 
 
 # カスタム認証例外追加
@@ -63,7 +63,11 @@ async def custom_auth_exception_handler(request: Request, exception: AuthExcepti
 # CORS設定
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://d1kqlatyhax1v4.cloudfront.net", "http://localhost:5173"],
+    allow_origins=[
+        "https://d1kqlatyhax1v4.cloudfront.net",
+        "https://dm2ux0xnncnol.cloudfront.net",
+        "http://localhost:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -73,4 +77,4 @@ app.add_middleware(
 if __name__ == "__main__":
     from uvicorn import run
 
-    run(app="main:app", host="0.0.0.0", port=8080, reload=True)
+    run(app="main:app", host="0.0.0.0", port=9090, reload=True)

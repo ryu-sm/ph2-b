@@ -41,7 +41,7 @@ async def insert_message(data: dict, db=Depends(get_db), token=Depends(get_token
 @router.put("/messages")
 async def update_messages(data: dict, db=Depends(get_db), token=Depends(get_token)):
     try:
-        await crud.update_messages_viewed(db, data["messages_ids"], token["id"])
+        await crud.update_messages_viewed(db, data["messages_ids"], token["role_type"], token["id"])
         return JSONResponse(status_code=200, content={"message": "successful"})
     except Exception as err:
         logger.exception(err)
@@ -53,7 +53,7 @@ async def update_messages(data: dict, db=Depends(get_db), token=Depends(get_toke
 @router.get("/manager/messages")
 async def get_manager_messages(db=Depends(get_db), token=Depends(get_token)):
     try:
-        messages = await crud.query_manager_dashboard_messages(db)
+        messages = await crud.query_manager_dashboard_messages(db, token["id"])
         return JSONResponse(status_code=200, content=messages)
     except Exception as err:
         logger.exception(err)

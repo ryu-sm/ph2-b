@@ -145,6 +145,23 @@ async def sales_person_get_access_applications(status: int, db=Depends(get_db), 
         )
 
 
+@router.get("/sales-person/preliminaries/file")
+async def sales_person_get_access_applications(status: int, db=Depends(get_db), token=Depends(get_token)):
+
+    try:
+        preliminaries = await crud.query_sales_person_access_p_application_headers_(
+            db, status, token["orgs"], token["id"]
+        )
+
+        file = await utils.preliminaries_output(preliminaries)
+        return JSONResponse(status_code=200, content=file)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
 @router.get("/sales-person/{s_sales_person_id}")
 async def sales_person_get_access_applications(s_sales_person_id: int, db=Depends(get_db), token=Depends(get_token)):
 
