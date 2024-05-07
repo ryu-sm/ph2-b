@@ -54,23 +54,21 @@ async def access_logs_output(start: str, end: str):
         DATE_FORMAT(created_at, '%Y/%m/%d %H:%i:%S') as created_at
     FROM
         c_access_logs
-    ORDER BY created_at DESC
+    
     """
     jp_tz = pytz.timezone("Asia/Tokyo")
     where = ""
     file_name = f"監視ログ"
     if start and end:
-        where += f"""WHERE created_at  >= '{start.replace("/","-")} 00:00:00' AND created_at  <= '{end.replace("/","-")} 11:59:59'"""
+        where += f"""WHERE created_at  >= '{start.replace("/","-")} 00:00:00' AND created_at  <= '{end.replace("/","-")} 23:59:59'"""
         file_name = f"""監視ログ_{start.replace("/","")}~{end.replace("/","")}"""
     if start and not end:
         where += f"""WHERE created_at  >= '{start.replace("/","-")} 00:00:00'"""
         file_name = f"""監視ログ_{start.replace("/","")}~"""
     if not start and end:
-        where += f"""WHERE created_at  <= '{end.replace("/","-")} 11:59:59'"""
+        where += f"""WHERE created_at  <= '{end.replace("/","-")} 23:59:59'"""
         file_name = f"""監視ログ_~{end.replace("/","")}"""
-    access_logs = await db.fetch_all(sql + where)
-    if len(access_logs) == 0:
-        return {"src": None}
+    access_logs = await db.fetch_all(sql + where + "ORDER BY created_at DESC")
 
     for access_log in access_logs:
         user_name = await get_user_email(db, access_log["account_id"])

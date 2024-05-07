@@ -62,7 +62,7 @@ async def translate_p_activities_p_application_headers(db: DB, p_application_hea
         DATE_FORMAT(a.created_at, '%Y-%m-%d %H:%i:%S') as old_created_at,
         DATE_FORMAT(a.updated_at, '%Y-%m-%d %H:%i:%S') as old_updated_at
     FROM
-        mortgage_staging_v2.p_application_headers as h
+        mortgage_staging_v3.p_application_headers as h
     LEFT JOIN
         mortgage_loan_tool_be_production.activities as a
         ON
@@ -103,19 +103,19 @@ async def translate_p_activities_p_application_headers(db: DB, p_application_hea
 
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.c_users WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.s_sales_persons WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.s_managers WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
@@ -184,19 +184,19 @@ async def translate_p_activities_p_application_headers(db: DB, p_application_hea
             operator_id = 0
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.c_users WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.s_sales_persons WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.s_managers WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
@@ -299,19 +299,19 @@ async def translate_p_activities_p_application_headers(db: DB, p_application_hea
             operator_id = 0
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.c_users WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.s_sales_persons WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.s_managers WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
@@ -375,19 +375,19 @@ async def translate_p_activities_p_application_headers(db: DB, p_application_hea
 
                     if operator_type == 1:
                         user = await db.fetch_one(
-                            f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
+                            f"SELECT id FROM mortgage_staging_v3.c_users WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
                         )
                         if user:
                             operator_id = user["id"]
                     if operator_type == 2:
                         sales_person = await db.fetch_one(
-                            f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
+                            f"SELECT id FROM mortgage_staging_v3.s_sales_persons WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
                         )
                         if sales_person:
                             operator_id = sales_person["id"]
                     if operator_type == 3:
                         manager = await db.fetch_one(
-                            f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
+                            f"SELECT id FROM mortgage_staging_v3.s_managers WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
                         )
                         if manager:
                             operator_id = manager["id"]
@@ -404,21 +404,21 @@ async def translate_p_activities_p_application_headers(db: DB, p_application_hea
                     if p_referral_agencies:
                         if p_referral_agencies["sale_agent_id"]:
                             org_c = await db.fetch_one(
-                                f"""SELECT id FROM mortgage_staging_v2.s_sales_company_orgs WHERE code = '{p_referral_agencies["sale_agent_id"]}';"""
+                                f"""SELECT id FROM mortgage_staging_v3.s_sales_company_orgs WHERE code = '{p_referral_agencies["sale_agent_id"]}';"""
                             )
 
                             if org_c:
                                 sales_company_id = org_c["id"]
                         if p_referral_agencies["store_id"]:
                             org_b = await db.fetch_one(
-                                f"""SELECT id FROM mortgage_staging_v2.s_sales_company_orgs WHERE code = '{p_referral_agencies["store_id"]}';"""
+                                f"""SELECT id FROM mortgage_staging_v3.s_sales_company_orgs WHERE code = '{p_referral_agencies["store_id"]}';"""
                             )
 
                             if org_b:
                                 sales_area_id = org_b["id"]
                         if p_referral_agencies["exhibition_id"]:
                             org_e = await db.fetch_one(
-                                f"""SELECT id FROM mortgage_staging_v2.s_sales_company_orgs WHERE code = '{p_referral_agencies["exhibition_id"]}';"""
+                                f"""SELECT id FROM mortgage_staging_v3.s_sales_company_orgs WHERE code = '{p_referral_agencies["exhibition_id"]}';"""
                             )
 
                             if org_e:
@@ -479,19 +479,19 @@ async def translate_p_activities_p_application_headers(db: DB, p_application_hea
 
                     if operator_type == 1:
                         user = await db.fetch_one(
-                            f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                            f"SELECT id FROM mortgage_staging_v3.c_users WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                         )
                         if user:
                             operator_id = user["id"]
                     if operator_type == 2:
                         sales_person = await db.fetch_one(
-                            f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                            f"SELECT id FROM mortgage_staging_v3.s_sales_persons WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                         )
                         if sales_person:
                             operator_id = sales_person["id"]
                     if operator_type == 3:
                         manager = await db.fetch_one(
-                            f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                            f"SELECT id FROM mortgage_staging_v3.s_managers WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                         )
                         if manager:
                             operator_id = manager["id"]
@@ -507,21 +507,21 @@ async def translate_p_activities_p_application_headers(db: DB, p_application_hea
                     if p_referral_agencies:
                         if p_referral_agencies["sale_agent_id"]:
                             org_c = await db.fetch_one(
-                                f"""SELECT id FROM mortgage_staging_v2.s_sales_company_orgs WHERE code = '{p_referral_agencies["sale_agent_id"]}';"""
+                                f"""SELECT id FROM mortgage_staging_v3.s_sales_company_orgs WHERE code = '{p_referral_agencies["sale_agent_id"]}';"""
                             )
 
                             if org_c:
                                 sales_company_id = org_c["id"]
                         if p_referral_agencies["store_id"]:
                             org_b = await db.fetch_one(
-                                f"""SELECT id FROM mortgage_staging_v2.s_sales_company_orgs WHERE code = '{p_referral_agencies["store_id"]}';"""
+                                f"""SELECT id FROM mortgage_staging_v3.s_sales_company_orgs WHERE code = '{p_referral_agencies["store_id"]}';"""
                             )
 
                             if org_b:
                                 sales_area_id = org_b["id"]
                         if p_referral_agencies["exhibition_id"]:
                             org_e = await db.fetch_one(
-                                f"""SELECT id FROM mortgage_staging_v2.s_sales_company_orgs WHERE code = '{p_referral_agencies["exhibition_id"]}';"""
+                                f"""SELECT id FROM mortgage_staging_v3.s_sales_company_orgs WHERE code = '{p_referral_agencies["exhibition_id"]}';"""
                             )
 
                             if org_e:
@@ -600,19 +600,19 @@ async def translate_p_activities_p_application_headers(db: DB, p_application_hea
 
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.c_users WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.s_sales_persons WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.s_managers WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
@@ -640,19 +640,19 @@ async def translate_p_activities_p_application_headers(db: DB, p_application_hea
 
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.c_users WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.s_sales_persons WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.s_managers WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
@@ -692,19 +692,19 @@ async def translate_p_activities_p_application_headers(db: DB, p_application_hea
 
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.c_users WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.s_sales_persons WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.s_managers WHERE old_id = {PApplicationHeaderCreateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
@@ -735,19 +735,19 @@ async def translate_p_activities_p_application_headers(db: DB, p_application_hea
 
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.c_users WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.s_sales_persons WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v3.s_managers WHERE old_id = {PApplicationHeaderUpdateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
@@ -815,4 +815,4 @@ async def translate_p_activities_p_application_headers(db: DB, p_application_hea
         datas = value["create"] + value["update"]
         for data in datas:
             id = await db.uuid_short()
-            await db.execute(utils.gen_insert_sql("mortgage_staging_v2.p_activities", {"id": id, **data}))
+            await db.execute(utils.gen_insert_sql("mortgage_staging_v3.p_activities", {"id": id, **data}))

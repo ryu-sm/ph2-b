@@ -41,8 +41,15 @@ async def user_send_verify_email(data: dict, db=Depends(get_db)):
 async def user_register(data: dict, request: Request, db=Depends(get_db)):
     try:
         payload = utils.parse_token(data["token"])
+
         if payload is None:
             return JSONResponse(status_code=407, content={"message": "token is invalid."})
+        if payload.get("s_sales_company_org_id"):
+            is_exist_s_sales_company = await crud.check_user_register_s_sales_company_org_id(
+                db, payload.get("s_sales_company_org_id")
+            )
+            if is_exist_s_sales_company is None:
+                return JSONResponse(status_code=408, content={"message": "s_sales_company_org_id is invalid."})
         is_exist = await crud.check_c_user_with_email(db, email=payload["email"])
         if is_exist:
             return JSONResponse(status_code=400, content={"message": "user email is exist."})

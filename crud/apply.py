@@ -33,7 +33,6 @@ import crud
 
 
 async def insert_p_application_headers(db: DB, data: dict, role_type, role_id, c_user_id=None, s_sales_person_id=None):
-    print(data)
     jp_tz = pytz.timezone("Asia/Tokyo")
     sql = f"SELECT MAX(apply_no) no FROM p_application_headers WHERE created_at  >= '{datetime.strftime(datetime.now(jp_tz),'%Y-%m-%d')} 00:00:00'"
     last_apply = await db.fetch_one(sql)
@@ -814,6 +813,7 @@ async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int,
         "F__02",
         "F__03",
         "K",
+        "S",
     ]
     files = {
         "G": [],
@@ -840,10 +840,9 @@ async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int,
         "F__02": [],
         "F__03": [],
         "K": [],
+        "S": [],
     }
-    if type == 0:
-        file_keys.append("S")
-        files["S"] = []
+
     for key in file_keys:
         sql = f"""
         SELECT

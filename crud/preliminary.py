@@ -40,6 +40,7 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
     sbi_id = sbi["id"]
     sql = f"""
     SELECT
+        CONVERT(p_application_headers.c_user_id,CHAR) AS c_user_id,
         CONVERT(p_application_headers.id,CHAR) AS id,
         p_application_headers.apply_no,
         DATE_FORMAT(p_application_headers.created_at, '%Y/%m/%d %H:%i') as created_at,
@@ -313,7 +314,13 @@ async def query_p_applicant_persons_for_ad(db: DB, p_application_header_id: int,
         office_capital_stock,
         main_income_source,
         before_last_year_income,
-        rel_to_applicant_a
+        rel_to_applicant_a,
+        job_change,
+        job_change_office_name_kana,
+        job_change_office_name_kanji,
+        prev_office_year_num,
+        prev_office_industry,
+        prev_office_industry_other
     FROM
         p_applicant_persons
     WHERE
@@ -345,6 +352,7 @@ async def query_p_applicant_persons_for_ad(db: DB, p_application_header_id: int,
         "F__02",
         "F__03",
         "K",
+        "S",
     ]
     files = {
         "G": [],
@@ -371,10 +379,9 @@ async def query_p_applicant_persons_for_ad(db: DB, p_application_header_id: int,
         "F__02": [],
         "F__03": [],
         "K": [],
+        "S": [],
     }
-    if type == 0:
-        file_keys.append("S")
-        files["S"] = []
+
     for key in file_keys:
         sql = f"""
         SELECT
@@ -1630,7 +1637,6 @@ async def query_field_uodate_histories_for_ad(db: DB, p_application_header_id: i
         p_activities.operate_type = 0
     LIMIT 1;
     """
-    # init_basic = await db.fetch_one(init_sql)
     init_info = await db.fetch_all(init_sql)
     [table_name, field_name, table_id] = update_history_key.split(".")
     sql = f"""
@@ -1980,3 +1986,12 @@ async def query_s_sales_company_orgs_upload_file(db: DB, p_application_header_id
             if header:
                 upload_file = item["upload_file"]
     return {"upload_file": upload_file}
+
+
+async def query_apply_type_for_ad(db: DB, p_application_header_id: int):
+    sql = f"""
+    SELECT operator_type FROM p_activities WHERE p_application_header_id = {p_application_header_id} AND operate_type = 0 LIMIT 1;
+    """
+    result = await db.fetch_one(sql)
+
+    return str(result["operator_type"])

@@ -172,3 +172,7 @@ async def upsert_p_draft_data(db: DB, c_user_id: int, data: dict):
 
 async def delete_p_draft_data(db: DB, c_user_id: int):
     await db.execute(f"DELETE FROM p_drafts WHERE c_user_id = {c_user_id};")
+
+
+async def check_user_register_s_sales_company_org_id(db: DB, s_sales_company_org_id):
+    return await db.fetch_one(f"SELECT id FROM s_sales_company_orgs WHERE id = '{s_sales_company_org_id}';")

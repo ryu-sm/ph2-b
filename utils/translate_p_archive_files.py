@@ -69,7 +69,7 @@ async def translate_p_archive_files(db: DB):
     FROM
         mortgage_loan_tool_be_production.archive_files as af
     INNER JOIN
-        mortgage_staging_v2.s_sales_persons as sp
+        mortgage_staging_v3.s_sales_persons as sp
         ON
         sp.old_id = af.s_sale_person_id;
     """
@@ -79,13 +79,13 @@ async def translate_p_archive_files(db: DB):
 
     for item in old_basic_info:
 
-        sql = f"SELECT CONVERT(sor.s_sales_company_org_id,CHAR) AS s_sales_company_org_id, sor.role FROM mortgage_staging_v2.s_sales_person_s_sales_company_org_rels as sor WHERE sor.s_sales_person_id = {item['s_sales_person_id']};"
+        sql = f"SELECT CONVERT(sor.s_sales_company_org_id,CHAR) AS s_sales_company_org_id, sor.role FROM mortgage_staging_v3.s_sales_person_s_sales_company_org_rels as sor WHERE sor.s_sales_person_id = {item['s_sales_person_id']};"
         orgs = await db.fetch_one(sql)
         sql = f"""
         WITH RECURSIVE child AS (
-        SELECT id, pid, category FROM mortgage_staging_v2.s_sales_company_orgs WHERE id = {orgs['s_sales_company_org_id']}
+        SELECT id, pid, category FROM mortgage_staging_v3.s_sales_company_orgs WHERE id = {orgs['s_sales_company_org_id']}
         union
-        SELECT parents.id, parents.pid, parents.category FROM mortgage_staging_v2.s_sales_company_orgs as parents INNER JOIN child ON parents.id = child.pid
+        SELECT parents.id, parents.pid, parents.category FROM mortgage_staging_v3.s_sales_company_orgs as parents INNER JOIN child ON parents.id = child.pid
         )
         SELECT
             child.id AS root_id
@@ -100,7 +100,7 @@ async def translate_p_archive_files(db: DB):
 
         await db.execute(
             utils.gen_insert_sql(
-                "mortgage_staging_v2.c_archive_files", {**item, "s_sales_company_org_id": parents["root_id"]}
+                "mortgage_staging_v3.c_archive_files", {**item, "s_sales_company_org_id": parents["root_id"]}
             )
         )
 
@@ -129,7 +129,7 @@ async def translate_p_archive_files(db: DB):
     for old_file_info in old_files_info:
         id = await db.uuid_short()
         c_archive_file = await db.fetch_one(
-            f"SELECT * FROM mortgage_staging_v2.c_archive_files WHERE old_id = {old_file_info['old_record_id']};"
+            f"SELECT * FROM mortgage_staging_v3.c_archive_files WHERE old_id = {old_file_info['old_record_id']};"
         )
         owner_id = None
         if c_archive_file:
@@ -154,4 +154,4 @@ async def translate_p_archive_files(db: DB):
         )
 
     for data in new_data:
-        await db.execute(utils.gen_insert_sql("mortgage_staging_v2.c_archive_uploaded_files", data))
+        await db.execute(utils.gen_insert_sql("mortgage_staging_v3.c_archive_uploaded_files", data))

@@ -96,7 +96,7 @@ async def sales_person_login(data: dict, request: Request, db=Depends(get_db)):
                         db, id=is_exist["id"], failed_time=is_exist["failed_time"] + 1
                     )
             else:
-                await crud.update_s_sales_person_failed_time(db, id=is_exist["id"])
+                await crud.update_s_sales_person_failed_first_at(db, id=is_exist["id"])
             return JSONResponse(status_code=400, content={"message": "email or password is invalid."})
         payload = await crud.query_s_sales_person_token_payload(db, id=is_exist["id"])
         access_token = utils.gen_token(
