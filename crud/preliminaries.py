@@ -296,8 +296,9 @@ async def update_memo(db: DB, memo_id: int, content: str):
 async def update_p_application_banks_provisional_after_result(
     db: DB, p_application_header_id: int, s_bank_id: int, provisional_after_result: int, role_type, role_id
 ):
+
     p_application_banks = await db.fetch_one(
-        f"SELECT id FROM WHERE p_application_header_id = {p_application_header_id} AND s_bank_id = {s_bank_id};"
+        f"SELECT id FROM p_application_banks WHERE p_application_header_id = {p_application_header_id} AND s_bank_id = {s_bank_id};"
     )
 
     sql = f"UPDATE p_application_banks SET provisional_after_result = {provisional_after_result} WHERE id = {p_application_banks['id']};"
