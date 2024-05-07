@@ -10,7 +10,7 @@ from utils.s3 import upload_to_s3
 
 
 async def check_s_sales_person_with_email(db: DB, email: str):
-    sql = f"SELECT CONVERT(id,CHAR) AS id, code, status, failed_first_at, failed_time, hashed_pwd FROM s_sales_persons WHERE email = '{email}';"
+    sql = f"SELECT CONVERT(id,CHAR) AS id, code, status, DATE_FORMAT(failed_first_at, '%Y-%m-%d %H:%i:%S') as failed_first_at, failed_time, hashed_pwd FROM s_sales_persons WHERE email = '{email}';"
     return await db.fetch_one(sql)
 
 

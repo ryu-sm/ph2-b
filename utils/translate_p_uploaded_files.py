@@ -84,25 +84,25 @@ async def translate_p_uploaded_files(db: DB):
         owner_id = 0
         if owner_type == 1:
             user = await db.fetch_one(
-                f"SELECT id FROM mortgage_staging_v1.c_users WHERE old_id = {old_file_info['role_id']};"
+                f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {old_file_info['role_id']};"
             )
             if user:
                 owner_id = user["id"]
         if owner_type == 2:
             sales_person = await db.fetch_one(
-                f"SELECT id FROM mortgage_staging_v1.s_sales_persons WHERE old_id = {old_file_info['role_id']};"
+                f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {old_file_info['role_id']};"
             )
             if sales_person:
                 owner_id = sales_person["id"]
         if owner_type == 3:
             manager = await db.fetch_one(
-                f"SELECT id FROM mortgage_staging_v1.s_managers WHERE old_id = {old_file_info['role_id']};"
+                f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {old_file_info['role_id']};"
             )
             if manager:
                 owner_id = manager["id"]
         p_application_header_id = None
         p_application_header = await db.fetch_one(
-            f"SELECT id FROM mortgage_staging_v1.p_application_headers WHERE old_id = {old_file_info['old_record_id']};"
+            f"SELECT id FROM mortgage_staging_v2.p_application_headers WHERE old_id = {old_file_info['old_record_id']};"
         )
         if p_application_header:
             p_application_header_id = p_application_header["id"]
@@ -152,24 +152,24 @@ async def translate_p_uploaded_files(db: DB):
         owner_id = 0
         if owner_type == 1:
             user = await db.fetch_one(
-                f"SELECT id FROM mortgage_staging_v1.c_users WHERE old_id = {old_file_info['role_id']};"
+                f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {old_file_info['role_id']};"
             )
             if user:
                 owner_id = user["id"]
         if owner_type == 2:
             sales_person = await db.fetch_one(
-                f"SELECT id FROM mortgage_staging_v1.s_sales_persons WHERE old_id = {old_file_info['role_id']};"
+                f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {old_file_info['role_id']};"
             )
             if sales_person:
                 owner_id = sales_person["id"]
         if owner_type == 3:
             manager = await db.fetch_one(
-                f"SELECT id FROM mortgage_staging_v1.s_managers WHERE old_id = {old_file_info['role_id']};"
+                f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {old_file_info['role_id']};"
             )
             if manager:
                 owner_id = manager["id"]
         p_applicant_persons = await db.fetch_one(
-            f"SELECT id, p_application_header_id, type FROM mortgage_staging_v1.p_applicant_persons WHERE old_id = {old_file_info['old_record_id']};"
+            f"SELECT id, p_application_header_id, type FROM mortgage_staging_v2.p_applicant_persons WHERE old_id = {old_file_info['old_record_id']};"
         )
 
         s3_key = f"{p_applicant_persons['p_application_header_id']}/{owner_id}_{owner_type_kanji_maps[owner_type]}/{prekey_maps[old_file_info['old_prekey']]}/{id}"
@@ -217,25 +217,25 @@ async def translate_p_uploaded_files(db: DB):
         owner_id = 0
         if owner_type == 1:
             user = await db.fetch_one(
-                f"SELECT id FROM mortgage_staging_v1.c_users WHERE old_id = {old_file_info['role_id']};"
+                f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {old_file_info['role_id']};"
             )
             if user:
                 owner_id = user["id"]
         if owner_type == 2:
             sales_person = await db.fetch_one(
-                f"SELECT id FROM mortgage_staging_v1.s_sales_persons WHERE old_id = {old_file_info['role_id']};"
+                f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {old_file_info['role_id']};"
             )
             if sales_person:
                 owner_id = sales_person["id"]
         if owner_type == 3:
             manager = await db.fetch_one(
-                f"SELECT id FROM mortgage_staging_v1.s_managers WHERE old_id = {old_file_info['role_id']};"
+                f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {old_file_info['role_id']};"
             )
             if manager:
                 owner_id = manager["id"]
 
         p_borrowing = await db.fetch_one(
-            f"SELECT id, p_application_header_id FROM mortgage_staging_v1.p_borrowings WHERE old_id = {old_file_info['old_record_id']};"
+            f"SELECT id, p_application_header_id FROM mortgage_staging_v2.p_borrowings WHERE old_id = {old_file_info['old_record_id']};"
         )
 
         s3_key = f"{p_borrowing['p_application_header_id']}/{owner_id}_{owner_type_kanji_maps[owner_type]}/{prekey_maps[old_file_info['old_prekey']]}/{id}"
@@ -256,4 +256,4 @@ async def translate_p_uploaded_files(db: DB):
         utils.upload_base64_file_s3(f"{s3_key}/{old_file_info['old_filename']}", base64_encoded_data)
 
     for data in new_data:
-        await db.execute(utils.gen_insert_sql("mortgage_staging_v1.p_uploaded_files", data))
+        await db.execute(utils.gen_insert_sql("mortgage_staging_v2.p_uploaded_files", data))

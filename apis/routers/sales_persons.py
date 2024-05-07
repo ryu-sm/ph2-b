@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Request
 from fastapi import Depends
 from fastapi.responses import JSONResponse
+import pytz
 
 from constant import ACCESS_LOG_OPERATION, DEFAULT_200_MSG, DEFAULT_500_MSG
 from core.config import settings
@@ -81,7 +82,13 @@ async def sales_person_login(data: dict, request: Request, db=Depends(get_db)):
             return JSONResponse(status_code=423, content={"message": "account is locked."})
         if not utils.verify_password(data["password"], is_exist["hashed_pwd"]):
             if is_exist["failed_first_at"]:
-                if (datetime.now() - is_exist["failed_first_at"]).seconds < 300 and is_exist["failed_time"] == 4:
+                if (
+                    datetime.strptime(
+                        datetime.now().astimezone(pytz.timezone("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M:%S"),
+                        "%Y-%m-%d %H:%M:%S",
+                    )
+                    - datetime.strptime(is_exist["failed_first_at"], "%Y-%m-%d %H:%M:%S")
+                ).seconds < 300 and is_exist["failed_time"] == 4:
                     await crud.update_s_sales_person_status_locked(db, id=is_exist["id"])
                     return JSONResponse(status_code=423, content={"message": "account is locked."})
                 else:

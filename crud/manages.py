@@ -10,7 +10,7 @@ from constant import BANK_CODE, TOKEN_ROLE_TYPE
 
 
 async def check_s_manager_with_email(db: DB, email: str):
-    sql = f"SELECT CONVERT(id,CHAR) AS id, status, failed_first_at, failed_time, hashed_pwd FROM s_managers WHERE email = '{email}';"
+    sql = f"SELECT CONVERT(id,CHAR) AS id, status, DATE_FORMAT(failed_first_at, '%Y-%m-%d %H:%i:%S') as failed_first_at, failed_time, hashed_pwd FROM s_managers WHERE email = '{email}';"
     return await db.fetch_one(sql)
 
 

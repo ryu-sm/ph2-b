@@ -2,6 +2,8 @@ from constant import MANN_TRANSLATE_FIELDS
 
 
 def mann_to(data: dict):
+    if data is None:
+        return {}
     new_data = {**data}
     for field in MANN_TRANSLATE_FIELDS:
         if field in data and data[field]:
@@ -10,6 +12,8 @@ def mann_to(data: dict):
 
 
 def to_mann(data: dict):
+    if data is None:
+        return {}
     new_data = {**data}
     for field in MANN_TRANSLATE_FIELDS:
         if field in data and data[field]:

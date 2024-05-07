@@ -44,7 +44,7 @@ async def translate_p_activities_p_applicant_persons_0(db: DB, p_application_hea
         DATE_FORMAT(a.created_at, '%Y-%m-%d %H:%i:%S') as old_created_at,
         DATE_FORMAT(a.updated_at, '%Y-%m-%d %H:%i:%S') as old_updated_at
     FROM
-        mortgage_staging_v1.p_applicant_persons as p
+        mortgage_staging_v2.p_applicant_persons as p
     LEFT JOIN
         mortgage_loan_tool_be_production.activities as a
         ON
@@ -78,19 +78,19 @@ async def translate_p_activities_p_applicant_persons_0(db: DB, p_application_hea
 
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.c_users WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_sales_persons WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_managers WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
@@ -117,19 +117,19 @@ async def translate_p_activities_p_applicant_persons_0(db: DB, p_application_hea
 
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.c_users WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_sales_persons WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_managers WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
@@ -151,10 +151,10 @@ async def translate_p_activities_p_applicant_persons_0(db: DB, p_application_hea
                 )
             else:
                 continue
-        if len(update) == 0:
-            pass
-        else:
-            new_data[new_key] = {"create": create, "update": update}
+        # if len(update) == 0:
+        #     pass
+        # else:
+        new_data[new_key] = {"create": create, "update": update}
 
     for old_key, new_key in p_applicant_person_parameters_0.items():
         create = []
@@ -166,19 +166,19 @@ async def translate_p_activities_p_applicant_persons_0(db: DB, p_application_hea
 
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.c_users WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_sales_persons WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_managers WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
@@ -205,19 +205,19 @@ async def translate_p_activities_p_applicant_persons_0(db: DB, p_application_hea
 
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.c_users WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_sales_persons WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_managers WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
@@ -239,10 +239,10 @@ async def translate_p_activities_p_applicant_persons_0(db: DB, p_application_hea
                 )
             else:
                 continue
-        if len(update) == 0:
-            pass
-        else:
-            new_data[new_key] = {"create": create, "update": update}
+        # if len(update) == 0:
+        #     pass
+        # else:
+        new_data[new_key] = {"create": create, "update": update}
 
     for old_key, new_key in p_applicant_person_parameters_files.items():
         create = []
@@ -255,24 +255,26 @@ async def translate_p_activities_p_applicant_persons_0(db: DB, p_application_hea
 
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.c_users WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_sales_persons WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_managers WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicantPersonCreateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
             if old_key in parameters:
-                if len([item for item in parameters[old_key] if item != ""]) == 0:
+                files = []
+                if parameters[old_key] and parameters[old_key] != "アップロードファイルを削除した":
+                    files = [item for item in parameters[old_key] if item != ""]
                     create.append(
                         {
                             "p_application_header_id": PApplicantPersonCreateData["p_application_header_id"],
@@ -281,29 +283,45 @@ async def translate_p_activities_p_applicant_persons_0(db: DB, p_application_hea
                             "table_name": "p_applicant_persons",
                             "field_name": new_key,
                             "table_id": PApplicantPersonCreateData["p_applicant_person_id"],
-                            "content": None,
+                            "content": ", ".join(files) if files else None,
                             "operate_type": OPERATE_TYPE.APPLY.value,
                             "created_at": PApplicantPersonCreateData["old_created_at"],
                             "updated_at": PApplicantPersonCreateData["old_updated_at"],
                         }
                     )
-                else:
-                    for file in [item for item in parameters[old_key] if item != ""]:
-                        create.append(
-                            {
-                                "p_application_header_id": PApplicantPersonCreateData["p_application_header_id"],
-                                "operator_type": operator_type,
-                                "operator_id": operator_id,
-                                "table_name": "p_applicant_persons",
-                                "field_name": new_key,
-                                "table_id": PApplicantPersonCreateData["p_applicant_person_id"],
-                                "content": file,
-                                "operate_type": OPERATE_TYPE.APPLY.value,
-                                "created_at": PApplicantPersonCreateData["old_created_at"],
-                                "updated_at": PApplicantPersonCreateData["old_updated_at"],
-                            }
-                        )
-                values.append([item for item in parameters[old_key] if item != ""])
+
+                # if len([item for item in parameters[old_key] if item != ""]) == 0:
+                #     create.append(
+                #         {
+                #             "p_application_header_id": PApplicantPersonCreateData["p_application_header_id"],
+                #             "operator_type": operator_type,
+                #             "operator_id": operator_id,
+                #             "table_name": "p_applicant_persons",
+                #             "field_name": new_key,
+                #             "table_id": PApplicantPersonCreateData["p_applicant_person_id"],
+                #             "content": None,
+                #             "operate_type": OPERATE_TYPE.APPLY.value,
+                #             "created_at": PApplicantPersonCreateData["old_created_at"],
+                #             "updated_at": PApplicantPersonCreateData["old_updated_at"],
+                #         }
+                #     )
+                # else:
+                #     for file in [item for item in parameters[old_key] if item != ""]:
+                #         create.append(
+                #             {
+                #                 "p_application_header_id": PApplicantPersonCreateData["p_application_header_id"],
+                #                 "operator_type": operator_type,
+                #                 "operator_id": operator_id,
+                #                 "table_name": "p_applicant_persons",
+                #                 "field_name": new_key,
+                #                 "table_id": PApplicantPersonCreateData["p_applicant_person_id"],
+                #                 "content": file,
+                #                 "operate_type": OPERATE_TYPE.APPLY.value,
+                #                 "created_at": PApplicantPersonCreateData["old_created_at"],
+                #                 "updated_at": PApplicantPersonCreateData["old_updated_at"],
+                #             }
+                #         )
+                # values.append([item for item in parameters[old_key] if item != ""])
 
         for PApplicantPersonUpdateData in PApplicantPersonsUpdateData:
             parameters = PApplicantPersonUpdateData["parameters"]
@@ -312,43 +330,27 @@ async def translate_p_activities_p_applicant_persons_0(db: DB, p_application_hea
 
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.c_users WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_sales_persons WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_managers WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PApplicantPersonUpdateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
 
             if old_key in parameters:
-                pre_value = [] if len(values) == 0 else values[-1]
-                old_value = [] if parameters[old_key] == "アップロードファイルを削除した" else parameters[old_key]
-                for file in [item for item in old_value if item != ""]:
-                    if file not in pre_value:
-                        update.append(
-                            {
-                                "p_application_header_id": PApplicantPersonUpdateData["p_application_header_id"],
-                                "operator_type": operator_type,
-                                "operator_id": operator_id,
-                                "table_name": "p_applicant_persons",
-                                "field_name": new_key,
-                                "table_id": PApplicantPersonUpdateData["p_applicant_person_id"],
-                                "content": file,
-                                "operate_type": OPERATE_TYPE.CREATE.value,
-                                "created_at": PApplicantPersonUpdateData["old_created_at"],
-                                "updated_at": PApplicantPersonUpdateData["old_updated_at"],
-                            }
-                        )
-                for file in list(set(pre_value) - set([item for item in old_value if item != ""])):
+                files = []
+                if parameters[old_key] and parameters[old_key] != "アップロードファイルを削除した":
+                    files = [item for item in parameters[old_key] if item != ""]
                     update.append(
                         {
                             "p_application_header_id": PApplicantPersonUpdateData["p_application_header_id"],
@@ -357,26 +359,55 @@ async def translate_p_activities_p_applicant_persons_0(db: DB, p_application_hea
                             "table_name": "p_applicant_persons",
                             "field_name": new_key,
                             "table_id": PApplicantPersonUpdateData["p_applicant_person_id"],
-                            "content": file,
-                            "operate_type": OPERATE_TYPE.DELETE.value,
+                            "content": ", ".join(files) if files else None,
+                            "operate_type": OPERATE_TYPE.UPDATE.value,
                             "created_at": PApplicantPersonUpdateData["old_created_at"],
                             "updated_at": PApplicantPersonUpdateData["old_updated_at"],
                         }
                     )
-                values.append([item for item in old_value if item != ""])
+                # pre_value = [] if len(values) == 0 else values[-1]
+                # old_value = [] if parameters[old_key] == "アップロードファイルを削除した" else parameters[old_key]
+                # for file in [item for item in old_value if item != ""]:
+                #     if file not in pre_value:
+                #         update.append(
+                #             {
+                #                 "p_application_header_id": PApplicantPersonUpdateData["p_application_header_id"],
+                #                 "operator_type": operator_type,
+                #                 "operator_id": operator_id,
+                #                 "table_name": "p_applicant_persons",
+                #                 "field_name": new_key,
+                #                 "table_id": PApplicantPersonUpdateData["p_applicant_person_id"],
+                #                 "content": file,
+                #                 "operate_type": OPERATE_TYPE.CREATE.value,
+                #                 "created_at": PApplicantPersonUpdateData["old_created_at"],
+                #                 "updated_at": PApplicantPersonUpdateData["old_updated_at"],
+                #             }
+                #         )
+                # for file in list(set(pre_value) - set([item for item in old_value if item != ""])):
+                #     update.append(
+                #         {
+                #             "p_application_header_id": PApplicantPersonUpdateData["p_application_header_id"],
+                #             "operator_type": operator_type,
+                #             "operator_id": operator_id,
+                #             "table_name": "p_applicant_persons",
+                #             "field_name": new_key,
+                #             "table_id": PApplicantPersonUpdateData["p_applicant_person_id"],
+                #             "content": file,
+                #             "operate_type": OPERATE_TYPE.DELETE.value,
+                #             "created_at": PApplicantPersonUpdateData["old_created_at"],
+                #             "updated_at": PApplicantPersonUpdateData["old_updated_at"],
+                #         }
+                #     )
+                # values = [item for item in old_value if item != ""]
             else:
                 continue
-        if len(update) == 0:
-            pass
-        else:
-            new_data[new_key] = {"create": create, "update": update}
+        # if len(update) == 0:
+        #     pass
+        # else:
+        new_data[new_key] = {"create": create, "update": update}
 
     for key, value in new_data.items():
         datas = value["create"] + value["update"]
         for data in datas:
             id = await db.uuid_short()
-            await db.execute(utils.gen_insert_sql("mortgage_staging_v1.p_activities", {"id": id, **data}))
-
-    # return new_data
-    # return PApplicantPersonsCreateData + PApplicantPersonsUpdateData
-    # # return PApplicationHeadersUpdateData + PApplicationHeadersUpdateData
+            await db.execute(utils.gen_insert_sql("mortgage_staging_v2.p_activities", {"id": id, **data}))

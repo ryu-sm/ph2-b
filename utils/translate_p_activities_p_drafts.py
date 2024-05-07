@@ -195,7 +195,7 @@ async def translate_p_activities_p_drafts(db: DB, old_draft_id=61):
 
         for bank_id in p_application_header["master_bank_ids"]:
             bank_code = bank_maps[bank_id]
-            new_bank = await db.fetch_one(f"SELECT id FROM mortgage_staging_v1.s_banks WHERE code = '{bank_code}';")
+            new_bank = await db.fetch_one(f"SELECT id FROM mortgage_staging_v2.s_banks WHERE code = '{bank_code}';")
             p_application_banks.append(str(new_bank["id"]))
 
     new_p_draft["isMCJ"] = True if len(p_application_banks) > 1 else False
@@ -439,11 +439,11 @@ async def translate_p_activities_p_drafts(db: DB, old_draft_id=61):
     if p_residents:
         new_p_draft["p_residents"] = p_residents
     new_user = await db.fetch_one(
-        f"""SELECT id FROM mortgage_staging_v1.c_users as u WHERE u.old_id = {p_draft["user_id"]};"""
+        f"""SELECT id FROM mortgage_staging_v2.c_users as u WHERE u.old_id = {p_draft["user_id"]};"""
     )
     new_p_draft_json = json.dumps(new_p_draft, ensure_ascii=False)
     id = await db.uuid_short()
-    sql = f"""INSERT INTO mortgage_staging_v1.p_drafts (id, c_user_id, data)
+    sql = f"""INSERT INTO mortgage_staging_v2.p_drafts (id, c_user_id, data)
     VALUES ({id}, {new_user["id"]}, '{new_p_draft_json}')
     """
     await db.execute(sql)

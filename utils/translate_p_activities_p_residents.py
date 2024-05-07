@@ -35,7 +35,7 @@ async def translate_p_activities_p_residents(db: DB, p_application_header_id):
         DATE_FORMAT(a.created_at, '%Y-%m-%d %H:%i:%S') as old_created_at,
         DATE_FORMAT(a.updated_at, '%Y-%m-%d %H:%i:%S') as old_updated_at
     FROM
-        mortgage_staging_v1.p_residents as p
+        mortgage_staging_v2.p_residents as p
     LEFT JOIN
         mortgage_loan_tool_be_production.activities as a
         ON
@@ -68,19 +68,19 @@ async def translate_p_activities_p_residents(db: DB, p_application_header_id):
 
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.c_users WHERE old_id = {PResidentCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PResidentCreateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_sales_persons WHERE old_id = {PResidentCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PResidentCreateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_managers WHERE old_id = {PResidentCreateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PResidentCreateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
@@ -103,19 +103,19 @@ async def translate_p_activities_p_residents(db: DB, p_application_header_id):
 
             if operator_type == 1:
                 user = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.c_users WHERE old_id = {PResidentUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {PResidentUpdateData['owner_id']};"
                 )
                 if user:
                     operator_id = user["id"]
             if operator_type == 2:
                 sales_person = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_sales_persons WHERE old_id = {PResidentUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {PResidentUpdateData['owner_id']};"
                 )
                 if sales_person:
                     operator_id = sales_person["id"]
             if operator_type == 3:
                 manager = await db.fetch_one(
-                    f"SELECT id FROM mortgage_staging_v1.s_managers WHERE old_id = {PResidentUpdateData['owner_id']};"
+                    f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {PResidentUpdateData['owner_id']};"
                 )
                 if manager:
                     operator_id = manager["id"]
@@ -135,13 +135,13 @@ async def translate_p_activities_p_residents(db: DB, p_application_header_id):
                 )
             else:
                 continue
-        if len(update) == 0:
-            pass
-        else:
-            new_data[new_key] = {"create": create, "update": update}
+        # if len(update) == 0:
+        #     pass
+        # else:
+        new_data[new_key] = {"create": create, "update": update}
 
     for key, value in new_data.items():
         datas = value["create"] + value["update"]
         for data in datas:
             id = await db.uuid_short()
-            await db.execute(utils.gen_insert_sql("mortgage_staging_v1.p_activities", {"id": id, **data}))
+            await db.execute(utils.gen_insert_sql("mortgage_staging_v2.p_activities", {"id": id, **data}))

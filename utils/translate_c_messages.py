@@ -39,21 +39,21 @@ owner_type_maps = {
 
 async def get_type_and_id(db: DB, viewed_account_id, viewed_account_type):
     if viewed_account_type == "User":
-        user = await db.fetch_one(f"SELECT id FROM mortgage_staging_v1.c_users WHERE old_id = {viewed_account_id}")
+        user = await db.fetch_one(f"SELECT id FROM mortgage_staging_v2.c_users WHERE old_id = {viewed_account_id}")
         user_id = None
         if user:
             user_id = user["id"]
         return {"viewed_account_id": user_id, "viewed_account_type": 1}
     if viewed_account_type == "SSalePerson":
         user = await db.fetch_one(
-            f"SELECT id FROM mortgage_staging_v1.s_sales_persons WHERE old_id = {viewed_account_id}"
+            f"SELECT id FROM mortgage_staging_v2.s_sales_persons WHERE old_id = {viewed_account_id}"
         )
         user_id = None
         if user:
             user_id = user["id"]
         return {"viewed_account_id": user_id, "viewed_account_type": 2}
     if viewed_account_type == "Manager":
-        user = await db.fetch_one(f"SELECT id FROM mortgage_staging_v1.s_managers WHERE old_id = {viewed_account_id}")
+        user = await db.fetch_one(f"SELECT id FROM mortgage_staging_v2.s_managers WHERE old_id = {viewed_account_id}")
         user_id = None
         if user:
             user_id = user["id"]
@@ -68,7 +68,7 @@ async def translate_c_messages(db: DB):
     FROM
         mortgage_loan_tool_be_production.messages as om
     JOIN
-        mortgage_staging_v1.c_messages as nm
+        mortgage_staging_v2.c_messages as nm
         ON
         nm.old_id = om.id
     """
