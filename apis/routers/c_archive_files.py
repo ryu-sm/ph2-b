@@ -18,14 +18,7 @@ router = APIRouter(route_class=LoggingContextRoute)
 @router.post("/sales-person/c_archive_files")
 async def sales_person_insert_c_archive_files(data: dict, db=Depends(get_db), token=Depends(get_token)):
     try:
-        await crud.insert_c_archive_files(
-            db,
-            data["files"],
-            data["s_sales_person_id"],
-            data["s_sales_company_org_id"],
-            token["role_type"],
-            token["id"],
-        )
+        await crud.insert_c_archive_files(db, data["files"], token["id"])
 
         return JSONResponse(status_code=200, content={"message": "successful"})
     except Exception as err:

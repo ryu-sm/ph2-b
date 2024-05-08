@@ -398,7 +398,7 @@ CREATE TABLE `p_borrowing_details` (
   `bonus_repayment_month` tinyint DEFAULT NULL COMMENT 'ボーナス返済月',
   `repayment_method` tinyint DEFAULT NULL COMMENT '返済方法',
   `loan_term_year` int DEFAULT NULL COMMENT '借入期間　ヶ年',
-  `loan_term_month` int DEFAULT NULL COMMENT '借入期間　ヶ月',
+  `loan_term_month` int DEFAULT "0" COMMENT '借入期間　ヶ月',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日付',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日付',
   PRIMARY KEY (`id`) USING BTREE,

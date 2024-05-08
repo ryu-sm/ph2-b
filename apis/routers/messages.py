@@ -65,7 +65,7 @@ async def get_manager_messages(db=Depends(get_db), token=Depends(get_token)):
 @router.get("/sales-person/messages")
 async def get_manager_messages(db=Depends(get_db), token=Depends(get_token)):
     try:
-        messages = await crud.query_sales_person_dashboard_messages(db, token["orgs"], token["id"])
+        messages = await crud.query_sales_person_dashboard_messages(db, token["id"])
         return JSONResponse(status_code=200, content=messages)
     except Exception as err:
         logger.exception(err)

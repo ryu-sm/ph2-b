@@ -140,7 +140,7 @@ async def manager_logout(request: Request, db=Depends(get_db), token=Depends(get
 async def manager_get_access_applications(status: int, db=Depends(get_db), token=Depends(get_token)):
 
     try:
-        p_application_headers_basic_list = await crud.query_manager_access_p_application_headers_(
+        p_application_headers_basic_list = await crud.query_manager_access_p_application_headers(
             db, status, token["id"]
         )
         return JSONResponse(status_code=200, content=p_application_headers_basic_list)
@@ -151,10 +151,23 @@ async def manager_get_access_applications(status: int, db=Depends(get_db), token
         )
 
 
+@router.get("/manager/preliminariy/access/{p_application_header_id}")
+async def manager_get_access_application_id(p_application_header_id: int, db=Depends(get_db), token=Depends(get_token)):
+
+    try:
+        access = await crud.query_manager_access_p_application_header_id(db, p_application_header_id, token["id"])
+        return JSONResponse(status_code=200, content=access)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
 @router.get("/manager/preliminaries/file")
 async def manager_get_access_applications_file(status: int, db=Depends(get_db), token=Depends(get_token)):
     try:
-        p_application_headers_basic_list = await crud.query_manager_access_p_application_headers_(
+        p_application_headers_basic_list = await crud.query_manager_access_p_application_headers(
             db, status, token["id"]
         )
         file = await utils.preliminaries_output(p_application_headers_basic_list)

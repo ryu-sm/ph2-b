@@ -10,10 +10,11 @@ from utils.s3 import delete_from_s3, upload_to_s3, download_from_s3
 from core.config import settings
 
 
-async def insert_c_archive_files(
-    db: DB, files: list, s_sales_person_id: int, s_sales_company_org_id: int, role_type, role_id
-):
-    s_sales_company_org_root_id = await crud.query_s_sales_company_orgs_root_id(db, s_sales_company_org_id)
+async def insert_c_archive_files(db: DB, files: list, s_sales_person_id: int):
+    below_orgs = await crud.query_sales_person_below_orgs(db, s_sales_person_id)
+    s_sales_company_org_root_id = await crud.query_s_sales_company_orgs_root_id(
+        db, below_orgs[0].get("s_sales_company_org_id")
+    )
     c_archive_file_id = await db.uuid_short()
     c_archive_file_sql_params = {
         "id": c_archive_file_id,
@@ -26,7 +27,6 @@ async def insert_c_archive_files(
         c_archive_uploaded_file_id = await db.uuid_short()
         c_archive_uploaded_file_sql_params = {
             "id": c_archive_uploaded_file_id,
-            # "owner_type": role_type,
             "owner_id": s_sales_person_id,
             "record_id": c_archive_file_id,
             "s3_key": f"{s_sales_company_org_root_id}/{s_sales_person_id}/{c_archive_uploaded_file_id}",

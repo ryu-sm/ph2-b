@@ -26,7 +26,6 @@ async def get_token(authorization: str = Header(), db: DB = Depends(get_db)):
             "email": payload["email"],
             "name_kanji": payload["name_kanji"],
             "role_type": payload["role_type"],
-            "orgs": payload["orgs"],
         }
         if DeepDiff(db_payload, t_payload):
             raise AuthException
@@ -36,7 +35,6 @@ async def get_token(authorization: str = Header(), db: DB = Depends(get_db)):
         t_payload = {
             "id": payload["id"],
             "email": payload["email"],
-            "role": payload["role"],
             "name_kanji": payload["name_kanji"],
             "role_type": payload["role_type"],
         }
