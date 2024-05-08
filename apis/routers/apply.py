@@ -21,6 +21,7 @@ from constant import (
 )
 
 from constant import DEFAULT_200_MSG, DEFAULT_500_MSG
+from utils import apply_data_check
 
 
 router = APIRouter()
@@ -29,10 +30,10 @@ router = APIRouter()
 @router.post("/application")
 async def post_application(data_: dict, db=Depends(get_db), token: dict = Depends(get_token)):
     try:
-        # errors = manager_data_check(data_)
+        errors = apply_data_check(data_, token["role_type"])
 
-        # if errors:
-        #     return JSONResponse(status_code=400, content=errors)
+        if errors:
+            return JSONResponse(status_code=400, content=errors)
         data = utils.blank_to_none(data_)
         p_application_header_id = None
         if token["role_type"] == TOKEN_ROLE_TYPE.USER.value:
@@ -130,6 +131,8 @@ async def post_application(data_: dict, db=Depends(get_db), token: dict = Depend
             template="manager_new_apply_email",
             link=f"{settings.FRONTEND_BASE_URL}/manager/edit-preliminary?id={p_application_header_id}",
         )
+
+        print(f"{settings.FRONTEND_BASE_URL}/manager/edit-preliminary?id={p_application_header_id}")
 
         await utils.gen_row_data(p_application_header_id, data_)
 

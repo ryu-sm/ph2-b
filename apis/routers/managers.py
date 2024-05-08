@@ -127,7 +127,7 @@ async def manager_logout(request: Request, db=Depends(get_db), token=Depends(get
             params={
                 "account_id": token.get("id"),
                 "account_type": token.get("role_type"),
-                "operation": ACCESS_LOG_OPERATION.LOGIN.value,
+                "operation": ACCESS_LOG_OPERATION.LOGOUT.value,
             },
         )
         return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
@@ -253,7 +253,7 @@ async def new_memo(data: dict, db=Depends(get_db), token=Depends(get_token)):
 
 
 @router.put("/manager/provisional_after_result")
-async def update_provisional_after_result(data: dict, db=Depends(get_db), token=Depends(get_token)):
+async def update_provisional_after_result(data: dict, request: Request, db=Depends(get_db), token=Depends(get_token)):
     try:
         await crud.update_p_application_banks_provisional_after_result(
             db,
@@ -262,6 +262,27 @@ async def update_provisional_after_result(data: dict, db=Depends(get_db), token=
             data["provisional_after_result"],
             token["role_type"],
             token["id"],
+        )
+        p_application_header_basic = await crud.query_p_application_header_basic(db, data["p_application_header_id"])
+        operation_content_maps = {
+            0: "仮審査結果の操作状態: 仮審査否決",
+            1: "仮審査結果の操作状態: 本審査",
+            2: "仮審査結果の操作状態: 本審査否決",
+            3: "仮審査結果の操作状態: 融資実行済み",
+            4: "仮審査結果の操作状態: 他行借入",
+            5: "仮審査結果の操作状態: 自宅購入取止め",
+        }
+
+        await utils.common_insert_c_access_log(
+            db,
+            request,
+            params={
+                "apply_no": p_application_header_basic["apply_no"],
+                "account_id": token.get("id"),
+                "account_type": token.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.UPDATE.value,
+                "operation_content": operation_content_maps[int(data["provisional_after_result"])],
+            },
         )
         return JSONResponse(status_code=200, content={"message": "successful"})
     except Exception as err:
