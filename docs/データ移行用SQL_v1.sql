@@ -517,7 +517,7 @@ insert into p_application_headers (
 	,required_funds_refinance_loan_balance    --  必要資金　借換対象ローン残債        
 	,required_funds_upgrade_amount    --  必要資金　増改築        
 	,required_funds_loan_plus_amount    --  必要資金　住宅ローンプラス        
-	,required_funds_total_amount    --  必要資金　必要資金合計        
+	-- ,required_funds_total_amount    --  必要資金　必要資金合計        
 	,funding_saving_amount    --  調達資金　預貯金        
 	,funding_other_saving_amount    --  調達資金　有価証券等        
 	,funding_estate_sale_amount    --  調達資金　不動産売却代金        
@@ -529,7 +529,7 @@ insert into p_application_headers (
 	,funding_other_amount_detail    --  調達資金　その他額名        
 	,funding_other_loan_amount    --  調達資金　その他の借り入れ        
 	,funding_other_refinance_amount    --  調達資金　その他借換        
-	,funding_total_amount    --  調達資金　調達資金合計        
+	-- ,funding_total_amount    --  調達資金　調達資金合計        
 	,refund_source_type    --  完済原資　区分（MCJ）        
 	,refund_source_type_other    --  完済原資　区分　その他（MCJ）        
 	,refund_source_content    --  完済原資　内容（MCJ）        
@@ -651,7 +651,7 @@ select
 	,h.refinancing_loan_balance as required_funds_refinance_loan_balance    --  必要資金　借換対象ローン残債
 	,h.house_upgrade_cost as required_funds_upgrade_amount    --  必要資金　増改築
 	,h.require_funds_breakdown_mortgage as required_funds_loan_plus_amount    --  必要資金　住宅ローンプラス
-	,(h.land_purchase_price+h.house_purchase_price+h.accessory_cost+h.additional_cost+h.require_funds_breakdown_mortgage+h.refinancing_loan_balance+h.house_upgrade_cost) as required_funds_total_amount    --  必要資金　必要資金合計
+	-- ,(h.land_purchase_price+h.house_purchase_price+h.accessory_cost+h.additional_cost+h.require_funds_breakdown_mortgage+h.refinancing_loan_balance+h.house_upgrade_cost) as required_funds_total_amount    --  必要資金　必要資金合計
 	,h.deposit_savings_1  as funding_saving_amount    --  調達資金　預貯金
 	,h.other_saving_amount as funding_other_saving_amount    --  調達資金　有価証券等
 	,h.real_estate_sale_price as funding_estate_sale_amount    --  調達資金　不動産売却代金
@@ -663,7 +663,7 @@ select
 	,h.other_procurement_breakdown_content as funding_other_amount_detail    --  調達資金　その他額名
 	,h.amount_any_loans as funding_other_loan_amount    --  調達資金　その他の借り入れ
 	,h.amount_others as funding_other_refinance_amount    --  調達資金　その他借換
-	,h.saving_amount as funding_total_amount    --  調達資金　調達資金合計
+	-- ,h.saving_amount as funding_total_amount    --  調達資金　調達資金合計
 -- 	,case when h.completely_repayment_type is null then null else '' end as refund_source_type    --  完済原資　区分（MCJ）
     ,case when h.completely_repayment_type is not null then
 		concat('[',replace( replace( replace( REPLACE(REPLACE(REPLACE(h.completely_repayment_type, '-', ''),' ',''),'\n',','),'\',','"') ,',\'','"'),'\'',',"'),']') else null

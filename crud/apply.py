@@ -619,7 +619,7 @@ async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
         required_funds_refinance_loan_balance,
         required_funds_upgrade_amount,
         required_funds_loan_plus_amount,
-        required_funds_total_amount,
+
         funding_saving_amount,
         funding_estate_sale_amount,
         funding_self_amount,
@@ -629,7 +629,7 @@ async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
         funding_pair_loan_amount,
         funding_other_amount,
         funding_other_amount_detail,
-        funding_total_amount,
+
         sales_company_id,
         sales_area_id,
         sales_exhibition_hall_id,
@@ -651,13 +651,12 @@ async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
         SELECT
             CONVERT(id,CHAR) AS id,
             s3_key,
-            file_name
+            file_name,
+            owner_type
         FROM
             p_uploaded_files
         WHERE
             p_application_header_id = {p_application_header_id}
-            AND
-            owner_type = 1
             AND
             type = 0
             AND
@@ -670,7 +669,14 @@ async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
         temp_files = []
         for file_info in files_info:
             src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
-            temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
+            temp_files.append(
+                {
+                    "id": file_info["id"],
+                    "name": file_info["file_name"],
+                    "src": src,
+                    "owner_type": file_info["owner_type"],
+                }
+            )
         files[key] = temp_files
     print(p_application_headers["created_at"])
     return none_to_blank({**p_application_headers, **files})
@@ -848,13 +854,13 @@ async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int,
         SELECT
             CONVERT(id,CHAR) AS id,
             s3_key,
-            file_name
+            file_name,
+            owner_type
         FROM
             p_uploaded_files
         WHERE
             p_application_header_id = {p_application_header_id}
-            AND
-            owner_type = 1
+         
             AND
             type = {type}
             AND
@@ -866,7 +872,14 @@ async def query_p_applicant_persons_for_ap(db: DB, p_application_header_id: int,
         temp_files = []
         for file_info in files_info:
             src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
-            temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
+            temp_files.append(
+                {
+                    "id": file_info["id"],
+                    "name": file_info["file_name"],
+                    "src": src,
+                    "owner_type": file_info["owner_type"],
+                }
+            )
         files[key] = temp_files
     return none_to_blank({**p_applicant_persons, **files})
 
@@ -976,15 +989,15 @@ async def query_p_borrowings_for_ap(db: DB, p_application_header_id: int):
             SELECT
                 CONVERT(id,CHAR) AS id,
                 s3_key,
-                file_name
+                file_name,
+                owner_type
             FROM
                 p_uploaded_files
             WHERE
                 p_application_header_id = {p_application_header_id}
                 AND
                 record_id = {borrowing["id"]}
-                AND
-                owner_type = 1
+
                 AND
                 type = 0
                 AND
@@ -996,7 +1009,14 @@ async def query_p_borrowings_for_ap(db: DB, p_application_header_id: int):
             temp_files = []
             for file_info in files_info:
                 src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
-                temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
+                temp_files.append(
+                    {
+                        "id": file_info["id"],
+                        "name": file_info["file_name"],
+                        "src": src,
+                        "owner_type": file_info["owner_type"],
+                    }
+                )
             files[key] = temp_files
         borrowings.append(none_to_blank({**borrowing, **files}))
     return borrowings
@@ -1063,8 +1083,7 @@ async def diff_update_p_application_headers_for_ap(db: DB, data: dict, p_applica
                 p_application_header_id = {p_application_header_id}
                 AND
                 deleted IS NULL
-                AND
-                owner_type = 1
+
                 AND
                 type = 0
                 AND
@@ -1312,8 +1331,7 @@ async def diff_update_p_applicant_persons_for_ap(db: DB, data: dict, p_applicati
                 p_application_header_id = {p_application_header_id}
                 AND
                 deleted IS NULL
-                AND
-                owner_type = 1
+
                 AND
                 type = {type}
                 AND
@@ -1833,8 +1851,7 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
                     record_id = {old_p_borrowing["id"]}
                     AND
                     deleted IS NULL
-                    AND
-                    owner_type = 1
+
                     AND
                     type = 0
                     AND
@@ -1857,7 +1874,6 @@ async def diff_update_p_borrowings_for_ap(db: DB, data: typing.List[dict], p_app
                         "owner_id": role_id,
                         "record_id": old_p_borrowing["id"],
                         "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
-                        # "s3_key": f"{p_application_header_id}/{p_upload_file_id}/{key}",
                         "s3_key": f"{p_application_header_id}/{role_id}_{OWNER_TYPE_EN_MAPS[role_type]}/{key}/{p_upload_file_id}",
                         "file_name": update_file["name"],
                     }
@@ -2012,13 +2028,13 @@ async def query_p_application_headers_files_for_ap(db: DB, p_application_header_
         SELECT
             CONVERT(id,CHAR) AS id,
             s3_key,
-            file_name
+            file_name,
+            owner_type
         FROM
             p_uploaded_files
         WHERE
             p_application_header_id = {p_application_header_id}
-            AND
-            owner_type = 1
+
             AND
             type = {P_UPLOAD_FILE_TYPE.APPLICANT.value}
             AND
@@ -2030,7 +2046,14 @@ async def query_p_application_headers_files_for_ap(db: DB, p_application_header_
         temp_files = []
         for file_info in files_info:
             src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
-            temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
+            temp_files.append(
+                {
+                    "id": file_info["id"],
+                    "name": file_info["file_name"],
+                    "src": src,
+                    "owner_type": file_info["owner_type"],
+                }
+            )
         files[key] = temp_files
     return files
 
@@ -2092,13 +2115,13 @@ async def query_p_applicant_persons_files_for_ap(db: DB, p_application_header_id
         SELECT
             CONVERT(id,CHAR) AS id,
             s3_key,
-            file_name
+            file_name,
+            owner_type
         FROM
             p_uploaded_files
         WHERE
             p_application_header_id = {p_application_header_id}
-            AND
-            owner_type = 1
+
             AND
             type = {type}
             AND
@@ -2110,7 +2133,14 @@ async def query_p_applicant_persons_files_for_ap(db: DB, p_application_header_id
         temp_files = []
         for file_info in files_info:
             src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
-            temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
+            temp_files.append(
+                {
+                    "id": file_info["id"],
+                    "name": file_info["file_name"],
+                    "src": src,
+                    "owner_type": file_info["owner_type"],
+                }
+            )
         files[key] = temp_files
     return files
 
@@ -2134,15 +2164,15 @@ async def query_p_borrowings_files_for_ap(db: DB, p_application_header_id: int):
             SELECT
                 CONVERT(id,CHAR) AS id,
                 s3_key,
-                file_name
+                file_name,
+                owner_type
             FROM
                 p_uploaded_files
             WHERE
                 p_application_header_id = {p_application_header_id}
                 AND
                 record_id = {borrowing["borrowing_id"]}
-                AND
-                owner_type = 1
+
                 AND
                 type = {P_UPLOAD_FILE_TYPE.APPLICANT.value}
                 AND
@@ -2154,7 +2184,14 @@ async def query_p_borrowings_files_for_ap(db: DB, p_application_header_id: int):
             temp_files = []
             for file_info in files_info:
                 src = utils.generate_presigned_url(f"{file_info['s3_key']}/{file_info['file_name']}")
-                temp_files.append({"id": file_info["id"], "name": file_info["file_name"], "src": src})
+                temp_files.append(
+                    {
+                        "id": file_info["id"],
+                        "name": file_info["file_name"],
+                        "src": src,
+                        "owner_type": file_info["owner_type"],
+                    }
+                )
             files[key] = temp_files
         borrowings.append(none_to_blank({**borrowing, **files}))
 

@@ -118,7 +118,7 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
         p_application_headers.required_funds_refinance_loan_balance,
         p_application_headers.required_funds_upgrade_amount,
         p_application_headers.required_funds_loan_plus_amount,
-        p_application_headers.required_funds_total_amount,
+
         p_application_headers.funding_saving_amount,
         p_application_headers.funding_estate_sale_amount,
         p_application_headers.funding_other_saving_amount,
@@ -127,7 +127,7 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
         p_application_headers.funding_pair_loan_amount,
         p_application_headers.funding_other_amount,
         p_application_headers.funding_other_amount_detail,
-        p_application_headers.funding_total_amount,
+
         p_application_headers.sales_company_id,
         p_application_headers.sales_area_id,
         p_application_headers.sales_exhibition_hall_id,
