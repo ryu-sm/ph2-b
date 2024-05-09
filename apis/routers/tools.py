@@ -15,6 +15,18 @@ from utils.translate_p_activities_p_borrowings import translate_p_activities_p_b
 router = APIRouter()
 
 
+@router.post("/agent-link-for-qrcode/{org_id}")
+async def gen_link_for_qrcode(org_id: int, db: DB = Depends(get_db)):
+    isOk = await db.fetch_one(f"select id from s_sales_company_orgs where id = {org_id}")
+
+    if isOk is None:
+        return JSONResponse(status_code=400)
+
+    data = {"s_sales_company_org_id": f"{org_id}"}
+    token = utils.gen_token(data, 525600)
+    return f"{settings.FRONTEND_BASE_URL}/sales-person/register/verify-email?token={token}"
+
+
 @router.post("/link-for-qrcode/{org_id}")
 async def gen_link_for_qrcode(org_id: int, db: DB = Depends(get_db)):
     isOk = await db.fetch_one(f"select id from s_sales_company_orgs where id = {org_id}")

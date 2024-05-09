@@ -20,6 +20,71 @@ from templates.user_register_init_message import INIT_MESSAGE
 router = APIRouter(route_class=LoggingContextRoute)
 
 
+@router.post("/sales-person/verify-email")
+async def sales_person_send_verify_email(data: dict, db=Depends(get_db)):
+    try:
+        is_exist = await crud.check_s_sales_person_with_email(db, email=data["email"])
+        if is_exist:
+            return JSONResponse(status_code=400, content={"message": "user email is exist."})
+        token = utils.gen_token(data, expires_delta=settings.JWT_VERIFY_EMAIL_TOKEN_EXP)
+        utils.send_email(
+            to=data["email"],
+            template="user_send_verify_email",
+            link=f"{settings.FRONTEND_BASE_URL}/sales-person/register?token={token}",
+        )
+        return JSONResponse(status_code=200, content=DEFAULT_200_MSG)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
+
+
+@router.post("/sales-person")
+async def sales_person_register(data: dict, request: Request, db=Depends(get_db)):
+    try:
+        payload = utils.parse_token(data["token"])
+
+        if payload is None:
+            return JSONResponse(status_code=407, content={"message": "token is invalid."})
+        if payload.get("s_sales_company_org_id"):
+            is_exist_s_sales_company = await crud.check_user_register_s_sales_company_org_id(
+                db, payload.get("s_sales_company_org_id")
+            )
+            if is_exist_s_sales_company is None:
+                return JSONResponse(status_code=408, content={"message": "s_sales_company_org_id is invalid."})
+        is_exist = await crud.check_s_sales_person_with_email(db, email=payload["email"])
+        if is_exist:
+            return JSONResponse(status_code=400, content={"message": "user email is exist."})
+
+        new_sales_person_id = await crud.insert_new_s_sales_person(
+            db,
+            name=data["name"],
+            email=payload["email"],
+            hashed_pwd=utils.hash_password(data["password"]),
+            s_sales_company_org_id=payload.get("s_sales_company_org_id"),
+        )
+
+        payload = await crud.query_s_sales_person_token_payload(db, id=new_sales_person_id)
+
+        access_token = utils.gen_token(
+            payload=payload,
+            expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
+        )
+
+        await utils.common_insert_c_access_log(
+            db,
+            request,
+            params={
+                "account_id": new_sales_person_id,
+                "account_type": 2,
+                "operation": ACCESS_LOG_OPERATION.REGISTER.value,
+            },
+        )
+        return JSONResponse(status_code=200, content={"access_token": access_token})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
+
+
 @router.post("/sales-person/password/verify-email")
 async def sales_person_send_reset_password_verify_email(data: schemas.VerifyEmail, db=Depends(get_db)):
     try:

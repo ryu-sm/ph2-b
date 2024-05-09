@@ -742,7 +742,7 @@ CREATE TABLE `s_sales_person_s_sales_company_org_rels` (
 DROP TABLE IF EXISTS `s_sales_persons`;
 CREATE TABLE `s_sales_persons` (
   `id` bigint unsigned NOT NULL COMMENT 'ID',
-  `code` varchar(20) NOT NULL COMMENT 'コード',
+  `code` varchar(20) DEFAULT NULL COMMENT 'コード',
   `email` varchar(128) NOT NULL COMMENT 'Eメール',
   `name_kanji` varchar(48) NOT NULL COMMENT '名前　漢字',
   `direct_phone` varchar(17) DEFAULT NULL COMMENT '直通番号',

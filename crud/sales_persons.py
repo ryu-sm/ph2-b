@@ -6,7 +6,27 @@ from core.database import DB
 import crud
 import utils
 from utils.common import none_to_blank
-from utils.s3 import upload_to_s3
+
+
+async def insert_new_s_sales_person(db: DB, name: str, email: str, hashed_pwd: str, s_sales_company_org_id: int):
+    id = await db.uuid_short()
+    sql_params = {
+        "id": id,
+        "email": email,
+        "name_kanji": name,
+        "hashed_pwd": hashed_pwd,
+        "status": 1,
+    }
+    await db.execute(utils.gen_insert_sql("s_sales_persons", sql_params))
+
+    sql_params = {
+        "s_sales_person_id": id,
+        "s_sales_company_org_id": s_sales_company_org_id,
+        "role": 1,
+    }
+    await db.execute(utils.gen_insert_sql("s_sales_person_s_sales_company_org_rels", sql_params))
+
+    return id
 
 
 async def check_s_sales_person_with_email(db: DB, email: str):
