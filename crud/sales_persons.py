@@ -29,6 +29,30 @@ async def insert_new_s_sales_person(db: DB, name: str, email: str, hashed_pwd: s
     return id
 
 
+async def insert_new_azure_s_sales_person(db: DB, code: str, name: str, email: str):
+    id = await db.uuid_short()
+    sql_params = {
+        "id": id,
+        "code": code,
+        "email": email,
+        "name_kanji": name,
+        "status": 2,
+    }
+    await db.execute(utils.gen_insert_sql("s_sales_persons", sql_params))
+    return id
+
+
+async def updated_new_azure_s_sales_person_status(db: DB, sales_person_id: str, s_sales_company_org_id: str):
+    sql = f"UPDATE s_sales_persons SET status = 1 WHERE id = {sales_person_id};"
+    await db.execute(sql)
+    sql_params = {
+        "s_sales_person_id": sales_person_id,
+        "s_sales_company_org_id": s_sales_company_org_id,
+        "role": 1,
+    }
+    await db.execute(utils.gen_insert_sql("s_sales_person_s_sales_company_org_rels", sql_params))
+
+
 async def check_s_sales_person_with_email(db: DB, email: str):
     sql = f"SELECT CONVERT(id,CHAR) AS id, code, status, DATE_FORMAT(failed_first_at, '%Y-%m-%d %H:%i:%S') as failed_first_at, failed_time, hashed_pwd FROM s_sales_persons WHERE email = '{email}';"
     return await db.fetch_one(sql)

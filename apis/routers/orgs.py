@@ -25,6 +25,18 @@ async def user_orgs(s_sales_company_org_id: Optional[int] = None, db=Depends(get
         )
 
 
+@router.get("/orgs")
+async def user_orgs(s_sales_company_org_id: Optional[int] = None, db=Depends(get_db)):
+    try:
+        orgs = await crud.query_s_sales_company_orgs(db, s_sales_company_org_id)
+        return JSONResponse(status_code=200, content=orgs)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
 @router.get("/orgs-info")
 async def get_parents_orgs_for_ap_with_id(
     s_sales_company_org_id: Optional[int] = None, db=Depends(get_db), token=Depends(get_token)
@@ -43,6 +55,18 @@ async def get_parents_orgs_for_ap_with_id(
 async def get_orgs_with_categories(categories: str, db=Depends(get_db), token=Depends(get_token)):
     try:
         orgs = await crud.query_s_sales_company_orgs_with_categories(db, categories)
+        return JSONResponse(status_code=200, content=orgs)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.get("/azure/orgs/{category}")
+async def get_orgs_with_categories(category: str, db=Depends(get_db)):
+    try:
+        orgs = await crud.query_s_sales_company_orgs_with_categories(db, category)
         return JSONResponse(status_code=200, content=orgs)
     except Exception as err:
         logger.exception(err)

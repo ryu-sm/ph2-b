@@ -28,6 +28,12 @@ class Settings(BaseSettings):
     JWT_SECRETS_KEY: str
     JWT_ALGORITHM: str
 
+    # AZURE
+    TENANT: str
+    CLIENT_ID: str
+    REDIRECT_URI: str
+    CLIENT_SECRET: str
+
     # AWS
     AWS_MAIL_SENDER: str
     C_ARCHIVE_UPLOADED_FILES_BUCKET_NAME: str

@@ -1,10 +1,13 @@
+import json
+from typing import Optional
 from loguru import logger
 from datetime import datetime
 from fastapi import APIRouter, Request
 from fastapi import Depends
 from fastapi.responses import JSONResponse
 import pytz
-
+import requests
+from core.config import settings
 from constant import ACCESS_LOG_OPERATION, DEFAULT_200_MSG, DEFAULT_500_MSG
 from core.config import settings
 from core.custom import LoggingContextRoute
@@ -14,8 +17,6 @@ import crud
 import utils
 import schemas
 
-
-from templates.user_register_init_message import INIT_MESSAGE
 
 router = APIRouter(route_class=LoggingContextRoute)
 
@@ -135,6 +136,103 @@ async def sales_person_up_password(data: dict, request: Request, db=Depends(get_
     except Exception as err:
         logger.exception(err)
         return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
+
+
+@router.post("/azure/sales-person/login/{code}")
+async def sales_person_azure_login(request: Request, code: Optional[str] = None, db=Depends(get_db)):
+    try:
+
+        token_res = requests.post(
+            url=f"https://login.microsoftonline.com/{settings.TENANT}/oauth2/v2.0/token?code={code}&grant_type=authorization_code&redirect_uri={settings.REDIRECT_URI}&client_id={settings.CLIENT_ID}&client_secret={settings.CLIENT_SECRET}&scope=openid%20profile%20User.read",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        if str(token_res.status_code) != "200":
+            return JSONResponse(status_code=407, content={"message": "azure error"})
+
+        token_body = json.loads(token_res.text)
+        access_token = token_body.get("access_token", "https://graph.microsoft.com/v1.0/me")
+
+        info_res = requests.get(
+            url=f"https://graph.microsoft.com/v1.0/me", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        if str(info_res.status_code) != "200":
+            return JSONResponse(status_code=407, content={"message": "azure error"})
+
+        info_body = json.loads(info_res.text)
+        email = info_body.get("userPrincipalName")
+
+        if email is None:
+            return JSONResponse(status_code=407, content={"message": "azure error"})
+
+        is_exist = await crud.check_s_sales_person_with_email(db, email=email)
+
+        if is_exist:
+            if is_exist["status"] == 2:
+                return JSONResponse(
+                    status_code=202,
+                    content={"sales_person_id": is_exist["id"]},
+                )
+
+            payload = await crud.query_s_sales_person_token_payload(db, id=is_exist["id"])
+            access_token = utils.gen_token(
+                payload=payload,
+                expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
+            )
+            await utils.common_insert_c_access_log(
+                db,
+                request,
+                params={
+                    "account_id": payload.get("id"),
+                    "account_type": payload.get("role_type"),
+                    "operation": ACCESS_LOG_OPERATION.LOGIN.value,
+                },
+            )
+            return JSONResponse(status_code=200, content={"access_token": access_token})
+        else:
+            code_and_name = email.split("@")[0].upper()
+            new_sales_person_id = await crud.insert_new_azure_s_sales_person(
+                db,
+                code=code_and_name,
+                name=code_and_name,
+                email=email,
+            )
+            return JSONResponse(
+                status_code=202,
+                content={"sales_person_id": new_sales_person_id},
+            )
+
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
+
+
+@router.post("/azure/sales-person/s_sales_company_org")
+async def sales_person_azure_login(data: dict, request: Request, db=Depends(get_db)):
+    try:
+        await crud.updated_new_azure_s_sales_person_status(db, data["sales_person_id"], data["s_sales_company_org_id"])
+        payload = await crud.query_s_sales_person_token_payload(db, id=data["sales_person_id"])
+        access_token = utils.gen_token(
+            payload=payload,
+            expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
+        )
+        await utils.common_insert_c_access_log(
+            db,
+            request,
+            params={
+                "account_id": payload.get("id"),
+                "account_type": payload.get("role_type"),
+                "operation": ACCESS_LOG_OPERATION.LOGIN.value,
+            },
+        )
+        return JSONResponse(status_code=200, content={"access_token": access_token})
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
 
 
 @router.post("/sales-person/token")
@@ -261,7 +359,6 @@ async def sales_person_get_access_applications(db=Depends(get_db), token=Depends
 
 @router.get("/sales-person/{s_sales_person_id}")
 async def sales_person_get_access_applications(s_sales_person_id: int, db=Depends(get_db), token=Depends(get_token)):
-
     try:
         s_sales_person = await crud.query_sales_person_basic_info(db, s_sales_person_id)
 

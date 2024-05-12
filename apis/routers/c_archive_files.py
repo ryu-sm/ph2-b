@@ -8,8 +8,6 @@ from core.custom import LoggingContextRoute
 from apis.deps import get_db
 from apis.deps import get_token
 import crud
-import utils
-import schemas
 
 
 router = APIRouter(route_class=LoggingContextRoute)
