@@ -12,7 +12,7 @@ def send_email(to, template, link):
         Destination={"ToAddresses": [to]},
         Message={
             "Subject": {"Data": template_module.TITLE},
-            "Body": {"Html": {"Data": template_module.BODY.format(link=link)}},
+            "Body": {"Text": {"Data": template_module.BODY.format(link=link)}},
         },
     )
 

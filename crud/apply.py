@@ -1353,7 +1353,7 @@ async def diff_update_p_applicant_persons_for_ap(db: DB, data: dict, p_applicati
                     "owner_type": role_type,
                     "owner_id": role_id,
                     "record_id": p_applicant_persons_id,
-                    "type": P_UPLOAD_FILE_TYPE.APPLICANT.value,
+                    "type": type,
                     "s3_key": f"{p_application_header_id}/{role_id}_{OWNER_TYPE_EN_MAPS[role_type]}/{key}/{p_upload_file_id}",
                     "file_name": update_file["name"],
                 }

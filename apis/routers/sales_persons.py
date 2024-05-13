@@ -58,7 +58,7 @@ async def sales_person_register(data: dict, request: Request, db=Depends(get_db)
 
         new_sales_person_id = await crud.insert_new_s_sales_person(
             db,
-            name=data["name"],
+            name=payload["email"],
             email=payload["email"],
             hashed_pwd=utils.hash_password(data["password"]),
             s_sales_company_org_id=payload.get("s_sales_company_org_id"),
