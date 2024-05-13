@@ -119,7 +119,7 @@ def manager_data_check(data: dict):
     if not data["p_applicant_persons__0"]["district_kanji"]:
         tab2_errors.append("町村丁目")
 
-    if data["p_applicant_persons__0"]["district_kanji"] and len(data["p_applicant_persons__0"]["district_kanji"]) > 40:
+    if data["p_applicant_persons__0"]["district_kanji"] and len(data["p_applicant_persons__0"]["district_kanji"]) > 60:
         tab2_errors.append("町村丁目")
 
     if not data["p_applicant_persons__0"]["other_address_kanji"]:
@@ -146,7 +146,7 @@ def manager_data_check(data: dict):
     if not data["p_applicant_persons__0"]["district_kana"]:
         tab2_errors.append("町村丁目（フリガナ）")
 
-    if data["p_applicant_persons__0"]["district_kana"] and len(data["p_applicant_persons__0"]["district_kana"]) > 30:
+    if data["p_applicant_persons__0"]["district_kana"] and len(data["p_applicant_persons__0"]["district_kana"]) > 60:
         tab2_errors.append("町村丁目（フリガナ）")
 
     if not data["p_applicant_persons__0"]["other_address_kana"]:
@@ -244,7 +244,7 @@ def manager_data_check(data: dict):
 
     if (
         data["p_applicant_persons__0"]["office_district_kanji"]
-        and len(data["p_applicant_persons__0"]["office_district_kanji"]) > 40
+        and len(data["p_applicant_persons__0"]["office_district_kanji"]) > 60
     ):
         tab3_errors.append("町村丁目")
 
@@ -271,7 +271,7 @@ def manager_data_check(data: dict):
 
     if (
         data["p_applicant_persons__0"]["office_district_kana"]
-        and len(data["p_applicant_persons__0"]["office_district_kana"]) > 30
+        and len(data["p_applicant_persons__0"]["office_district_kana"]) > 60
     ):
         tab3_errors.append("町村丁目（フリガナ）")
 
@@ -384,7 +384,7 @@ def manager_data_check(data: dict):
             if not p_join_guarantor["district_kanji"]:
                 tab4_errors.append("町村丁目")
 
-            if p_join_guarantor["district_kanji"] and len(p_join_guarantor["district_kanji"]) > 40:
+            if p_join_guarantor["district_kanji"] and len(p_join_guarantor["district_kanji"]) > 60:
                 tab4_errors.append("町村丁目")
 
             if not p_join_guarantor["other_address_kanji"]:
@@ -399,7 +399,7 @@ def manager_data_check(data: dict):
             if p_join_guarantor["city_kana"] and len(p_join_guarantor["city_kana"]) > 20:
                 tab4_errors.append("市区郡（フリガナ）")
 
-            if p_join_guarantor["district_kana"] and len(p_join_guarantor["district_kana"]) > 30:
+            if p_join_guarantor["district_kana"] and len(p_join_guarantor["district_kana"]) > 60:
                 tab4_errors.append("町村丁目（フリガナ）")
 
             if p_join_guarantor["other_address_kana"] and len(p_join_guarantor["other_address_kana"]) > 138:
@@ -455,7 +455,7 @@ def manager_data_check(data: dict):
         tab5_errors.append("融資対象物件　以下地番")
     if (
         data["p_application_headers"]["property_district"]
-        and len(data["p_application_headers"]["property_district"]) > 40
+        and len(data["p_application_headers"]["property_district"]) > 60
     ):
         tab5_errors.append("融資対象物件　以下地番")
 
@@ -603,7 +603,7 @@ def manager_data_check(data: dict):
 
         if (
             data["p_applicant_persons__1"]["district_kanji"]
-            and len(data["p_applicant_persons__1"]["district_kanji"]) > 40
+            and len(data["p_applicant_persons__1"]["district_kanji"]) > 60
         ):
             tab2_1_errors.append("町村丁目")
 
@@ -627,7 +627,7 @@ def manager_data_check(data: dict):
 
         if (
             data["p_applicant_persons__1"]["district_kana"]
-            and len(data["p_applicant_persons__1"]["district_kana"]) > 30
+            and len(data["p_applicant_persons__1"]["district_kana"]) > 60
         ):
             tab2_1_errors.append("町村丁目（フリガナ）")
 
@@ -694,7 +694,7 @@ def manager_data_check(data: dict):
 
         if (
             data["p_applicant_persons__1"]["office_district_kanji"]
-            and len(data["p_applicant_persons__1"]["office_district_kanji"]) > 40
+            and len(data["p_applicant_persons__1"]["office_district_kanji"]) > 60
         ):
             tab3_1_errors.append("町村丁目")
 
@@ -718,7 +718,7 @@ def manager_data_check(data: dict):
 
         if (
             data["p_applicant_persons__1"]["office_district_kana"]
-            and len(data["p_applicant_persons__1"]["office_district_kana"]) > 30
+            and len(data["p_applicant_persons__1"]["office_district_kana"]) > 60
         ):
             tab3_1_errors.append("町村丁目（フリガナ）")
 

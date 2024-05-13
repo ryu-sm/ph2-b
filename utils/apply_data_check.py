@@ -9,7 +9,7 @@ def apply_data_check(data: dict, role_type: int):
     if data["p_applicant_persons__0"]["city_kana"] and len(data["p_applicant_persons__0"]["city_kana"]) > 20:
         step_id_2_errors.append("市区郡（フリガナ）")
 
-    if data["p_applicant_persons__0"]["district_kana"] and len(data["p_applicant_persons__0"]["district_kana"]) > 30:
+    if data["p_applicant_persons__0"]["district_kana"] and len(data["p_applicant_persons__0"]["district_kana"]) > 60:
         step_id_2_errors.append("町村丁目（フリガナ）")
 
     if data["p_applicant_persons__0"]["nationality"] == "2":
@@ -35,7 +35,7 @@ def apply_data_check(data: dict, role_type: int):
 
     if (
         data["p_applicant_persons__0"]["office_district_kana"]
-        and len(data["p_applicant_persons__0"]["office_district_kana"]) > 30
+        and len(data["p_applicant_persons__0"]["office_district_kana"]) > 60
     ):
         step_id_3_errors.append("町村丁目（フリガナ）")
 
@@ -56,7 +56,7 @@ def apply_data_check(data: dict, role_type: int):
 
         if (
             data["p_applicant_persons__1"]["district_kana"]
-            and len(data["p_applicant_persons__1"]["district_kana"]) > 30
+            and len(data["p_applicant_persons__1"]["district_kana"]) > 60
         ):
             step_id_4_errors.append("町村丁目（フリガナ）")
 
@@ -84,7 +84,7 @@ def apply_data_check(data: dict, role_type: int):
 
         if (
             data["p_applicant_persons__1"]["office_district_kana"]
-            and len(data["p_applicant_persons__1"]["office_district_kana"]) > 30
+            and len(data["p_applicant_persons__1"]["office_district_kana"]) > 60
         ):
             step_id_5_errors.append("町村丁目（フリガナ）")
 
@@ -101,7 +101,7 @@ def apply_data_check(data: dict, role_type: int):
             if p_join_guarantor["city_kana"] and len(p_join_guarantor["city_kana"]) > 20:
                 step_id_6_errors.append("市区郡（フリガナ）")
 
-            if p_join_guarantor["district_kana"] and len(p_join_guarantor["district_kana"]) > 30:
+            if p_join_guarantor["district_kana"] and len(p_join_guarantor["district_kana"]) > 60:
                 step_id_6_errors.append("町村丁目（フリガナ）")
 
             if step_id_6_errors:
@@ -116,7 +116,7 @@ def apply_data_check(data: dict, role_type: int):
         if p_resident["city_kana"] and len(p_resident["city_kana"]) > 20:
             step_id_7_errors.append("市区郡（フリガナ）")
 
-        if p_resident["district_kana"] and len(p_resident["district_kana"]) > 30:
+        if p_resident["district_kana"] and len(p_resident["district_kana"]) > 60:
             step_id_7_errors.append("町村丁目（フリガナ）")
 
         if step_id_7_errors:

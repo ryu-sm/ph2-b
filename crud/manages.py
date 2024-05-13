@@ -51,7 +51,6 @@ async def update_s_manager_password_with_id(db: DB, id: int, hashed_pwd: str):
 
 
 async def query_manager_access_p_application_headers(db: DB, status: int, role_id: int):
-    manager = await db.fetch_one(f"SELECT role FROM s_managers WHERE id = {role_id};")
     sbi = await db.fetch_one(f"SELECT id, name FROM s_banks WHERE code = '{BANK_CODE.SBI.value}';")
     p_application_headers_basic = []
     basic_sql = f"""
@@ -66,66 +65,33 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
         AND
         p_application_banks.s_bank_id = {sbi["id"]}
     """
-    if manager and manager["role"] == 9:
-        if status == 1:
-            sql = f"""
-            {basic_sql}
-            WHERE
-                p_application_headers.unsubcribed IS NULL
-                AND
-                p_application_banks.provisional_after_result IS NULL
-            """
-            p_application_headers_basic = await db.fetch_all(sql)
-        if status == 2:
-            sql = f"""
-            {basic_sql}
-            WHERE
-                p_application_headers.unsubcribed IS NULL
-                AND
-                p_application_banks.provisional_after_result = 1
-            """
-            p_application_headers_basic = await db.fetch_all(sql)
-        if status == 3:
-            sql = f"""
-            {basic_sql}
-            WHERE
-                p_application_headers.unsubcribed = 1
-                OR
-                p_application_banks.provisional_after_result in (0, 2, 3, 4, 5)
-            """
-            p_application_headers_basic = await db.fetch_all(sql)
-    if manager and manager["role"] == 1:
-        if status == 1:
-            sql = f"""
-            {basic_sql}
-                AND p_application_headers.s_manager_id = {role_id}
-            WHERE
-                p_application_headers.unsubcribed IS NULL
-                AND
-                p_application_banks.provisional_after_result IS NULL
-            """
-            p_application_headers_basic = await db.fetch_all(sql)
-
-        if status == 2:
-            sql = f"""
-            {basic_sql}
-                AND p_application_headers.s_manager_id = {role_id}
-            WHERE
-                p_application_headers.unsubcribed IS NULL
-                AND
-                p_application_banks.provisional_after_result = 1
-            """
-            p_application_headers_basic = await db.fetch_all(sql)
-        if status == 3:
-            sql = f"""
-            {basic_sql}
-                AND p_application_headers.s_manager_id = {role_id}
-            WHERE
-                p_application_headers.unsubcribed = 1
-                OR
-                p_application_banks.provisional_after_result in (0, 2, 3, 4, 5)
-            """
-            p_application_headers_basic = await db.fetch_all(sql)
+    if status == 1:
+        sql = f"""
+        {basic_sql}
+        WHERE
+            p_application_headers.unsubcribed IS NULL
+            AND
+            p_application_banks.provisional_after_result IS NULL
+        """
+        p_application_headers_basic = await db.fetch_all(sql)
+    if status == 2:
+        sql = f"""
+        {basic_sql}
+        WHERE
+            p_application_headers.unsubcribed IS NULL
+            AND
+            p_application_banks.provisional_after_result = 1
+        """
+        p_application_headers_basic = await db.fetch_all(sql)
+    if status == 3:
+        sql = f"""
+        {basic_sql}
+        WHERE
+            p_application_headers.unsubcribed = 1
+            OR
+            p_application_banks.provisional_after_result in (0, 2, 3, 4, 5)
+        """
+        p_application_headers_basic = await db.fetch_all(sql)
 
     access_p_application_headers_id = [item["id"] for item in p_application_headers_basic]
     if len(access_p_application_headers_id) == 0:
@@ -251,18 +217,6 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
     return general_result + paired_result
 
 
-async def query_manager_access_p_application_header_id(db: DB, p_application_header_id, role_id):
-    manager = await db.fetch_one(f"SELECT id, role FROM s_managers WHERE id = {role_id};")
-
-    if manager["role"] == 9:
-        return {"access": True}
-    if manager["role"] == 1:
-        p_application_header = await db.fetch_one(
-            f"SELECT id FROM p_application_headers WHERE id = {p_application_header_id} AND s_manager_id = {manager['id']}"
-        )
-        return {"access": bool(p_application_header)}
-
-
 async def update_p_application_headers_approver_confirmation(
     db: DB, p_application_header_id: int, approver_confirmation: int
 ):
@@ -343,3 +297,7 @@ async def delete_p_application_banks_pprovisional_result(
         s_bank_id = {s_bank_id};
     """
     await db.execute(sql)
+
+
+async def query_manager_role(db: DB, manager_id):
+    return await db.fetch_one(f"SELECT role FROM s_managers WHERE id = {manager_id};")
