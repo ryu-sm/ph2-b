@@ -143,25 +143,38 @@ async def sales_person_azure_login(request: Request, code: Optional[str] = None,
     try:
 
         token_res = requests.post(
-            url=f"https://login.microsoftonline.com/{settings.TENANT}/oauth2/v2.0/token?code={code}&grant_type=authorization_code&redirect_uri={settings.REDIRECT_URI}&client_id={settings.CLIENT_ID}&client_secret={settings.CLIENT_SECRET}&scope=openid%20profile%20User.read",
+            url=f"https://login.microsoftonline.com/{settings.TENANT}/oauth2/v2.0/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
+            data={
+                "grant_type": "authorization_code",
+                "client_id": settings.CLIENT_ID,
+                "client_secret": settings.CLIENT_SECRET,
+                "code": code,
+                "redirect_uri": settings.REDIRECT_URI,
+            },
         )
+
+        logger.info("token_res:", token_res.json)
+
         if str(token_res.status_code) != "200":
             return JSONResponse(status_code=407, content={"message": "azure error"})
 
         token_body = json.loads(token_res.text)
-        access_token = token_body.get("access_token", "https://graph.microsoft.com/v1.0/me")
+        access_token = token_body.get("access_token")
 
         info_res = requests.get(
-            url=f"https://graph.microsoft.com/v1.0/me", headers={"Authorization": f"Bearer {access_token}"}
+            url=f"https://graph.microsoft.com/v1.0/me",
+            headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
         )
+
+        logger.info("info_res:", info_res.json)
 
         if str(info_res.status_code) != "200":
             return JSONResponse(status_code=407, content={"message": "azure error"})
 
         info_body = json.loads(info_res.text)
         email = info_body.get("userPrincipalName")
-
+        display_name = info_body.get("displayName")
         if email is None:
             return JSONResponse(status_code=407, content={"message": "azure error"})
 
@@ -190,11 +203,11 @@ async def sales_person_azure_login(request: Request, code: Optional[str] = None,
             )
             return JSONResponse(status_code=200, content={"access_token": access_token})
         else:
-            code_and_name = email.split("@")[0].upper()
+            code = email.split("@")[0].upper()
             new_sales_person_id = await crud.insert_new_azure_s_sales_person(
                 db,
-                code=code_and_name,
-                name=code_and_name,
+                code=code,
+                name=display_name if display_name else email,
                 email=email,
             )
             return JSONResponse(

@@ -39,7 +39,7 @@ async def insert_new_azure_s_sales_person(db: DB, code: str, name: str, email: s
         "status": 2,
     }
     await db.execute(utils.gen_insert_sql("s_sales_persons", sql_params))
-    return id
+    return str(id)
 
 
 async def updated_new_azure_s_sales_person_status(db: DB, sales_person_id: str, s_sales_company_org_id: str):
