@@ -116,7 +116,8 @@ async def query_pair_loan_options(db: DB, p_application_header_id, is_seted):
             AND
             p_application_banks.provisional_after_result is NULL
             AND
-            p_application_headers.id != {p_application_header_id};
+            p_application_headers.id != {p_application_header_id}
+        ORDER BY p_application_headers.id DESC;
         """
 
         return await db.fetch_all(sql)
@@ -141,7 +142,8 @@ async def query_pair_loan_options(db: DB, p_application_header_id, is_seted):
         AND
         p_application_banks.provisional_after_result is NULL
         AND
-        p_application_headers.id != {p_application_header_id};
+        p_application_headers.id != {p_application_header_id}
+    ORDER BY p_application_headers.id DESC;
     """
 
     return await db.fetch_all(sql)
