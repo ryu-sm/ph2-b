@@ -145,6 +145,13 @@ async def query_s_sales_company_orgs_with_categories(db: DB, categories: str):
     return await db.fetch_all(sql)
 
 
+async def query_s_sales_company_orgs_with_categories_for_azure(db: DB, categories: str):
+    categories_ = [f"'{item}'" for item in categories.split(",")]
+
+    sql = f"SELECT CONVERT(id,CHAR) as value, name as label FROM s_sales_company_orgs WHERE azure_register = 1 AND category IN ({', '.join(categories_)});"
+    return await db.fetch_all(sql)
+
+
 async def query_children_s_sales_company_orgs_with_category(db: DB, parent_id: int, category: str):
     sql = f"""
     WITH RECURSIVE parents AS (

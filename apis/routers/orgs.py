@@ -66,7 +66,7 @@ async def get_orgs_with_categories(categories: str, db=Depends(get_db), token=De
 @router.get("/azure/orgs/{category}")
 async def get_orgs_with_categories(category: str, db=Depends(get_db)):
     try:
-        orgs = await crud.query_s_sales_company_orgs_with_categories(db, category)
+        orgs = await crud.query_s_sales_company_orgs_with_categories_for_azure(db, category)
         return JSONResponse(status_code=200, content=orgs)
     except Exception as err:
         logger.exception(err)

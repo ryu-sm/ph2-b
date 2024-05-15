@@ -712,6 +712,7 @@ CREATE TABLE `s_sales_company_orgs` (
   `fax` varchar(17) DEFAULT NULL COMMENT 'FAX',
   `upload_file` tinyint DEFAULT '1' COMMENT '書類アップロード',
   `display_pdf` tinyint DEFAULT '1' COMMENT '結果PDF閲覧',
+  `azure_register` tinyint DEFAULT '0' COMMENT 'AZURE登録フラグ',
   `status` tinyint DEFAULT '1' COMMENT '状態',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日付',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日付',
