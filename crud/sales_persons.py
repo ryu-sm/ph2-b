@@ -29,6 +29,19 @@ async def insert_new_s_sales_person(db: DB, name: str, email: str, hashed_pwd: s
     return id
 
 
+async def insert_new_email_s_sales_person(db: DB, hashed_pwd: str, code: str, name: str, email: str):
+    id = await db.uuid_short()
+    sql_params = {
+        "id": id,
+        "email": email,
+        "name_kanji": name,
+        "hashed_pwd": hashed_pwd,
+        "status": 2,
+    }
+    await db.execute(utils.gen_insert_sql("s_sales_persons", sql_params))
+    return str(id)
+
+
 async def insert_new_azure_s_sales_person(db: DB, code: str, name: str, email: str):
     id = await db.uuid_short()
     sql_params = {
