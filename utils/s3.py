@@ -1,3 +1,4 @@
+import io
 import json
 import boto3
 import base64
@@ -53,4 +54,9 @@ def generate_presigned_url(object_key, bucket=settings.P_UPLOADED_FILES_BUCKET_N
 def upload_base64_file_s3(full_key: str, base64_file: str, bucket=settings.P_UPLOADED_FILES_BUCKET_NAME):
     [file_type, file_content_str] = base64_file.split(",")
     file_content = base64.b64decode(file_content_str)
-    s3_client.put_object(Bucket=bucket, Key=full_key, Body=file_content)
+    if ".pdf" in full_key:
+        pass
+        pdf_buffer = io.BytesIO(file_content)
+        s3_client.upload_fileobj(pdf_buffer, bucket, full_key, ExtraArgs={"ContentType": "application/pdf"})
+    else:
+        s3_client.put_object(Bucket=bucket, Key=full_key, Body=file_content)
