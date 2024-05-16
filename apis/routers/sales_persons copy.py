@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 import pytz
 import requests
 from core.config import settings
-from constant import ACCESS_LOG_OPERATION, DEFAULT_200_MSG, DEFAULT_500_MSG, TOKEN_ROLE_TYPE
+from constant import ACCESS_LOG_OPERATION, DEFAULT_200_MSG, DEFAULT_500_MSG
 from core.config import settings
 from core.custom import LoggingContextRoute
 from apis.deps import get_db
@@ -42,62 +42,83 @@ async def sales_person_send_verify_email(data: dict, db=Depends(get_db)):
 @router.post("/sales-person")
 async def sales_person_register(data: dict, request: Request, db=Depends(get_db)):
     try:
+        payload = utils.parse_token(data["token"])
+
+        if payload is None:
+            return JSONResponse(status_code=407, content={"message": "token is invalid."})
+        if payload.get("s_sales_company_org_id"):
+            is_exist_s_sales_company = await crud.check_user_register_s_sales_company_org_id(
+                db, payload.get("s_sales_company_org_id")
+            )
+            if is_exist_s_sales_company is None:
+                return JSONResponse(status_code=408, content={"message": "s_sales_company_org_id is invalid."})
+        is_exist = await crud.check_s_sales_person_with_email(db, email=payload["email"])
+        if is_exist:
+            return JSONResponse(status_code=400, content={"message": "user email is exist."})
+        code = payload["email"].split("@")[0].upper()
         new_sales_person_id = await crud.insert_new_email_s_sales_person(
             db,
             hashed_pwd=utils.hash_password(data["password"]),
-            name=data["email"],
-            email=data["email"],
-            s_sales_company_org_id=data["s_sales_company_org_id"],
+            code=code,
+            name=payload["email"],
+            email=payload["email"],
         )
-        payload = await crud.query_s_sales_person_token_payload(db, id=new_sales_person_id)
-        access_token = utils.gen_token(
-            payload=payload,
-            expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
+
+        return JSONResponse(
+            status_code=202,
+            content={"sales_person_id": new_sales_person_id},
         )
-        await utils.common_insert_c_access_log(
-            db,
-            request,
-            params={
-                "account_id": new_sales_person_id,
-                "account_type": TOKEN_ROLE_TYPE.SALES_PERSON.value,
-                "operation": ACCESS_LOG_OPERATION.REGISTER.value,
-            },
-        )
-        return JSONResponse(status_code=200, content={"access_token": access_token})
 
     except Exception as err:
         logger.exception(err)
         return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
-@router.post("/azure/sales-person")
-async def sales_person_register(data: dict, request: Request, db=Depends(get_db)):
-    try:
-        new_sales_person_id = await crud.insert_new_azure_s_sales_person(
-            db,
-            name=data["name"],
-            email=data["email"],
-            s_sales_company_org_id=data["s_sales_company_org_id"],
-        )
-        payload = await crud.query_s_sales_person_token_payload(db, id=new_sales_person_id)
-        access_token = utils.gen_token(
-            payload=payload,
-            expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
-        )
-        await utils.common_insert_c_access_log(
-            db,
-            request,
-            params={
-                "account_id": new_sales_person_id,
-                "account_type": TOKEN_ROLE_TYPE.SALES_PERSON.value,
-                "operation": ACCESS_LOG_OPERATION.REGISTER.value,
-            },
-        )
-        return JSONResponse(status_code=200, content={"access_token": access_token})
+# @router.post("/sales-person")
+# async def sales_person_register(data: dict, request: Request, db=Depends(get_db)):
+#     try:
+#         payload = utils.parse_token(data["token"])
 
-    except Exception as err:
-        logger.exception(err)
-        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
+#         if payload is None:
+#             return JSONResponse(status_code=407, content={"message": "token is invalid."})
+#         if payload.get("s_sales_company_org_id"):
+#             is_exist_s_sales_company = await crud.check_user_register_s_sales_company_org_id(
+#                 db, payload.get("s_sales_company_org_id")
+#             )
+#             if is_exist_s_sales_company is None:
+#                 return JSONResponse(status_code=408, content={"message": "s_sales_company_org_id is invalid."})
+#         is_exist = await crud.check_s_sales_person_with_email(db, email=payload["email"])
+#         if is_exist:
+#             return JSONResponse(status_code=400, content={"message": "user email is exist."})
+
+#         new_sales_person_id = await crud.insert_new_s_sales_person(
+#             db,
+#             name=payload["email"],
+#             email=payload["email"],
+#             hashed_pwd=utils.hash_password(data["password"]),
+#             s_sales_company_org_id=payload.get("s_sales_company_org_id"),
+#         )
+
+#         payload = await crud.query_s_sales_person_token_payload(db, id=new_sales_person_id)
+
+#         access_token = utils.gen_token(
+#             payload=payload,
+#             expires_delta=settings.JWT_ACCESS_TOKEN_EXP,
+#         )
+
+#         await utils.common_insert_c_access_log(
+#             db,
+#             request,
+#             params={
+#                 "account_id": new_sales_person_id,
+#                 "account_type": 2,
+#                 "operation": ACCESS_LOG_OPERATION.REGISTER.value,
+#             },
+#         )
+#         return JSONResponse(status_code=200, content={"access_token": access_token})
+#     except Exception as err:
+#         logger.exception(err)
+#         return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
 
 
 @router.post("/sales-person/password/verify-email")
@@ -195,6 +216,12 @@ async def sales_person_azure_login(request: Request, code: Optional[str] = None,
         is_exist = await crud.check_s_sales_person_with_email(db, email=email)
 
         if is_exist:
+            if is_exist["status"] == 2:
+                return JSONResponse(
+                    status_code=202,
+                    content={"sales_person_id": is_exist["id"]},
+                )
+
             payload = await crud.query_s_sales_person_token_payload(db, id=is_exist["id"])
             access_token = utils.gen_token(
                 payload=payload,
@@ -211,14 +238,16 @@ async def sales_person_azure_login(request: Request, code: Optional[str] = None,
             )
             return JSONResponse(status_code=200, content={"access_token": access_token})
         else:
-
+            code = email.split("@")[0].upper()
+            new_sales_person_id = await crud.insert_new_azure_s_sales_person(
+                db,
+                code=code,
+                name=display_name if display_name else email,
+                email=email,
+            )
             return JSONResponse(
                 status_code=202,
-                content={
-                    "email": email,
-                    "name": display_name,
-                    "s_sales_company_org_id": await crud.query_azure_register_org(db),
-                },
+                content={"sales_person_id": new_sales_person_id},
             )
 
     except Exception as err:

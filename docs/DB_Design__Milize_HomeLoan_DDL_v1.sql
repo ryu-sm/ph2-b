@@ -743,7 +743,6 @@ CREATE TABLE `s_sales_person_s_sales_company_org_rels` (
 DROP TABLE IF EXISTS `s_sales_persons`;
 CREATE TABLE `s_sales_persons` (
   `id` bigint unsigned NOT NULL COMMENT 'ID',
-  `code` varchar(128) DEFAULT NULL COMMENT 'コード',
   `email` varchar(128) NOT NULL COMMENT 'Eメール',
   `name_kanji` varchar(48) NOT NULL COMMENT '名前　漢字',
   `direct_phone` varchar(17) DEFAULT NULL COMMENT '直通番号',
@@ -753,6 +752,7 @@ CREATE TABLE `s_sales_persons` (
   `status` tinyint NOT NULL COMMENT '状態',
   `failed_time` tinyint DEFAULT NULL COMMENT 'ログイン失敗回数',
   `failed_first_at` datetime DEFAULT NULL COMMENT 'ログイン失敗初回日付',
+  `type` tinyint DEFAULT NULL COMMENT 'タイプ',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日付',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日付',
   PRIMARY KEY (`id`) USING BTREE,

@@ -278,7 +278,7 @@ truncate table s_sales_persons;
 insert into s_sales_persons
 (
 	id    --  ID
-	,code    --  コード
+	-- ,code    --  コード
 	,email    --  Eメール
 	,name_kanji    --  名前　漢字
 	,direct_phone    --  直通番号
@@ -294,7 +294,7 @@ insert into s_sales_persons
 )
 select 
 	UUID_SHORT() as id    --  ID
-	,sp.sale_person_code as code    --  コード
+	-- ,sp.sale_person_code as code    --  コード
 	,sp.email as email    --  Eメール
 	,sp.name_kanji as name_kanji    --  名前　漢字
 	,sp.phone_number as direct_phone    --  直通番号

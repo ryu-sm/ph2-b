@@ -1,91 +1,69 @@
 import base64
 import json
 import uuid
-from constant import ACCESS_ROLE, BANK_CODE, SALES_PERSON_STATUS, SALES_PERSON_TYPE, TOKEN_ROLE_TYPE
+from constant import BANK_CODE, TOKEN_ROLE_TYPE
 from core.database import DB
 import crud
 import utils
 from utils.common import none_to_blank
 
 
-async def insert_new_email_s_sales_person(db: DB, name: str, email: str, hashed_pwd: str, s_sales_company_org_id: int):
+async def insert_new_s_sales_person(db: DB, name: str, email: str, hashed_pwd: str, s_sales_company_org_id: int):
     id = await db.uuid_short()
     sql_params = {
         "id": id,
         "email": email,
         "name_kanji": name,
         "hashed_pwd": hashed_pwd,
-        "type": SALES_PERSON_TYPE.EMAIL.value,
-        "status": SALES_PERSON_STATUS.NORMAL.value,
+        "status": 1,
     }
     await db.execute(utils.gen_insert_sql("s_sales_persons", sql_params))
 
     sql_params = {
         "s_sales_person_id": id,
         "s_sales_company_org_id": s_sales_company_org_id,
-        "role": ACCESS_ROLE.GENERAL.value,
+        "role": 1,
     }
     await db.execute(utils.gen_insert_sql("s_sales_person_s_sales_company_org_rels", sql_params))
 
     return id
 
 
-async def insert_new_azure_s_sales_person(db: DB, name: str, email: str, s_sales_company_org_id: int):
+async def insert_new_email_s_sales_person(db: DB, hashed_pwd: str, code: str, name: str, email: str):
     id = await db.uuid_short()
     sql_params = {
         "id": id,
         "email": email,
         "name_kanji": name,
-        "type": SALES_PERSON_TYPE.AZURE.value,
-        "status": SALES_PERSON_STATUS.NORMAL.value,
+        "hashed_pwd": hashed_pwd,
+        "status": 2,
     }
     await db.execute(utils.gen_insert_sql("s_sales_persons", sql_params))
+    return str(id)
 
+
+async def insert_new_azure_s_sales_person(db: DB, code: str, name: str, email: str):
+    id = await db.uuid_short()
     sql_params = {
-        "s_sales_person_id": id,
+        "id": id,
+        "code": code,
+        "email": email,
+        "name_kanji": name,
+        "status": 2,
+    }
+    await db.execute(utils.gen_insert_sql("s_sales_persons", sql_params))
+    return str(id)
+
+
+async def updated_new_azure_s_sales_person_status(db: DB, sales_person_id: str, s_sales_company_org_id: str):
+    sql = f"UPDATE s_sales_persons SET status = 1 WHERE id = {sales_person_id};"
+    await db.execute(sql)
+    sql_params = {
+        "s_sales_person_id": sales_person_id,
         "s_sales_company_org_id": s_sales_company_org_id,
-        "role": ACCESS_ROLE.GENERAL.value,
+        "role": 1,
     }
     await db.execute(utils.gen_insert_sql("s_sales_person_s_sales_company_org_rels", sql_params))
-
-    return id
-
-
-# async def insert_new_email_s_sales_person(db: DB, hashed_pwd: str, code: str, name: str, email: str):
-#     id = await db.uuid_short()
-#     sql_params = {
-#         "id": id,
-#         "email": email,
-#         "name_kanji": name,
-#         "hashed_pwd": hashed_pwd,
-#         "status": 2,
-#     }
-#     await db.execute(utils.gen_insert_sql("s_sales_persons", sql_params))
-#     return str(id)
-
-
-# async def insert_new_azure_s_sales_person(db: DB, code: str, name: str, email: str):
-#     id = await db.uuid_short()
-#     sql_params = {
-#         "id": id,
-#         "code": code,
-#         "email": email,
-#         "name_kanji": name,
-#         "status": 2,
-#     }
-#     await db.execute(utils.gen_insert_sql("s_sales_persons", sql_params))
-#     return str(id)
-
-
-# async def updated_new_azure_s_sales_person_status(db: DB, sales_person_id: str, s_sales_company_org_id: str):
-#     sql = f"UPDATE s_sales_persons SET status = 1 WHERE id = {sales_person_id};"
-#     await db.execute(sql)
-#     sql_params = {
-#         "s_sales_person_id": sales_person_id,
-#         "s_sales_company_org_id": s_sales_company_org_id,
-#         "role": 1,
-#     }
-#     await db.execute(utils.gen_insert_sql("s_sales_person_s_sales_company_org_rels", sql_params))
 
 
 async def check_s_sales_person_with_email(db: DB, email: str):
@@ -118,7 +96,7 @@ async def update_s_sales_person_failed_first_at(db: DB, id: int, failed_time: in
 
 async def query_s_sales_person_token_payload(db: DB, id: int):
     return await db.fetch_one(
-        f"SELECT CONVERT(id,CHAR) AS id,  email, name_kanji, 2 as role_type, type FROM s_sales_persons WHERE id = {id};"
+        f"SELECT CONVERT(id,CHAR) AS id, code, email, name_kanji, 2 as role_type FROM s_sales_persons WHERE id = {id};"
     )
 
 

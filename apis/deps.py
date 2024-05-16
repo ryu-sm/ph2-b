@@ -22,8 +22,8 @@ async def get_token(authorization: str = Header(), db: DB = Depends(get_db)):
         db_payload = await crud.query_s_sales_person_token_payload(db, payload["id"])
         t_payload = {
             "id": payload["id"],
-            "code": payload["code"],
             "email": payload["email"],
+            "type": payload["type"],
             "name_kanji": payload["name_kanji"],
             "role_type": payload["role_type"],
         }
