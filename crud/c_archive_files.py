@@ -73,7 +73,8 @@ async def query_c_archive_files_for_s_sales_person(db: DB, s_sales_person_id):
     WHERE
         c_archive_files.deleted is NULL
         AND
-        c_archive_files.s_sales_person_id in ({', '.join(list(set(access_ids)))});
+        c_archive_files.s_sales_person_id in ({', '.join(list(set(access_ids)))})
+    ORDER BY c_archive_files.created_at DESC;
     """
     basic = await db.fetch_all(sql)
 
@@ -110,7 +111,8 @@ async def query_c_archive_files_for_manager(db: DB):
         ON
         s_sales_company_orgs.id = c_archive_files.s_sales_company_org_id
     WHERE
-        c_archive_files.deleted is NULL;
+        c_archive_files.deleted is NULL
+    ORDER BY c_archive_files.created_at DESC;
     """
     basic = await db.fetch_all(sql)
 

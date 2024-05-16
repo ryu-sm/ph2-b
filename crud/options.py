@@ -101,23 +101,8 @@ async def query_pair_loan_options(db: DB, p_application_header_id, is_seted):
             p_application_headers.apply_no as label
         FROM
             p_application_headers
-        JOIN
-            p_application_banks
-            ON
-            p_application_banks.p_application_header_id = p_application_headers.id
-            AND
-            p_application_banks.s_bank_id = {sbi_id}
         WHERE
-            p_application_headers.unsubcribed is NULL
-            AND
-            p_application_headers.pair_loan_id is NOT NULL
-            AND
-            p_application_headers.loan_type = 2
-            AND
-            p_application_banks.provisional_after_result is NULL
-            AND
-            p_application_headers.id != {p_application_header_id}
-        ORDER BY p_application_headers.id DESC;
+            p_application_headers.pair_loan_id = {p_application_header_id};
         """
 
         return await db.fetch_all(sql)

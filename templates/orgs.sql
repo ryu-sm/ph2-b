@@ -1,0 +1,10 @@
+INSERT INTO s_sales_company_orgs (id, pid, category, `code`, `name`, contact_phone1, azure_register) VALUES (4640162817012753117, 4640162817012724658, 'C', 'C6', '栃木セキスイハイム', '090-1234-1111', 1);
+INSERT INTO s_sales_company_orgs (id, pid, category, `code`, `name`, contact_phone1, azure_register) VALUES (4640162817012753118, 4640162817012724658, 'C', 'C7', '群馬セキスイハイム', '090-1234-2222', 1);
+INSERT INTO s_sales_company_orgs (id, pid, category, `code`, `name`, contact_phone1, azure_register) VALUES (4640162817012753119, 4640162817012724658, 'C', 'C8', 'セキスイハイム信越', '090-1234-3333', 1);
+INSERT INTO s_sales_company_orgs (id, pid, category, `code`, `name`, contact_phone1, azure_register) VALUES (4640162817012753120, 4640162817012724658, 'C', 'C9', 'セキスイハイム東海', '090-1234-4444', 1);
+INSERT INTO s_sales_company_orgs (id, pid, category, `code`, `name`, contact_phone1, azure_register) VALUES (4640162817012753121, 4640162817012724658, 'C', 'C10', 'セキスイハイム中部', '090-1234-5555', 1);
+INSERT INTO s_sales_company_orgs (id, pid, category, `code`, `name`, contact_phone1, azure_register) VALUES (4640162817012753122, 4640162817012724658, 'C', 'C11', 'セキスイハイム近畿', '090-1234-6666', 1);
+INSERT INTO s_sales_company_orgs (id, pid, category, `code`, `name`, contact_phone1, azure_register) VALUES (4640162817012753123, 4640162817012724658, 'C', 'C12', 'セキスイハイム山陽', '090-1234-7777', 1);
+INSERT INTO s_sales_company_orgs (id, pid, category, `code`, `name`, contact_phone1, azure_register) VALUES (4640162817012753124, 4640162817012724658, 'C', 'C13', 'セキスイハイム中四国', '090-1234-8888', 1);
+INSERT INTO s_sales_company_orgs (id, pid, category, `code`, `name`, contact_phone1, azure_register) VALUES (4640162817012753126, 4640162817012724658, 'C', 'C14', 'セキスイハイム東四国', '090-1234-9999', 1);
+INSERT INTO s_sales_company_orgs (id, pid, category, `code`, `name`, contact_phone1, azure_register) VALUES (4640162817012753127, 4640162817012724658, 'C', 'C15', 'セキスイハイム九州', '090-1234-0000', 1);

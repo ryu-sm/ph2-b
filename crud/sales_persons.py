@@ -362,7 +362,7 @@ async def query_sales_person_access_p_application_headers(db: DB, status: int, r
             none_to_blank(
                 {
                     **utils.to_mann(pair_a),
-                    "unviewed": unviewed_b,
+                    "unviewed": unviewed_a,
                     "manager_options": manager_options,
                     "pair_loan_data": {
                         **none_to_blank(utils.to_mann(pair_b)),
