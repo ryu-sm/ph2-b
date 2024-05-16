@@ -149,6 +149,21 @@ class USER_STATUS(Enum):
     LOCK = "2"
 
 
+class SALES_PERSON_STATUS(Enum):
+    NORMAL = "1"
+    LOCK = "2"
+
+
+class SALES_PERSON_TYPE(Enum):
+    EMAIL = "1"
+    AZURE = "2"
+
+
+class MANAGER_STATUS(Enum):
+    NORMAL = "1"
+    LOCK = "2"
+
+
 class AGENT_SENDED(Enum):
     DEFAULT = "0"
     SENDED = "1"
@@ -221,3 +236,8 @@ class ACCESS_LOG_OPERATION(Enum):
     DOWNLOAD = "ダウンロード"
     REGISTER = "登録"
     UNSUBCRIBED = "退会"
+
+
+class ACCESS_ROLE(Enum):
+    GENERAL = "1"
+    MANAGER = "9"
