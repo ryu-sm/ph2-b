@@ -21,11 +21,11 @@ async def get_token(authorization: str = Header(), db: DB = Depends(get_db)):
     if payload["role_type"] == 2:
         db_payload = await crud.query_s_sales_person_token_payload(db, payload["id"])
         t_payload = {
-            "id": payload["id"],
-            "email": payload["email"],
-            "type": payload["type"],
-            "name_kanji": payload["name_kanji"],
-            "role_type": payload["role_type"],
+            "id": payload.get("id"),
+            "email": payload.get("email"),
+            "type": payload.get("type"),
+            "name_kanji": payload.get("name_kanji"),
+            "role_type": payload.get("role_type"),
         }
         if DeepDiff(db_payload, t_payload):
             raise AuthException
@@ -33,10 +33,10 @@ async def get_token(authorization: str = Header(), db: DB = Depends(get_db)):
     if payload["role_type"] == 3:
         db_payload = await crud.query_s_manager_token_payload(db, payload["id"])
         t_payload = {
-            "id": payload["id"],
-            "email": payload["email"],
-            "name_kanji": payload["name_kanji"],
-            "role_type": payload["role_type"],
+            "id": payload.get("id"),
+            "email": payload.get("email"),
+            "name_kanji": payload.get("name_kanji"),
+            "role_type": payload.get("role_type"),
         }
 
         if DeepDiff(db_payload, t_payload):

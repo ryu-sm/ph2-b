@@ -265,7 +265,7 @@ CREATE TABLE `p_application_headers` (
   `join_guarantor_umu` tinyint DEFAULT '0' COMMENT '担保提供者有無',
   `loan_plus` tinyint DEFAULT '0' COMMENT '住宅ローンプラス',
   `land_advance_plan` tinyint DEFAULT NULL COMMENT '土地先行プラン希望',
-  `curr_borrowing_status` tinyint DEFAULT NULL COMMENT '現在利用中のローン',
+  `curr_borrowing_status` tinyint DEFAULT '0' COMMENT '現在利用中のローン',
   `pre_examination_status` tinyint DEFAULT NULL COMMENT '事前審査結果',
   `vendor_business_card` tinyint DEFAULT NULL COMMENT '業者名刺',
   `vendor_name` varchar(48) DEFAULT NULL COMMENT '業者名　入力項目',

@@ -175,6 +175,7 @@ async def sales_person_azure_login(request: Request, code: Optional[str] = None,
 
         token_body = json.loads(token_res.text)
         access_token = token_body.get("access_token")
+        print(access_token)
 
         info_res = requests.get(
             url=f"https://graph.microsoft.com/v1.0/me",

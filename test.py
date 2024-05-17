@@ -16,7 +16,7 @@ from core.database import DB
 
 async def main():
     db = DB()
-    await translate_c_messages(db)
+    # await translate_c_messages(db)
     # await translate_set_pair_loan(db)
     # p_drafts = await db.fetch_all(
     #     "SELECT id FROM mortgage_loan_tool_be_production.drafts WHERE user_id IS NOT NULL AND first_submit IS NULL AND p_application_header_id IS NULL;"
@@ -24,7 +24,7 @@ async def main():
     # for p_draft in p_drafts:
     #     await translate_p_activities_p_drafts(db, p_draft["id"])
     # await translate_p_uploaded_files(db)
-    # await translate_p_archive_files(db)
+    await translate_p_archive_files(db)
     # p_application_headers = await db.fetch_all("SELECT id FROM mortgage_staging_v3.p_application_headers;")
     # for p_application_header in p_application_headers:
     #     await translate_p_activities_p_application_headers(db, p_application_header["id"])
@@ -62,6 +62,8 @@ async def main():
     #     else:
     #         await db.execute(f"""UPDATE p_residents SET resident_type = 0 WHERE id IN ({", ".join(pr_ids[0:1])});""")
     #         await db.execute(f"""UPDATE p_residents SET resident_type = 1 WHERE id IN ({", ".join(pr_ids[1:])});""")
+
+    # TODO: curr_borrowing_status defaut 0
 
 
 asyncio.run(main())
