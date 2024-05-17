@@ -176,3 +176,9 @@ async def delete_p_draft_data(db: DB, c_user_id: int):
 
 async def check_user_register_s_sales_company_org_id(db: DB, s_sales_company_org_id):
     return await db.fetch_one(f"SELECT id FROM s_sales_company_orgs WHERE id = '{s_sales_company_org_id}';")
+
+
+async def query_user_s_sales_company_org_id(db: DB, id):
+    return await db.fetch_one(
+        f"SELECT CONVERT(s_sales_company_org_id,CHAR) AS s_sales_company_org_id FROM c_users WHERE id = {id};"
+    )

@@ -273,3 +273,13 @@ async def user_get_draft(db=Depends(get_db), token=Depends(get_token)):
     except Exception as err:
         logger.exception(err)
         return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
+
+
+@router.get("/user/s_sales_company_org_id")
+async def user_get_draft(db=Depends(get_db), token=Depends(get_token)):
+    try:
+        data = await crud.query_user_s_sales_company_org_id(db, token.get("id"))
+        return JSONResponse(status_code=200, content=data)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(status_code=500, content=DEFAULT_500_MSG)
