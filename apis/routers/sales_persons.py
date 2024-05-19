@@ -185,13 +185,13 @@ async def sales_person_azure_login(request: Request, code: Optional[str] = None,
         logger.info("info_res:", info_res.json())
 
         if str(info_res.status_code) != "200":
-            return JSONResponse(status_code=407, content={"message": "azure error"})
+            return JSONResponse(status_code=408, content={"message": "azure error"})
 
         info_body = json.loads(info_res.text)
         email = info_body.get("userPrincipalName")
         display_name = info_body.get("displayName")
         if email is None:
-            return JSONResponse(status_code=407, content={"message": "azure error"})
+            return JSONResponse(status_code=408, content={"message": "azure error"})
 
         is_exist = await crud.check_s_sales_person_with_email(db, email=email)
 

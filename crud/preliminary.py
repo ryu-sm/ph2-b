@@ -1361,6 +1361,8 @@ async def diff_update_p_borrowings_for_ad(db: DB, data: typing.List[dict], p_app
             continue
         [old_p_borrowing] = filter
         for key, value in p_borrowing.items():
+            old_value = old_p_borrowing.get(key, "")
+
             if key in ["I"]:
                 sql = f"""
                 SELECT
@@ -1459,8 +1461,6 @@ async def diff_update_p_borrowings_for_ad(db: DB, data: typing.List[dict], p_app
                             )
                         )
                 continue
-
-            old_value = old_p_borrowing.get(key, "")
 
             if value == old_value:
                 continue
