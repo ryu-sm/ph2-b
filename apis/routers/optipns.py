@@ -58,7 +58,6 @@ async def get_sales_exhibition_hall_options(parent_id: int, db=Depends(get_db)):
 @router.get("/pair_loan_options")
 async def get_pair_loan_options(id: int, is_seted: int, db=Depends(get_db)):
     try:
-        print(type(is_seted), is_seted)
         pair_loan_options = await crud.query_pair_loan_options(db, id, is_seted)
         return JSONResponse(status_code=200, content=pair_loan_options)
     except Exception as err:

@@ -130,20 +130,16 @@ async def query_sales_person_access_p_application_headers(db: DB, status: int, r
                 sql = f"""
                 {basic_sql}
                 AND
-                p_application_headers.unsubcribed IS NULL
-                AND
                 p_application_banks.provisional_after_result IS NULL
                 """
                 p_application_headers_basic = await db.fetch_all(sql)
                 access_p_application_headers_id = access_p_application_headers_id + [
                     item["id"] for item in p_application_headers_basic
                 ]
-                print(2)
+
             if status == 2:
                 sql = f"""
                 {basic_sql}
-                AND
-                p_application_headers.unsubcribed IS NULL
                 AND
                 p_application_banks.provisional_after_result = 1
                 """
@@ -151,23 +147,18 @@ async def query_sales_person_access_p_application_headers(db: DB, status: int, r
                 access_p_application_headers_id = access_p_application_headers_id + [
                     item["id"] for item in p_application_headers_basic
                 ]
-                print(3)
+
             if status == 3:
                 sql = f"""
                 {basic_sql}
                 AND
-                (
-                    p_application_headers.unsubcribed = 1
-                    OR
-                    p_application_banks.provisional_after_result in (0, 2, 3, 4, 5)
-                )
+                p_application_banks.provisional_after_result in (0, 2, 3, 4, 5)
                 """
 
                 p_application_headers_basic = await db.fetch_all(sql)
                 access_p_application_headers_id = access_p_application_headers_id + [
                     item["id"] for item in p_application_headers_basic
                 ]
-                print(4, sql)
 
         if org["role"] == 9:
             access_orgs = await crud.query_child_s_sales_company_orgs(db, org["s_sales_company_org_id"])

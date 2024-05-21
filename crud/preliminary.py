@@ -1874,7 +1874,7 @@ async def query_p_borrowings_files_for_ad_view(db: DB, p_application_header_id: 
 
 async def query_p_application_header_basic(db: DB, id: int):
     return await db.fetch_one(
-        f"SELECT apply_no, pre_examination_status, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%S') as created_at FROM p_application_headers WHERE id = {id};"
+        f"SELECT apply_no, pre_examination_status, pair_loan_id, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%S') as created_at FROM p_application_headers WHERE id = {id};"
     )
 
 

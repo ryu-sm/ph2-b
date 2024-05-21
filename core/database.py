@@ -59,7 +59,7 @@ class DB:
                 await conn.commit()
 
     async def uuid_short(self) -> int:
-        result = await self.fetch_one("SELECT UUID_SHORT() as value;")
+        result = await self.fetch_one("SELECT UUID_SHORT() AS value;")
         return result["value"]
 
 

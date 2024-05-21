@@ -263,7 +263,6 @@ async def update_provisional_after_result(data: dict, request: Request, db=Depen
             token["role_type"],
             token["id"],
         )
-        p_application_header_basic = await crud.query_p_application_header_basic(db, data["p_application_header_id"])
         operation_content_maps = {
             0: "仮審査結果の操作状態: 仮審査否決",
             1: "仮審査結果の操作状態: 本審査",
@@ -272,6 +271,7 @@ async def update_provisional_after_result(data: dict, request: Request, db=Depen
             4: "仮審査結果の操作状態: 他行借入",
             5: "仮審査結果の操作状態: 自宅購入取止め",
         }
+        p_application_header_basic = await crud.query_p_application_header_basic(db, data["p_application_header_id"])
 
         await utils.common_insert_c_access_log(
             db,
@@ -284,6 +284,30 @@ async def update_provisional_after_result(data: dict, request: Request, db=Depen
                 "operation_content": operation_content_maps[int(data["provisional_after_result"])],
             },
         )
+        if p_application_header_basic.get("pair_loan_id"):
+            await crud.update_p_application_banks_provisional_after_result(
+                db,
+                p_application_header_basic.get("pair_loan_id"),
+                data["s_bank_id"],
+                data["provisional_after_result"],
+                token["role_type"],
+                token["id"],
+            )
+            p_application_header_basic_pair_loan = await crud.query_p_application_header_basic(
+                db, p_application_header_basic.get("pair_loan_id")
+            )
+
+            await utils.common_insert_c_access_log(
+                db,
+                request,
+                params={
+                    "apply_no": p_application_header_basic_pair_loan["apply_no"],
+                    "account_id": token.get("id"),
+                    "account_type": token.get("role_type"),
+                    "operation": ACCESS_LOG_OPERATION.UPDATE.value,
+                    "operation_content": operation_content_maps[int(data["provisional_after_result"])],
+                },
+            )
         return JSONResponse(status_code=200, content={"message": "successful"})
     except Exception as err:
         logger.exception(err)

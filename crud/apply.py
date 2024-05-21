@@ -562,6 +562,7 @@ async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
         loan_target_type,
         land_advance_plan,
         loan_type,
+        pair_loan_id,
         pair_loan_last_name,
         pair_loan_first_name,
         pair_loan_rel_name,

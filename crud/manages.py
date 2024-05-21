@@ -69,8 +69,6 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
         sql = f"""
         {basic_sql}
         WHERE
-            p_application_headers.unsubcribed IS NULL
-            AND
             p_application_banks.provisional_after_result IS NULL
         """
         p_application_headers_basic = await db.fetch_all(sql)
@@ -78,8 +76,6 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
         sql = f"""
         {basic_sql}
         WHERE
-            p_application_headers.unsubcribed IS NULL
-            AND
             p_application_banks.provisional_after_result = 1
         """
         p_application_headers_basic = await db.fetch_all(sql)
@@ -87,13 +83,12 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
         sql = f"""
         {basic_sql}
         WHERE
-            p_application_headers.unsubcribed = 1
-            OR
             p_application_banks.provisional_after_result in (0, 2, 3, 4, 5)
         """
         p_application_headers_basic = await db.fetch_all(sql)
 
     access_p_application_headers_id = [item["id"] for item in p_application_headers_basic]
+
     if len(access_p_application_headers_id) == 0:
         return []
     basic_info_sql = f"""
@@ -214,6 +209,7 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
                 }
             )
         )
+
     return general_result + paired_result
 
 
