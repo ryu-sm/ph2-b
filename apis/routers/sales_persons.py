@@ -16,6 +16,7 @@ from apis.deps import get_token
 import crud
 import utils
 import schemas
+from jose import jwt
 
 
 router = APIRouter(route_class=LoggingContextRoute)
@@ -171,11 +172,19 @@ async def sales_person_azure_login(request: Request, code: Optional[str] = None,
         logger.info("token_res:", token_res.json())
 
         if str(token_res.status_code) != "200":
-            return JSONResponse(status_code=407, content={"message": "azure error"})
+            return JSONResponse(status_code=400, content={"message": "azure error"})
 
         token_body = json.loads(token_res.text)
         access_token = token_body.get("access_token")
-        print(access_token)
+
+        access_token_payload = jwt.get_unverified_claims(access_token)
+
+        tid = access_token_payload.get("tid")
+
+        s_sales_company_org_id = await crud.query_azure_register_org(db, tid)
+
+        if s_sales_company_org_id is None:
+            return JSONResponse(status_code=409, content={"message": "azure error"})
 
         info_res = requests.get(
             url=f"https://graph.microsoft.com/v1.0/me",
@@ -218,7 +227,7 @@ async def sales_person_azure_login(request: Request, code: Optional[str] = None,
                 content={
                     "email": email,
                     "name": display_name,
-                    "s_sales_company_org_id": await crud.query_azure_register_org(db),
+                    "s_sales_company_org_id": s_sales_company_org_id,
                 },
             )
 

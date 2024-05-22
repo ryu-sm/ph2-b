@@ -212,6 +212,11 @@ async def query_orgs_access_s_sales_persons(db: DB, orgs_id: int):
     return await db.fetch_all(sql)
 
 
-async def query_azure_register_org(db: DB):
-    org = await db.fetch_one(f"SELECT CONVERT(id,CHAR) as id FROM s_sales_company_orgs WHERE azure_register = 1;")
-    return org["id"]
+async def query_azure_register_org(db: DB, tenant_id):
+    org = await db.fetch_one(
+        f"SELECT CONVERT(id,CHAR) as id FROM s_sales_company_orgs WHERE tenant_id = '{tenant_id}';"
+    )
+    if org:
+        return org["id"]
+    else:
+        return None
