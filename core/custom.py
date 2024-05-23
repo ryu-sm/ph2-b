@@ -19,21 +19,6 @@ class LoggingContextRoute(APIRoute):
             payload = utils.only_parse_payload(request.headers.get("authorization"))
             request_body = await request.body()
 
-            # await crud.insert_c_access_log(
-            #     db=DB(),
-            #     account_id=payload["id"] if payload else None,
-            #     ip=request.client.host,
-            #     url=request.url._url,
-            #     endpoint=utils.parse_endpoint(request.url.path, request.path_params),
-            #     method=request.method,
-            #     params={
-            #         "path": dict(request.path_params) if request.path_params else None,
-            #         "query": dict(request.query_params) if request.query_params else None,
-            #         "body": json.loads(request_body) if request_body else None,
-            #     },
-            #     status_code=response.status_code,
-            #     response_body=json.loads(response.body.decode("utf-8")),
-            # )
             return response
 
         return custom_route_handler

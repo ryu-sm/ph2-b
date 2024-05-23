@@ -122,8 +122,7 @@ async def delete_c_user(db: DB, id: int):
 
 
 async def query_c_user_token_payload(db: DB, c_user_id: int):
-    sbi = await db.fetch_one(f"SELECT id, name FROM s_banks WHERE code = {BANK_CODE.SBI.value};")
-    sbi_id = sbi["id"]
+
     sql = f"""
     SELECT
         CONVERT(c_users.id,CHAR) AS id,

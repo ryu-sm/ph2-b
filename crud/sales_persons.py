@@ -453,3 +453,35 @@ async def query_sales_person_below_orgs(db: DB, s_sales_person_id: int):
         s_sales_person_id = {s_sales_person_id};
     """
     return await db.fetch_all(sql)
+
+
+async def query_azure_access(db: DB, s_sales_person_id):
+    sql = f"""
+    SELECT
+        s_sales_company_org_id
+    FROM
+        s_sales_person_s_sales_company_org_rels
+    WHERE
+        s_sales_person_id = {s_sales_person_id}
+    """
+    child = await db.fetch_one(sql)
+    sql = f"""
+    WITH RECURSIVE child AS (
+     SELECT id, pid, category, tenant_id FROM s_sales_company_orgs WHERE id = {child["s_sales_company_org_id"]}
+     union
+     SELECT parents.id, parents.pid, parents.category, parents.tenant_id FROM s_sales_company_orgs as parents INNER JOIN child ON parents.id = child.pid
+    )
+    SELECT
+        child.id AS root_id,
+        child.tenant_id
+    FROM
+        child
+    WHERE
+        child.category = "H";
+    """
+    parent = await db.fetch_one(sql)
+
+    if parent:
+        return parent["tenant_id"]
+    else:
+        return None
