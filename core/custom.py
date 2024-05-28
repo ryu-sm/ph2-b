@@ -25,6 +25,7 @@ class LoggingContextRoute(APIRoute):
 
 
 class AuthException(Exception):
-    def __init__(self):
+    def __init__(self, url):
         Exception.__init__(self)
         self.name = "JWT token verify exception."
+        self.url = url
