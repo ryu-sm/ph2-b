@@ -13,7 +13,7 @@ import crud
 import utils
 import schemas
 
-from constant import DEFAULT_200_MSG, DEFAULT_500_MSG, ACCESS_LOG_OPERATION, TOKEN_ROLE_TYPE
+from constant import DEFAULT_200_MSG, DEFAULT_500_MSG, ACCESS_LOG_OPERATION, ORG_OTHER_ID, TOKEN_ROLE_TYPE
 from templates.user_register_init_message import INIT_MESSAGE
 
 router = APIRouter()
@@ -57,7 +57,7 @@ async def user_register(data: dict, request: Request, db=Depends(get_db)):
             db,
             email=payload["email"],
             hashed_pwd=utils.hash_password(data["password"]),
-            s_sales_company_org_id=payload.get("s_sales_company_org_id"),
+            s_sales_company_org_id=payload.get("s_sales_company_org_id") or ORG_OTHER_ID,
         )
         await crud.insert_init_message(db, c_user_id=new_user_id, content=INIT_MESSAGE)
         access_token = utils.gen_token(

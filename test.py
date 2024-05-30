@@ -11,6 +11,7 @@ from utils.translate_p_activities_p_residents import translate_p_activities_p_re
 from utils.translate_p_activities_p_drafts import translate_p_activities_p_drafts
 from utils.translate_set_pair_loan import translate_set_pair_loan
 from utils.translate_c_messages import translate_c_messages
+from utils.translate_sales_host_company_id import translate_sales_host_company_id
 from core.database import DB
 
 
@@ -24,7 +25,7 @@ async def main():
     # for p_draft in p_drafts:
     #     await translate_p_activities_p_drafts(db, p_draft["id"])
     # await translate_p_uploaded_files(db)
-    await translate_p_archive_files(db)
+    # await translate_p_archive_files(db)
     # p_application_headers = await db.fetch_all("SELECT id FROM mortgage_staging_v3.p_application_headers;")
     # for p_application_header in p_application_headers:
     #     await translate_p_activities_p_application_headers(db, p_application_header["id"])
@@ -64,6 +65,8 @@ async def main():
     #         await db.execute(f"""UPDATE p_residents SET resident_type = 1 WHERE id IN ({", ".join(pr_ids[1:])});""")
 
     # TODO: curr_borrowing_status defaut 0
+
+    await translate_sales_host_company_id(db)
 
 
 asyncio.run(main())

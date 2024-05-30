@@ -18,13 +18,10 @@ from constant import (
 )
 from constant import (
     P_UPLOAD_FILE_TYPE,
-    TOKEN_ROLE_TYPE,
-    P_APPLICANT_PERSONS_TYPE,
     P_BORROWING_DETAILS_TIME_TYPE,
     LOAN_TYPE,
     LAND_ADVANCE_PLAN,
     JOIN_GUARANTOR_UMU,
-    CURR_BORROWING_STATUS,
     OPERATE_TYPE,
     BANK_CODE,
 )
@@ -128,6 +125,10 @@ async def query_p_application_headers_for_ad(db: DB, p_application_header_id):
         p_application_headers.funding_other_amount,
         p_application_headers.funding_other_amount_detail,
 
+        p_application_headers.sales_company,
+        p_application_headers.sales_area,
+        p_application_headers.sales_exhibition_hall,
+        p_application_headers.sales_host_company_id,
         p_application_headers.sales_company_id,
         p_application_headers.sales_area_id,
         p_application_headers.sales_exhibition_hall_id,

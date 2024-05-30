@@ -631,6 +631,10 @@ async def query_p_application_headers_for_ap(db: DB, p_application_header_id):
         funding_other_amount,
         funding_other_amount_detail,
 
+        sales_company,
+        sales_area,
+        sales_exhibition_hall,
+        sales_host_company_id,
         sales_company_id,
         sales_area_id,
         sales_exhibition_hall_id,

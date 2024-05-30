@@ -100,6 +100,7 @@ async def query_manager_access_p_application_headers(db: DB, status: int, role_i
         CONVERT(p_application_headers.s_sales_person_id,CHAR) AS s_sales_person_id,
         CONVERT(p_application_headers.s_manager_id,CHAR) AS s_manager_id,
         CONVERT(p_application_headers.sales_company_id,CHAR) AS sales_company_id,
+        CONVERT(p_application_headers.sales_host_company_id,CHAR) AS sales_host_company_id,
         CONVERT(p_application_headers.loan_type,CHAR) AS loan_type,
         CONVERT(p_application_headers.pair_loan_id,CHAR) AS pair_loan_id,
         null as pair_loan_data,

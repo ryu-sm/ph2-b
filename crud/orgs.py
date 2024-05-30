@@ -220,3 +220,21 @@ async def query_azure_register_org(db: DB, tenant_id):
         return org["id"]
     else:
         return None
+
+
+async def query_org_category_c_with_id(db: DB, id):
+    sql = f"""
+    WITH RECURSIVE parents AS (
+     SELECT id, pid, category, name FROM s_sales_company_orgs WHERE id = {id}
+     union
+     SELECT child.id, child.pid, child.category, child.name FROM s_sales_company_orgs as child INNER JOIN parents ON parents.id = child.pid
+    )
+    SELECT
+        CONVERT(parents.id,CHAR) as value,
+        CONVERT(parents.pid,CHAR) as pid,
+        parents.name as label,
+        parents.category
+    FROM
+        parents;
+    """
+    return await db.fetch_all(sql)

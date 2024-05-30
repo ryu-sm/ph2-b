@@ -107,3 +107,17 @@ async def get_orgs_access_s_sales_persons(orgs_id: Optional[int] = None, db=Depe
         return JSONResponse(
             status_code=500, content={"message": "An unknown exception occurred, please try again later."}
         )
+
+
+@router.get("/orgs/category-c")
+async def get_orgs_access_s_sales_persons(
+    s_sales_company_org_id: Optional[int] = None, db=Depends(get_db), token=Depends(get_token)
+):
+    try:
+        orgs = await crud.query_org_category_c_with_id(db, s_sales_company_org_id)
+        return JSONResponse(status_code=200, content=orgs)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )

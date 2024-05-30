@@ -235,6 +235,7 @@ async def query_sales_person_access_p_application_headers(db: DB, status: int, r
         CONVERT(p_application_headers.s_sales_person_id,CHAR) AS s_sales_person_id,
         CONVERT(p_application_headers.s_manager_id,CHAR) AS s_manager_id,
         CONVERT(p_application_headers.sales_company_id,CHAR) AS sales_company_id,
+        CONVERT(p_application_headers.sales_host_company_id,CHAR) AS sales_host_company_id,
         CONVERT(p_application_headers.loan_type,CHAR) AS loan_type,
         CONVERT(p_application_headers.pair_loan_id,CHAR) AS pair_loan_id,
         null as pair_loan_data,
@@ -485,3 +486,31 @@ async def query_azure_access(db: DB, s_sales_person_id):
         return parent["tenant_id"]
     else:
         return None
+
+
+async def query_sales_person_below_orgs(db: DB, s_sales_person_id):
+    rel_orgs = await db.fetch_all(
+        f"SELECT s_sales_company_org_id FROM s_sales_person_s_sales_company_org_rels WHERE s_sales_person_id = {s_sales_person_id}"
+    )
+    print(rel_orgs)
+
+    if len(rel_orgs) == 1:
+        [org] = rel_orgs
+        sql = f"""
+        WITH RECURSIVE child AS (
+        SELECT id, pid, category, name FROM s_sales_company_orgs WHERE id = {org["s_sales_company_org_id"]}
+        union
+        SELECT parents.id, parents.pid, parents.category, parents.name FROM s_sales_company_orgs as parents INNER JOIN child ON parents.id = child.pid
+        )
+        SELECT
+            CONVERT(child.id,CHAR) as id,
+            child.category
+        FROM
+            child
+        WHERE
+            child.pid IS NOT NULL;
+        """
+        return await db.fetch_all(sql)
+
+    else:
+        return []
