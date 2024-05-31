@@ -514,3 +514,28 @@ async def query_sales_person_below_orgs(db: DB, s_sales_person_id):
 
     else:
         return []
+
+
+async def query_sales_person_host_orgs(db: DB, s_sales_person_id):
+    rel_orgs = await db.fetch_all(
+        f"SELECT s_sales_company_org_id FROM s_sales_person_s_sales_company_org_rels WHERE s_sales_person_id = {s_sales_person_id}"
+    )
+    print(rel_orgs)
+
+    if len(rel_orgs) >= 1:
+        org = rel_orgs[0]
+        sql = f"""
+        WITH RECURSIVE child AS (
+        SELECT id, pid, category FROM s_sales_company_orgs WHERE id = {org["s_sales_company_org_id"]}
+        union
+        SELECT parents.id, parents.pid, parents.category FROM s_sales_company_orgs as parents INNER JOIN child ON parents.id = child.pid
+        )
+        SELECT
+            CONVERT(child.id,CHAR) as id,
+            child.category
+        FROM
+            child
+        WHERE
+            child.category = "H";
+        """
+        return await db.fetch_one(sql)

@@ -397,7 +397,18 @@ async def sales_person_get_access_applications(s_sales_person_id: int, db=Depend
         return JSONResponse(
             status_code=500, content={"message": "An unknown exception occurred, please try again later."}
         )
+    
+@router.get("/sales-person/host-org")
+async def sales_person_get_access_applications(db=Depends(get_db), token=Depends(get_token)):
+    try:
+        org = await crud.query_sales_person_host_orgs(db, token["id"])
 
+        return JSONResponse(status_code=200, content=org)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
 
 @router.get("/sales-person/{s_sales_person_id}")
 async def sales_person_get_access_applications(s_sales_person_id: int, db=Depends(get_db), token=Depends(get_token)):
@@ -410,3 +421,6 @@ async def sales_person_get_access_applications(s_sales_person_id: int, db=Depend
         return JSONResponse(
             status_code=500, content={"message": "An unknown exception occurred, please try again later."}
         )
+
+
+
