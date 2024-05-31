@@ -247,7 +247,7 @@ async def delete_message(db: DB, id: int):
 
 
 async def query_sales_person_dashboard_messages(db: DB, role_id: int):
-    orgs = await crud.query_sales_person_below_orgs(db, role_id)
+    orgs = await crud.query_sales_person_below_orgs_basic(db, role_id)
     ids = []
     for org in orgs:
         if org["role"] == 1:

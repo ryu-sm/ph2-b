@@ -11,7 +11,7 @@ from core.config import settings
 
 
 async def insert_c_archive_files(db: DB, files: list, s_sales_person_id: int):
-    below_orgs = await crud.query_sales_person_below_orgs(db, s_sales_person_id)
+    below_orgs = await crud.query_sales_person_below_orgs_basic(db, s_sales_person_id)
     s_sales_company_org_root_id = await crud.query_s_sales_company_orgs_root_id(
         db, below_orgs[0].get("s_sales_company_org_id")
     )

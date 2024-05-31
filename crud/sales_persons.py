@@ -98,7 +98,7 @@ async def update_s_sales_person_password_with_id(db: DB, id: int, hashed_pwd: st
 
 async def query_sales_person_access_p_application_headers(db: DB, status: int, role_id: int):
     sbi = await db.fetch_one(f"SELECT id, name FROM s_banks WHERE code = '{BANK_CODE.SBI.value}';")
-    orgs = await crud.query_sales_person_below_orgs(db, role_id)
+    orgs = await crud.query_sales_person_below_orgs_basic(db, role_id)
 
     access_p_application_headers_id = []
     for org in orgs:
@@ -354,7 +354,7 @@ async def query_sales_person_access_p_application_headers(db: DB, status: int, r
 
 async def query_sales_person_access_p_application_header_id(db: DB, p_application_header_id: int, role_id: int):
     sbi = await db.fetch_one(f"SELECT id, name FROM s_banks WHERE code = '{BANK_CODE.SBI.value}';")
-    orgs = await crud.query_sales_person_below_orgs(db, role_id)
+    orgs = await crud.query_sales_person_below_orgs_basic(db, role_id)
 
     access_p_application_headers_id = []
     for org in orgs:
@@ -438,7 +438,7 @@ async def query_sales_person_basic_info(db: DB, s_sales_person_id: int):
     return await db.fetch_one(sql)
 
 
-async def query_sales_person_below_orgs(db: DB, s_sales_person_id: int):
+async def query_sales_person_below_orgs_basic(db: DB, s_sales_person_id: int):
     sql = f"""
     SELECT
         CONVERT(s_sales_person_s_sales_company_org_rels.s_sales_company_org_id,CHAR) AS s_sales_company_org_id,

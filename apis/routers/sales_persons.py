@@ -376,7 +376,7 @@ async def sales_person_get_access_applications(status: int, db=Depends(get_db), 
 async def sales_person_get_access_applications(db=Depends(get_db), token=Depends(get_token)):
 
     try:
-        orgs = await crud.query_sales_person_below_orgs(db, token["id"])
+        orgs = await crud.query_sales_person_below_orgs_basic(db, token["id"])
 
         return JSONResponse(status_code=200, content=orgs)
     except Exception as err:

@@ -16,7 +16,6 @@ async def query_c_user_with_email(db: DB, email: str):
         CONVERT(s_sales_company_org_id,CHAR) AS s_sales_company_org_id,
         status,
         DATE_FORMAT(failed_first_at, '%Y-%m-%d %H:%i:%S') as failed_first_at,
-        failed_first_at,
         failed_time,
         hashed_pwd
     FROM

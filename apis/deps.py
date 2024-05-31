@@ -12,7 +12,7 @@ async def get_db() -> DB:
     return DB()
 
 
-async def get_token(request: Request, authorization: str = Header(), db: DB = Depends(get_db)):
+async def get_token(authorization: str = Header(), db: DB = Depends(get_db)):
     payload = utils.parse_token(authorization)
     if payload is None:
         raise AuthException(url="none")
