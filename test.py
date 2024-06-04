@@ -12,6 +12,8 @@ from utils.translate_p_activities_p_drafts import translate_p_activities_p_draft
 from utils.translate_set_pair_loan import translate_set_pair_loan
 from utils.translate_c_messages import translate_c_messages
 from utils.translate_sales_host_company_id import translate_sales_host_company_id
+from utils.translate_id_to_input import translate_id_to_input
+from utils.translate_id_to_input_for_draft import translate_id_to_input_for_draft
 from core.database import DB
 
 
@@ -66,7 +68,9 @@ async def main():
 
     # TODO: curr_borrowing_status defaut 0
 
-    await translate_sales_host_company_id(db)
+    # await translate_sales_host_company_id(db)
+    # await translate_id_to_input(db)
+    await translate_id_to_input_for_draft(db)
 
 
 asyncio.run(main())

@@ -2,6 +2,7 @@ import json
 import pandas as pd
 from io import BytesIO
 from core.database import DB
+import crud
 from utils.gen_row_data_configs import CODE_CONFIGS
 from utils.ja_date import format_js_date_ym, format_js_date_ymd, gen_ja_apply_datetime
 from utils.ja_numeric import format_ja_numeric
@@ -3104,54 +3105,110 @@ async def gen_row_data(p_application_header_id: int, data: dict):
             "filed_value": ", ".join([item["name"] for item in data["p_application_headers"]["J"]]),
         }
     )
-    target = list(filter(lambda x: x["id"] == data["p_application_headers"]["sales_company_id"], orgs))
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(12)}：担当者情報",
-            "big_class": "提携会社（不動産会社・住宅メーカー等）",
-            "class": "",
-            "field_name": "提携会社（不動産会社・住宅メーカー等）",
-            "filed_value": target[0]["name"] if target else "",
-        }
-    )
-    target = list(filter(lambda x: x["id"] == data["p_application_headers"]["sales_area_id"], orgs))
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(12)}：担当者情報",
-            "big_class": "エリア",
-            "class": "",
-            "field_name": "エリア",
-            "filed_value": target[0]["name"] if target else "",
-        }
-    )
-    target = list(filter(lambda x: x["id"] == data["p_application_headers"]["sales_exhibition_hall_id"], orgs))
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(12)}：担当者情報",
-            "big_class": "展示場",
-            "class": "",
-            "field_name": "展示場",
-            "filed_value": target[0]["name"] if target else "",
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(12)}：担当者情報",
-            "big_class": "担当者名",
-            "class": "",
-            "field_name": "担当者名",
-            "filed_value": data["p_application_headers"]["vendor_name"],
-        }
-    )
-    json_data.append(
-        {
-            "step": f"STEP {get_step_code(12)}：担当者情報",
-            "big_class": "携帯電話番号",
-            "class": "",
-            "field_name": "携帯電話番号",
-            "filed_value": data["p_application_headers"]["vendor_phone"],
-        }
-    )
+    if data["p_application_headers"]["sales_company"]:
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(12)}：担当者情報",
+                "big_class": "提携会社（不動産会社・住宅メーカー等）",
+                "class": "",
+                "field_name": "提携会社（不動産会社・住宅メーカー等）",
+                "filed_value": data["p_application_headers"]["sales_company"],
+            }
+        )
+    else:
+        target = list(filter(lambda x: x["id"] == data["p_application_headers"]["sales_company_id"], orgs))
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(12)}：担当者情報",
+                "big_class": "提携会社（不動産会社・住宅メーカー等）",
+                "class": "",
+                "field_name": "提携会社（不動産会社・住宅メーカー等）",
+                "filed_value": target[0]["name"] if target else "",
+            }
+        )
+    if data["p_application_headers"]["sales_area"]:
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(12)}：担当者情報",
+                "big_class": "エリア",
+                "class": "",
+                "field_name": "エリア",
+                "filed_value": data["p_application_headers"]["sales_area"],
+            }
+        )
+    else:
+        target = list(filter(lambda x: x["id"] == data["p_application_headers"]["sales_area_id"], orgs))
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(12)}：担当者情報",
+                "big_class": "エリア",
+                "class": "",
+                "field_name": "エリア",
+                "filed_value": target[0]["name"] if target else "",
+            }
+        )
+    if data["p_application_headers"]["sales_exhibition_hall"]:
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(12)}：担当者情報",
+                "big_class": "展示場",
+                "class": "",
+                "field_name": "展示場",
+                "filed_value": (data["p_application_headers"]["sales_exhibition_hall"]),
+            }
+        )
+    else:
+        target = list(filter(lambda x: x["id"] == data["p_application_headers"]["sales_exhibition_hall_id"], orgs))
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(12)}：担当者情報",
+                "big_class": "展示場",
+                "class": "",
+                "field_name": "展示場",
+                "filed_value": (target[0]["name"] if target else ""),
+            }
+        )
+    if data["p_application_headers"]["s_sales_person_id"]:
+        s_sales_person = await crud.query_sales_person_basic_info(
+            db, data["p_application_headers"]["s_sales_person_id"]
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(12)}：担当者情報",
+                "big_class": "担当者名",
+                "class": "",
+                "field_name": "担当者名",
+                "filed_value": s_sales_person["name_kanji"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(12)}：担当者情報",
+                "big_class": "携帯電話番号",
+                "class": "",
+                "field_name": "携帯電話番号",
+                "filed_value": s_sales_person["mobile_phone"],
+            }
+        )
+    else:
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(12)}：担当者情報",
+                "big_class": "担当者名",
+                "class": "",
+                "field_name": "担当者名",
+                "filed_value": data["p_application_headers"]["vendor_name"],
+            }
+        )
+        json_data.append(
+            {
+                "step": f"STEP {get_step_code(12)}：担当者情報",
+                "big_class": "携帯電話番号",
+                "class": "",
+                "field_name": "携帯電話番号",
+                "filed_value": data["p_application_headers"]["vendor_phone"],
+            }
+        )
 
     df = pd.DataFrame(
         json_data,

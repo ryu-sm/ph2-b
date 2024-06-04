@@ -145,7 +145,6 @@ async def query_c_user_token_payload(db: DB, c_user_id: int):
         c_users.id = {c_user_id};
     """
     result = await db.fetch_one(sql)
-    print(sql)
     result["has_draft"] = bool(result["has_draft"])
 
     return result

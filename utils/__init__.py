@@ -12,3 +12,5 @@ from .access_logs import *
 from .mann_translate import *
 from .preliminaries import *
 from .apply_data_check import *
+from .translate_id_to_input import *
+from .translate_id_to_input_for_draft import *

@@ -127,7 +127,8 @@ async def query_parents_orgs_for_ad_with_sales_person_id(db: DB, sales_person_id
         )
         SELECT
             CONVERT(child.id,CHAR) as id,
-            child.category
+            child.category,
+            child.name
         FROM
             child
         WHERE
@@ -238,3 +239,20 @@ async def query_org_category_c_with_id(db: DB, id):
         parents;
     """
     return await db.fetch_all(sql)
+
+
+async def query_translate_org_root_id(db: DB, code: str):
+    sql = f"""
+    WITH RECURSIVE child AS (
+     SELECT id, pid, category FROM s_sales_company_orgs WHERE code = '{code}'
+     union
+     SELECT parents.id, parents.pid, parents.category FROM s_sales_company_orgs as parents INNER JOIN child ON parents.id = child.pid
+    )
+    SELECT
+        CONVERT(child.id,CHAR) AS s_sales_company_org_id
+    FROM
+        child
+    WHERE
+        child.category = "H";
+    """
+    return await db.fetch_one(sql)

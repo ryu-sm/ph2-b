@@ -121,3 +121,15 @@ async def get_orgs_access_s_sales_persons(
         return JSONResponse(
             status_code=500, content={"message": "An unknown exception occurred, please try again later."}
         )
+
+
+@router.get("/translate-host-org/{code}")
+async def get_orgs_access_s_sales_persons(code: Optional[str] = None, db=Depends(get_db)):
+    try:
+        orgs = await crud.query_translate_org_root_id(db, code)
+        return JSONResponse(status_code=200, content=orgs)
+    except Exception as err:
+        logger.exception(err)
+        return JSONResponse(
+            status_code=500, content={"message": "An unknown exception occurred, please try again later."}
+        )
